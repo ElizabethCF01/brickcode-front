@@ -199,3 +199,31 @@ All blocks are registered with `registerRobotBlocks()` (call once at startup) an
 `ROBOT_TOOLBOX` exports a ready-to-use Blockly v9+ JSON toolbox definition. Pass it to the `toolbox` option of `Blockly.inject()` or the `BlocklyWorkspace` component.
 
 > **Note**: `BlockInterpreter` v1 handles `drive_forward`, `wait_seconds`, and `motor_stop`. The new `robot_*` block types require a corresponding interpreter update (Task 3.2).
+
+---
+
+## UI Layout (Task 3.3)
+
+**Files**: `src/components/ControlPanel.tsx`, `src/components/BlocklyWorkspace.tsx`, `src/components/SensorPanel.tsx`, `src/App.tsx`
+
+### Layout structure
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  ControlPanel  (header — Run / Stop / Reset buttons)    │
+├──────────────────────────┬──────────────────────────────┤
+│  SimulatorCanvas         │  BlocklyWorkspace (w-105)    │
+│  (flex-1)                │  Blockly injected into div   │
+├──────────────────────────┴──────────────────────────────┤
+│  SensorPanel  (footer — sensor bar + status label)      │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Key decisions
+
+- **`registerRobotBlocks()` is called once in `main.tsx`** before `createRoot` — safe against StrictMode double-mount.
+- **Blockly ResizeObserver**: `BlocklyWorkspace` observes its container and calls `Blockly.svgResize(workspace)` on every resize; without this the SVG stays mis-sized after layout changes.
+- **Toolbox extension**: `BlocklyWorkspace` combines `ROBOT_TOOLBOX` categories with built-in `controls_*` and `math_*` categories into `FULL_TOOLBOX`. `ROBOT_TOOLBOX` in `robotBlocks.ts` remains unchanged.
+- **Sensor key convention**: `simulationStore.sensorValues['front']` holds the front distance sensor reading in cm. `SensorPanel` reads this key; the bar fills relative to `SENSOR_MAX_CM = 100`. When the key is absent the display shows `— cm`.
+- **Control buttons**: Run/Stop/Reset toggle `simulationStore.status` only. Wiring to `BlockInterpreter` is deferred to the task that builds `SimpleRobot`.
+- **Status labels**: `stopped` → "En reposo", `running` → "Ejecutando", `paused` → "Pausado".
