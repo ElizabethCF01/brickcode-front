@@ -126,3 +126,32 @@ The sensor creates no Rapier rigid bodies, so `world` is never needed at constru
 - Color: `#4CAF50` base, `#43A047` stud circles
 
 > **Note**: `SceneSetup.ts` currently adds a separate decorative green floor plane at y = 0. When the Baseplate is used in the runtime scene, the floor in `SceneSetup` should be removed or repositioned to avoid z-fighting.
+
+---
+
+## BlockInterpreter
+
+**File**: `src/interpreter/BlockInterpreter.ts`
+
+### Design
+
+`BlockInterpreter` takes a `SimpleRobot` and walks the Blockly workspace AST directly at run time — no codegen, no `eval()`.
+
+- `run(workspace)` calls `workspace.getTopBlocks(true)` then executes each top-level sequence with `executeSequence`, which follows `block.getNextBlock()` in a while loop.
+- Timed blocks (`drive_forward`) use a cancellable `setTimeout`-based `sleep(ms)` so `requestAnimationFrame` and the physics loop keep firing while the interpreter waits.
+- `stop()` sets `_running = false`, cancels the active sleep timer, and immediately brakes both motors.
+- A second call to `run()` while already running is a no-op (guard at entry).
+
+### Drive convention
+
+`drive_forward` calls `left.setSpeed(+n)` and `right.setSpeed(+n)`. Both positive = robot moves forward. The physical motor mounting must match this convention: both motors must spin "outward" (away from centre) in the positive direction.
+
+### Supported block types (v1)
+
+| Block type     | Fields              | Behaviour |
+|----------------|---------------------|-----------|
+| `drive_forward`| `SPEED` (deg/s), `DURATION` (s) | Sets both motors to `+SPEED`, waits, auto-stops |
+| `wait_seconds` | `SECONDS`           | Sleeps for the given duration; no motor change |
+| `motor_stop`   | —                   | Brakes both motors immediately |
+
+Unknown block types are silently skipped.
