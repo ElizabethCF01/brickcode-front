@@ -146,12 +146,56 @@ The sensor creates no Rapier rigid bodies, so `world` is never needed at constru
 
 `drive_forward` calls `left.setSpeed(+n)` and `right.setSpeed(+n)`. Both positive = robot moves forward. The physical motor mounting must match this convention: both motors must spin "outward" (away from centre) in the positive direction.
 
-### Supported block types (v1)
+### Speed mapping
 
-| Block type     | Fields              | Behaviour |
-|----------------|---------------------|-----------|
-| `drive_forward`| `SPEED` (deg/s), `DURATION` (s) | Sets both motors to `+SPEED`, waits, auto-stops |
-| `wait_seconds` | `SECONDS`           | Sleeps for the given duration; no motor change |
-| `motor_stop`   | —                   | Brakes both motors immediately |
+`robot_drive_forward` and `robot_drive_backward` accept `SPEED` as 0–100 (percentage), mapped linearly to deg/s: `speed_deg_s = (SPEED / 100) × 360`. This is more intuitive for children than raw deg/s.
+
+The legacy `drive_forward` block still accepts deg/s directly for backwards compatibility with existing tests and workspaces.
+
+### Turn geometry (approximate)
+
+`robot_turn` calculates duration from `DEGREES` using:
+
+```
+motorDeg = DEGREES × (wheelBase/2) / WHEEL_RADIUS
+duration = motorDeg / TURN_MOTOR_SPEED
+```
+
+Constants: `WHEEL_RADIUS_WU = 0.16`, `TURN_MOTOR_SPEED = 180 deg/s`. `wheelBase` defaults to `0.48 WU` (6 studs, estimated) until the chassis is built; override via `SimpleRobot.wheelBaseWU`.
+
+Turn direction: LEFT = left motor backward + right motor forward (CCW from above). RIGHT = opposite.
+
+### Supported block types
+
+| Block type             | Fields                              | Behaviour |
+|------------------------|-------------------------------------|-----------|
+| `robot_drive_forward`  | `SPEED` (0–100 %), `DURATION` (s)   | Sets both motors to `+SPEED%`, waits, auto-stops |
+| `robot_drive_backward` | `SPEED` (0–100 %), `DURATION` (s)   | Sets both motors to `−SPEED%`, waits, auto-stops |
+| `robot_turn`           | `DIRECTION` (LEFT/RIGHT), `DEGREES` | Differential spin for computed duration, auto-stops |
+| `robot_stop`           | —                                   | Brakes both motors immediately |
+| `wait_seconds`         | `SECONDS`                           | Sleeps for the given duration; no motor change |
+| `drive_forward` *(legacy)* | `SPEED` (deg/s), `DURATION` (s) | As before; kept for test/workspace compat |
+| `motor_stop` *(legacy)*    | —                               | As before; kept for test/workspace compat |
 
 Unknown block types are silently skipped.
+
+---
+
+## Custom Blockly Blocks
+
+**File**: `src/blocks/definitions/robotBlocks.ts`
+
+All blocks are registered with `registerRobotBlocks()` (call once at startup) and surfaced in a single **"Mi Robot 🤖"** toolbox category.
+
+| Block type            | Kind      | Fields                                      | Colour      |
+|-----------------------|-----------|---------------------------------------------|-------------|
+| `robot_drive_forward` | statement | `SPEED` (0–100), `DURATION` (s)             | LEGO red    |
+| `robot_drive_backward`| statement | `SPEED` (0–100), `DURATION` (s)             | LEGO red    |
+| `robot_turn`          | statement | `DIRECTION` (LEFT/RIGHT), `DEGREES` (0–360) | LEGO blue   |
+| `robot_stop`          | statement | —                                           | LEGO red    |
+| `sensor_distance`     | value     | — (output: Number, cm)                      | LEGO yellow |
+| `wait_seconds`        | statement | `SECONDS`                                   | LEGO yellow |
+
+`ROBOT_TOOLBOX` exports a ready-to-use Blockly v9+ JSON toolbox definition. Pass it to the `toolbox` option of `Blockly.inject()` or the `BlocklyWorkspace` component.
+
+> **Note**: `BlockInterpreter` v1 handles `drive_forward`, `wait_seconds`, and `motor_stop`. The new `robot_*` block types require a corresponding interpreter update (Task 3.2).
