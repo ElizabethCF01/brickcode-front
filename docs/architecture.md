@@ -39,9 +39,78 @@ Why: including stud cylinders in the collider would make flat-top stacking fragi
 | `SimulationEngine` | Single `rAF` loop; steps Rapier then renders Three.js |
 | `LegoBrick` | Holds one `THREE.Group` (body + studs) and one `RAPIER.RigidBody`; exposes `syncRender()` and `dispose()` |
 | `Baseplate`             | 32×32 stud static platform; `RigidBodyDesc.fixed()` collider with top surface at y = 0; stud grid rendered via `DataTexture` (no DOM needed) |
-| `LegoMotor` *(planned)* | Extends component pattern; adds `setSpeed()` driving a Rapier joint torque |
-| `LegoSensor` *(planned)* | Rapier ray-cast each frame; exposes `readDistance()` |
+| `LegoMotor` | Fixed anchor body + `RevoluteImpulseJoint`; `configureMotorVelocity` drives the attached wheel body |
+| `LegoDistanceSensor` | Rapier ray-cast each frame via `world.castRay()`; exposes `getValue()` → cm; optional red debug ray in scene |
 | `BlockInterpreter` | Walks Blockly AST; calls component methods directly — no codegen |
+
+---
+
+## LegoMotor
+
+**File**: `src/engine/components/LegoMotor.ts`
+
+### Joint design (Option A — direct body reference)
+
+`MotorConfig` takes `attachedBody: RAPIER.RigidBody` (a direct reference, not a string ID).
+Three alternatives were considered:
+
+| Option | Approach | Why rejected |
+|--------|----------|--------------|
+| A ✓ | Direct `RigidBody` reference | Chosen — no registry needed; `RevoluteImpulseJoint` requires two body objects anyway |
+| B | `attachedBodyId: string` + body registry | Extra infrastructure before any robot exists |
+| C | Motor owns its own wheel body | Motor becomes a composite — breaks the "driver of external body" architecture intent |
+
+### Physics: RevoluteImpulseJoint + configureMotorVelocity
+
+The motor creates a **fixed anchor body** at `config.position` and connects it to `attachedBody`
+via `RAPIER.JointData.revolute(origin, origin, axis)`. The joint motor is driven each call to
+`setSpeed()` / `stop()` via `joint.configureMotorVelocity(rad/s, damping)`:
+
+- `DRIVE_DAMPING = 50` — tracks target velocity against moderate loads
+- `BRAKE_DAMPING = 500` — 10× higher; kills residual velocity quickly on `stop()`
+
+**Constraint for callers**: `attachedBody` must be created at the same world position as
+`config.position`. Both local anchor offsets are `(0, 0, 0)` — if the body was placed elsewhere
+the joint will apply a large corrective force on the first step.
+
+### Angle tracking
+
+`RevoluteImpulseJoint` has no `angle()` method in the Rapier 0.19 TypeScript API.
+`getAngle()` integrates `targetSpeed × deltaTime` each frame. This reflects *commanded* motion;
+if the wheel is physically blocked, the reported angle will diverge from the actual rotation.
+
+### Visual
+
+A `THREE.CylinderGeometry` (2-stud radius, 1-stud width) lives inside a `THREE.Group`.
+The **group** receives the physics body transform every `step()`; the **inner mesh** holds a
+constant rotation offset so the wheel face is perpendicular to the spin axis:
+
+- `axis = 'x'` → `mesh.rotation.z = π/2`
+- `axis = 'z'` → `mesh.rotation.x = π/2`
+- `axis = 'y'` → no rotation (cylinder default height is already along Y)
+
+---
+
+## LegoDistanceSensor
+
+**File**: `src/engine/components/LegoDistanceSensor.ts`
+
+### Design
+
+`SensorConfig` takes a world-space `position` and `direction` (normalised internally), plus `maxRange` **in cm**. The sensor has no Rapier rigid body — it fires a read-only ray via `world.castRay()`.
+
+- `getValue()` → cm; returns `maxRange` when no collider is within range.
+- `step(world)` is called each frame after `world.step()`. It uses `RAPIER.Ray` + `world.castRay(ray, maxRangeWU, solid: true)`. `timeOfImpact` (world units along the normalised direction) is multiplied by `WORLD_TO_CM = 10` to produce the cm reading.
+- `solid: true` — if the ray origin is inside a shape, `timeOfImpact = 0` (reports contact rather than exit point).
+- Debug ray: a `THREE.Line` (red, `#ff0000`) drawn from the sensor origin to the detected hit point. Toggled with `setDebugVisible(bool)`. The end vertex is updated in-place each frame via `BufferAttribute.needsUpdate` — no geometry recreation.
+
+### Why constructor takes only `(config, scene)` — not `(config, world, scene)`
+
+The sensor creates no Rapier rigid bodies, so `world` is never needed at construction time or in `dispose()`. Passing it per `step(world)` call is sufficient and keeps the constructor signature minimal.
+
+### Position is fixed in world space
+
+`config.position` is copied at construction and never updated. When a robot body is introduced, the sensor will need an `attachedBody` reference so `step()` can derive world-space position from the body transform.
 
 ---
 
