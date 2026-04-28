@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# LDraw raw library (downloaded out-of-tree; only packed .mpd files are committed)
+public/ldraw/parts/
+public/ldraw/p/
+public/ldraw/LDConfig.ldr

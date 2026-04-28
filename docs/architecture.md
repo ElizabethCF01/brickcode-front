@@ -278,6 +278,100 @@ Full differential-drive physics (revolute joints, wheel friction, traction) is d
 - **Control buttons**: Run/Stop/Reset toggle `simulationStore.status` only. Wiring to `BlockInterpreter` is deferred to the task that builds `SimpleRobot`.
 - **Status labels**: `stopped` → "En reposo", `running` → "Ejecutando", `paused` → "Pausado".
 
+## LDraw Asset Pipeline
+
+**Files**: `scripts/packLDrawParts.ts`, `scripts/ldrawCatalog.ts`, `scripts/vendor/packLDrawModel.mjs`, `public/ldraw/models/packed/*.mpd`
+
+### Goal
+
+Replace prototype primitives (`BoxGeometry` + cylinders for studs, etc.) with millimetre-accurate CAD geometry from the [LDraw](https://www.ldraw.org/) open standard (CC BY 2.0). Three.js ships an `LDrawLoader` (`three/examples/jsm/loaders/LDrawLoader.js`) that consumes packed `.mpd` files at runtime.
+
+This pipeline is **visual only** — Rapier colliders remain cuboids (see *Physics Collider Strategy* above). LDraw geometry is for rendering; physics keeps using simple shapes for stable stacking and predictable behaviour.
+
+### Why packed `.mpd`
+
+A raw LDraw part (e.g. `parts/3001.dat`) references dozens of sub-parts and primitives via path. Serving the entire library to the browser is impractical (~170 MB, thousands of HTTP requests). The official three.js script `packLDrawModel.mjs` recursively inlines all referenced files into a single self-contained `.mpd`, ready to load with one HTTP request.
+
+### Library is not committed
+
+The raw LDraw library (~170 MB of CC BY 2.0 `.dat` files) is **not** in the repo. Only the small packed outputs are committed.
+
+To regenerate packed parts:
+
+1. Download `complete.zip` from https://library.ldraw.org/library/updates/complete.zip.
+2. Unzip somewhere local (e.g. `~/ldraw-library/`). Verify it contains `LDConfig.ldr`, `parts/`, `p/`.
+3. `LDRAW_LIB_PATH=~/ldraw-library npm run pack-ldraw`.
+
+The script writes `public/ldraw/models/packed/<id>.mpd` for each entry in `LDRAW_CATALOG`.
+
+`.gitignore` blocks `public/ldraw/parts/`, `public/ldraw/p/`, and `public/ldraw/LDConfig.ldr` defensively so the raw library can't be accidentally committed.
+
+### Catalog
+
+`scripts/ldrawCatalog.ts` is the single source of truth for which parts are bundled. Initial catalog covers what already exists in `src/engine/components/`:
+
+| id | LDraw file | Used by |
+|---|---|---|
+| `brick-2x4` | `parts/3001.dat` | `LegoBrick` |
+| `baseplate-32x32` | `parts/3811.dat` | `Baseplate` |
+| `wheel` | `parts/3483.dat` | `LegoMotor` (wheel visual) |
+
+Adding a part = append to `LDRAW_CATALOG`, run `npm run pack-ldraw`, commit the new `.mpd`.
+
+### Vendored packer
+
+`scripts/vendor/packLDrawModel.mjs` is adapted from three.js (`utils/packLDrawModel.mjs` on GitHub — not published to npm). The original is a CLI; we expose it as `packLDrawModel(libPath, fileName)` returning the packed string. Algorithm unchanged. License: MIT (three.js authors). See `scripts/vendor/README.md`.
+
+### LDraw scale
+
+LDraw uses **LDU** (LDraw Units) where 1 LDU = 0.4 mm. Real LEGO stud spacing = 20 LDU = 8 mm.
+
+To convert LDU → BrickCode world units (1 WU = 10 cm = 100 mm = 250 LDU):
+
+```
+worldUnits = LDU * 0.004
+```
+
+When loading a packed part with `LDrawLoader`, scale the resulting `Group` by `0.004` to match the existing `STUD = 0.08` convention.
+
+LDraw also flips the Y axis relative to three.js (LDraw Y points down). `LDrawLoader` handles this automatically.
+
+---
+
+## LDrawLibraryManager
+
+**File**: `src/engine/ldraw/LDrawLibraryManager.ts`
+
+Runtime cache for the packed LDraw parts produced by `npm run pack-ldraw`. One instance is created at app startup, `preloadAll()` is awaited before the simulator scene mounts, and components retrieve clones via `getPart(key, color?)` instead of authoring `BoxGeometry`/`CylinderGeometry` themselves.
+
+### Key mapping
+
+`BRICKCODE_PARTS` exposes semantic keys (`HUB_EV3`, `MOTOR_M`, `MOTOR_L`, `SENSOR_DISTANCE`, `SENSOR_COLOR`, `WHEEL_LARGE`, `BEAM_3`, `BEAM_5`, `BASEPLATE_32`). Each key maps to a **catalog id** (the packed `.mpd` filename), not a raw `.dat`. The raw `.dat` ids live in `scripts/ldrawCatalog.ts` and are inlined at pack time — runtime never sees them.
+
+`SENSOR_DISTANCE` maps to `17388.dat` (EV3 IR sensor). EV3-G surfaces the IR sensor as a distance reading, so we reuse the IR mesh as the visual for the simulator's distance sensor.
+
+### preloadAll
+
+Loads every entry in parallel via `loader.loadAsync(url)` and applies `scale(0.004)` (LDU → WU) on the cached group. `onProgress(loaded, total)` is called once per completed part so the loading bar can advance smoothly. The returned promise resolves once every part is in the cache.
+
+### getPart / applyColor
+
+`getPart` returns `cached.clone(true)` — meshes are cloned but materials are not, so material substitution per clone is safe. `applyColor` looks up `loader.getMaterial(String(code))` and replaces `mesh.material` on every descendant mesh; LDraw color codes are integers (4 = red, 14 = yellow, 15 = white). Unknown codes are a no-op rather than an error.
+
+### Why no scene reference
+
+The manager loads and caches; it never adds objects to the scene. Each component receives the clone from `getPart` and calls `scene.add` itself. Passing a `THREE.Scene` to the constructor would be dead weight.
+
+### Adding a new part
+
+1. Append entry to `LDRAW_CATALOG` in `scripts/ldrawCatalog.ts`.
+2. Add semantic key in `BRICKCODE_PARTS`.
+3. Run `LDRAW_LIB_PATH=… npm run pack-ldraw` and commit the new `.mpd`.
+
+Steps 1 and 2 are committed; step 3 produces an asset that is also committed. Without step 3 the part 404s at preload.
+
+---
+
 ## Block Editor UX
 
 **Files**: `src/components/BlocklyWorkspace.tsx`, `src/App.tsx`, `src/blocks/definitions/robotBlocks.ts`, `src/index.css`

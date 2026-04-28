@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import ControlPanel from './components/ControlPanel'
 import SensorPanel from './components/SensorPanel'
+import Attribution from './components/Attribution'
 import ChallengePanel from './components/ChallengePanel'
 import BlocklyWorkspace from './components/BlocklyWorkspace'
 import SimulatorCanvas from './engine/renderer/SimulatorCanvas'
@@ -70,6 +71,7 @@ export default function App() {
       </div>
 
       <SensorPanel />
+      <Attribution />
     </div>
   )
 }
