@@ -372,6 +372,50 @@ Steps 1 and 2 are committed; step 3 produces an asset that is also committed. Wi
 
 ---
 
+## LDraw Visual Integration in Components (Task 4.3)
+
+`LegoBrick`, `LegoMotor`, and `LegoDistanceSensor` accept an optional
+`LDrawLibraryManager` in their config. When provided, the prototype primitives
+(`BoxGeometry` + stud cylinders, wheel cylinder, no-mesh sensor) are replaced
+by the corresponding LDraw clones (`BRICK_2X4`, `WHEEL_LARGE`,
+`SENSOR_DISTANCE`). When absent, the previous primitive path is used —
+keeping headless tests (no DOM, no WebGL) working unchanged.
+
+### What is *not* changed
+
+- **Rapier colliders are untouched.** LegoBrick still uses a `cuboid(w/2,
+  BODY_H/2, d/2)` matching the brick body; LegoMotor still uses an anchor
+  `RigidBodyDesc.fixed()` driving an external wheel body via
+  `RevoluteImpulseJoint`; LegoDistanceSensor still has no rigid body and casts
+  a ray each frame.
+- **No physics body for the sensor.** The LDraw mesh is decorative. Adding a
+  collider would require collision-group filtering to avoid the sensor's own
+  ray hitting itself; the architecture explicitly avoids this (see
+  *LegoDistanceSensor*).
+
+### Origin alignment
+
+LDraw bricks are authored with the origin at the **centre of the bottom face**.
+Inside `LegoBrick`, the LDraw clone is offset by `(0, -BODY_H/2, 0)` so the
+brick's geometric centre (group origin) maps to the collider centre.
+
+The LDraw wheel (3483) and EV3 motors/sensors are authored axle-along-Y after
+the loader's Y-flip, so the existing axis-rotation offset in `LegoMotor`
+(`rotation.z = π/2` for X axis, `rotation.x = π/2` for Z) applies unchanged
+to the LDraw clone.
+
+### Wiring at runtime
+
+`SimulationEngine.create` reads the manager from `getLDrawManager()` (set in
+`main.tsx` after `preloadAll`) and forwards it to the front
+`LegoDistanceSensor`. `LegoBrick` and `LegoMotor` are not yet instantiated by
+the engine (the runtime currently uses a kinematic chassis box and a
+`SimpleMotor` stub that records commanded speed without physics) — their
+LDraw paths are dormant until Task 4.4 (build a real `SimpleRobot`) wires
+them in.
+
+---
+
 ## Block Editor UX
 
 **Files**: `src/components/BlocklyWorkspace.tsx`, `src/App.tsx`, `src/blocks/definitions/robotBlocks.ts`, `src/index.css`

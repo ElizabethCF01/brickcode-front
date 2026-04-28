@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import RAPIER from '@dimforge/rapier3d-compat'
+import type { LDrawLibraryManager } from '../ldraw/LDrawLibraryManager'
 
 // Wheel geometry — roughly a 2-stud-radius LEGO wheel (scale: 1 unit = 10 cm)
 const WHEEL_RADIUS  = 0.16   // 2 studs × 0.08 = 16 mm
@@ -24,6 +25,11 @@ export interface MotorConfig {
   attachedBody: RAPIER.RigidBody
   /** The axis around which the motor rotates, expressed in the local frame of attachedBody. */
   axis: 'x' | 'y' | 'z'
+  /**
+   * Optional LDraw library manager. When provided, the wheel visual is replaced
+   * by the WHEEL_LARGE LDraw clone. The revolute joint and physics are unchanged.
+   */
+  ldraw?: LDrawLibraryManager
 }
 
 export class LegoMotor {
@@ -33,9 +39,9 @@ export class LegoMotor {
   private readonly joint:        RAPIER.RevoluteImpulseJoint
   private readonly anchor:       RAPIER.RigidBody
   private readonly group:        THREE.Group
-  private readonly wheelMesh:    THREE.Mesh
-  private readonly geometry:     THREE.CylinderGeometry
-  private readonly material:     THREE.MeshStandardMaterial
+  private readonly wheelVisual:  THREE.Object3D
+  private readonly geometry:     THREE.CylinderGeometry | null
+  private readonly material:     THREE.MeshStandardMaterial | null
   private readonly attachedBody: RAPIER.RigidBody
   private readonly world:        RAPIER.World
   private readonly scene:        THREE.Scene
@@ -46,20 +52,32 @@ export class LegoMotor {
     this.attachedBody = config.attachedBody
 
     // ── Three.js wheel visual ──────────────────────────────────────────────────
-    this.material  = new THREE.MeshStandardMaterial({ color: '#444444' })
-    this.geometry  = new THREE.CylinderGeometry(WHEEL_RADIUS, WHEEL_RADIUS, WHEEL_WIDTH, 24)
-    this.wheelMesh = new THREE.Mesh(this.geometry, this.material)
-    this.wheelMesh.castShadow = true
+    if (config.ldraw) {
+      this.wheelVisual = config.ldraw.getPart('WHEEL_LARGE')
+      this.wheelVisual.traverse((obj) => {
+        const m = obj as THREE.Mesh
+        if (m.isMesh) m.castShadow = true
+      })
+      this.geometry = null
+      this.material = null
+    } else {
+      this.material = new THREE.MeshStandardMaterial({ color: '#444444' })
+      this.geometry = new THREE.CylinderGeometry(WHEEL_RADIUS, WHEEL_RADIUS, WHEEL_WIDTH, 24)
+      const mesh = new THREE.Mesh(this.geometry, this.material)
+      mesh.castShadow = true
+      this.wheelVisual = mesh
+    }
 
-    // CylinderGeometry height axis is Y by default.
-    // Rotate the inner mesh so the wheel face is perpendicular to the spin axis.
-    // The group receives the physics transform; the mesh rotation is a local offset.
-    if (config.axis === 'x') this.wheelMesh.rotation.z = Math.PI / 2
-    else if (config.axis === 'z') this.wheelMesh.rotation.x = Math.PI / 2
+    // Wheel default orientation has the axle along Y (cylinder default; LDraw
+    // wheel 3483 also authored axle-along-Y after LDrawLoader's Y-flip).
+    // Rotate so the wheel face is perpendicular to the spin axis.
+    // The group receives the physics transform; this rotation is a local offset.
+    if (config.axis === 'x') this.wheelVisual.rotation.z = Math.PI / 2
+    else if (config.axis === 'z') this.wheelVisual.rotation.x = Math.PI / 2
 
     this.group = new THREE.Group()
     this.group.position.copy(config.position)
-    this.group.add(this.wheelMesh)
+    this.group.add(this.wheelVisual)
     scene.add(this.group)
 
     // ── Rapier anchor (fixed body — the motor housing) ─────────────────────────
@@ -125,8 +143,13 @@ export class LegoMotor {
   }
 
   dispose(): void {
-    this.geometry.dispose()
-    this.material.dispose()
+    this.geometry?.dispose()
+    this.material?.dispose()
+    // LDraw clone: dispose its (cloned) geometries; materials are shared with the cache.
+    this.wheelVisual.traverse((obj) => {
+      const m = obj as THREE.Mesh
+      if (m.isMesh && m.geometry !== this.geometry) m.geometry?.dispose()
+    })
     this.scene.remove(this.group)
     this.world.removeImpulseJoint(this.joint, /* wakeUp */ true)
     this.world.removeRigidBody(this.anchor)

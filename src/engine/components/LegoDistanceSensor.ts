@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import RAPIER from '@dimforge/rapier3d-compat'
+import type { LDrawLibraryManager } from '../ldraw/LDrawLibraryManager'
 
 // Scale: 1 world unit = 10 cm — see docs/architecture.md §Scale Convention.
 const WORLD_TO_CM = 10
@@ -11,6 +12,13 @@ export interface SensorConfig {
   direction: THREE.Vector3
   /** Maximum sensing distance in **cm**. Returned by getValue() when no hit is found. */
   maxRange: number
+  /**
+   * Optional LDraw library manager. When provided, a SENSOR_DISTANCE LDraw mesh
+   * is added at the sensor origin and follows setWorldPosition() each frame.
+   * The sensor still has no rigid body (per architecture decision) — the visual
+   * is decorative; the ray continues to be cast against the unchanged world.
+   */
+  ldraw?: LDrawLibraryManager
 }
 
 export class LegoDistanceSensor {
@@ -19,10 +27,11 @@ export class LegoDistanceSensor {
   private readonly position:   THREE.Vector3  // world-space origin (fixed)
   private readonly direction:  THREE.Vector3  // normalised
 
-  private readonly scene:   THREE.Scene
-  private readonly rayLine: THREE.Line
-  private readonly rayGeo:  THREE.BufferGeometry
-  private readonly rayMat:  THREE.LineBasicMaterial
+  private readonly scene:    THREE.Scene
+  private readonly rayLine:  THREE.Line
+  private readonly rayGeo:   THREE.BufferGeometry
+  private readonly rayMat:   THREE.LineBasicMaterial
+  private readonly bodyMesh: THREE.Group | null
 
   constructor(config: SensorConfig, scene: THREE.Scene) {
     this.scene      = scene
@@ -30,6 +39,28 @@ export class LegoDistanceSensor {
     this.value      = config.maxRange
     this.position   = config.position.clone()
     this.direction  = config.direction.clone().normalize()
+
+    // ── Optional LDraw visual body ──────────────────────────────────────────
+    // The mesh is decorative. Ray continues to fire from `this.position`
+    // independently of the mesh transform.
+    if (config.ldraw) {
+      this.bodyMesh = config.ldraw.getPart('SENSOR_DISTANCE')
+      // Orient sensor face along -Z (default LDraw orientation has the lens
+      // along -Y after the loader's Y-flip; rotate so the lens points along
+      // the configured `direction`).
+      this.bodyMesh.position.copy(this.position)
+      this.bodyMesh.quaternion.setFromUnitVectors(
+        new THREE.Vector3(0, 0, -1),
+        this.direction,
+      )
+      this.bodyMesh.traverse((obj) => {
+        const m = obj as THREE.Mesh
+        if (m.isMesh) m.castShadow = true
+      })
+      scene.add(this.bodyMesh)
+    } else {
+      this.bodyMesh = null
+    }
 
     // Debug ray: a line from the sensor origin to the detected hit point.
     // Start both points at the origin; step() will move the second point each frame.
@@ -95,6 +126,8 @@ export class LegoDistanceSensor {
     const attr = this.rayGeo.attributes.position as THREE.BufferAttribute
     attr.setXYZ(0, pos.x, pos.y, pos.z)
     attr.needsUpdate = true
+    // Move the LDraw visual body alongside the ray origin.
+    if (this.bodyMesh) this.bodyMesh.position.copy(pos)
   }
 
   /** Toggle the red debug ray visible in the 3D scene. */
@@ -107,5 +140,12 @@ export class LegoDistanceSensor {
     this.rayGeo.dispose()
     this.rayMat.dispose()
     this.scene.remove(this.rayLine)
+    if (this.bodyMesh) {
+      this.bodyMesh.traverse((obj) => {
+        const m = obj as THREE.Mesh
+        if (m.isMesh) m.geometry?.dispose()
+      })
+      this.scene.remove(this.bodyMesh)
+    }
   }
 }

@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import RAPIER from '@dimforge/rapier3d-compat'
 import { createScene, resizeRenderer, type SceneRefs } from './renderer/SceneSetup'
 import { LegoDistanceSensor } from './components/LegoDistanceSensor'
+import { getLDrawManager } from './ldraw/ldrawSingleton'
 import { BlockInterpreter, type IMotor, type SimpleRobot } from '../interpreter/BlockInterpreter'
 import { useSimulationStore } from '../store/simulationStore'
 import type { ChallengeEngine } from '../challenges/challenge-01'
@@ -124,11 +125,15 @@ export class SimulationEngine implements ChallengeEngine {
     )
 
     // ── Front distance sensor ─────────────────────────────────────────────────
+    // Pull the preloaded LDraw manager from the singleton (set in main.tsx
+    // after preloadAll resolves). null in tests / before preload.
+    const ldraw = getLDrawManager() ?? undefined
     const sensor = new LegoDistanceSensor(
       {
         position:  new THREE.Vector3(0, START_Y, SENSOR_Z_OFFSET),
         direction: new THREE.Vector3(0, 0, -1),
         maxRange:  200,  // cm
+        ldraw,
       },
       refs.scene,
     )

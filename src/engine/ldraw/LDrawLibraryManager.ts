@@ -24,6 +24,7 @@ export const BRICKCODE_PARTS = {
   BEAM_3:          'beam-3',           // 32523.dat — Technic Beam 3
   BEAM_5:          'beam-5',           // 32316.dat — Technic Beam 5
   BASEPLATE_32:    'baseplate-32x32',  // 3811.dat  — Baseplate 32×32
+  BRICK_2X4:       'brick-2x4',        // 3001.dat  — Brick 2×4
 } as const
 
 export type PartKey = keyof typeof BRICKCODE_PARTS
