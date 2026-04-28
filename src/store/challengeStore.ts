@@ -1,5 +1,10 @@
 import { create } from 'zustand'
 
+export interface ChallengeResult {
+  success: boolean
+  message: string
+}
+
 interface Challenge {
   id: string
   title: string
@@ -8,14 +13,14 @@ interface Challenge {
 
 interface ChallengeState {
   activeChallenge: Challenge | null
-  success: boolean
+  result: ChallengeResult | null
   setChallenge: (challenge: Challenge | null) => void
-  setSuccess: (success: boolean) => void
+  setResult: (result: ChallengeResult | null) => void
 }
 
 export const useChallengeStore = create<ChallengeState>((set) => ({
   activeChallenge: null,
-  success: false,
-  setChallenge: (challenge) => set({ activeChallenge: challenge, success: false }),
-  setSuccess: (success) => set({ success }),
+  result: null,
+  setChallenge: (challenge) => set({ activeChallenge: challenge, result: null }),
+  setResult: (result) => set({ result }),
 }))

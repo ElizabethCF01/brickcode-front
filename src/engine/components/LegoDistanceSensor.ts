@@ -15,7 +15,6 @@ export interface SensorConfig {
 
 export class LegoDistanceSensor {
   private value: number
-  private readonly maxRange:   number         // cm
   private readonly maxRangeWU: number         // world units
   private readonly position:   THREE.Vector3  // world-space origin (fixed)
   private readonly direction:  THREE.Vector3  // normalised
@@ -27,7 +26,6 @@ export class LegoDistanceSensor {
 
   constructor(config: SensorConfig, scene: THREE.Scene) {
     this.scene      = scene
-    this.maxRange   = config.maxRange
     this.maxRangeWU = config.maxRange / WORLD_TO_CM
     this.value      = config.maxRange
     this.position   = config.position.clone()
@@ -85,6 +83,18 @@ export class LegoDistanceSensor {
       )
       attr.needsUpdate = true
     }
+  }
+
+  /**
+   * Move the sensor origin to `pos` in world space.
+   * Call each frame when the sensor is mounted on a moving body.
+   */
+  setWorldPosition(pos: THREE.Vector3): void {
+    this.position.copy(pos)
+    // Keep the debug ray start in sync regardless of visibility.
+    const attr = this.rayGeo.attributes.position as THREE.BufferAttribute
+    attr.setXYZ(0, pos.x, pos.y, pos.z)
+    attr.needsUpdate = true
   }
 
   /** Toggle the red debug ray visible in the 3D scene. */

@@ -1,12 +1,15 @@
 import { useEffect, useRef } from 'react'
 import * as Blockly from 'blockly'
 import { ROBOT_TOOLBOX } from '../blocks/definitions/robotBlocks'
+import { setWorkspace } from '../blocks/workspaceSingleton'
+
+type ToolboxItem = Blockly.utils.toolbox.ToolboxItemInfo
 
 const FULL_TOOLBOX: Blockly.utils.toolbox.ToolboxDefinition = {
   kind: 'categoryToolbox',
   contents: [
-    // Spread robot category from ROBOT_TOOLBOX
-    ...((ROBOT_TOOLBOX as { contents: object[] }).contents),
+    // Spread the robot category from ROBOT_TOOLBOX.
+    ...((ROBOT_TOOLBOX as { contents: ToolboxItem[] }).contents),
     {
       kind: 'category',
       name: 'Control 🔁',
@@ -16,7 +19,7 @@ const FULL_TOOLBOX: Blockly.utils.toolbox.ToolboxDefinition = {
         { kind: 'block', type: 'controls_whileUntil' },
         { kind: 'block', type: 'controls_if' },
       ],
-    },
+    } as ToolboxItem,
     {
       kind: 'category',
       name: 'Matemáticas 🔢',
@@ -26,7 +29,7 @@ const FULL_TOOLBOX: Blockly.utils.toolbox.ToolboxDefinition = {
         { kind: 'block', type: 'math_arithmetic' },
         { kind: 'block', type: 'math_compare' },
       ],
-    },
+    } as ToolboxItem,
   ],
 }
 
@@ -37,6 +40,10 @@ export default function BlocklyWorkspace() {
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
+
+    // Clear any Blockly DOM left over from a previous inject/dispose cycle
+    // (React StrictMode mounts twice; dispose() doesn't guarantee a clean container).
+    while (container.firstChild) container.removeChild(container.firstChild)
 
     const workspace = Blockly.inject(container, {
       toolbox: FULL_TOOLBOX,
@@ -58,17 +65,18 @@ export default function BlocklyWorkspace() {
       }),
     })
     workspaceRef.current = workspace
+    setWorkspace(workspace)
 
     const ro = new ResizeObserver(() => {
       Blockly.svgResize(workspace)
     })
     ro.observe(container)
 
-    // Initial size pass — the container may already have dimensions
     Blockly.svgResize(workspace)
 
     return () => {
       ro.disconnect()
+      setWorkspace(null)
       workspace.dispose()
       workspaceRef.current = null
     }

@@ -9,8 +9,6 @@ const LEGO_BLUE   = '#006CB7'
 // Block JSON definitions
 // ---------------------------------------------------------------------------
 
-const BLOCK_DEFINITIONS: Blockly.blocks.Blocks = {}
-
 // Defined inline via defineBlocksWithJsonArray — typed as any[] matches the
 // Blockly JSON array API (BlockDefinition union is complex; JSON is fine here).
 const blockJsonArray: object[] = [
@@ -85,9 +83,6 @@ const blockJsonArray: object[] = [
     tooltip: 'Pausa el programa durante N segundos.',
   },
 ]
-
-// Suppress TS complaint — Blockly JSON API accepts plain object arrays.
-void BLOCK_DEFINITIONS
 
 /**
  * Registers all BrickCode robot blocks with the Blockly runtime.

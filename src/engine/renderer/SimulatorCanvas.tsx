@@ -1,39 +1,41 @@
 import { useEffect, useRef } from 'react'
-import { createScene, resizeRenderer, type SceneRefs } from './SceneSetup'
+import { SimulationEngine } from '../SimulationEngine'
+import { setEngine } from '../engineSingleton'
+import { challenge01 } from '../../challenges/challenge-01'
 
 export default function SimulatorCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const refsRef = useRef<SceneRefs | null>(null)
-  const rafRef = useRef<number>(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const refs = createScene(canvas)
-    refsRef.current = refs
+    let disposed = false
+    let engine: SimulationEngine | undefined
 
-    const { scene, camera, renderer, controls } = refs
+    SimulationEngine.create(canvas).then(e => {
+      // Guard against React StrictMode double-mount cleanup running before resolve.
+      if (disposed) { e.dispose(); return }
 
-    function animate() {
-      rafRef.current = requestAnimationFrame(animate)
-      controls.update()
-      renderer.render(scene, camera)
-    }
-    animate()
+      engine = e
+      engine.loadChallenge(challenge01.setup.bind(challenge01))
+      engine.startRAF()
+      setEngine(engine)
+    })
 
-    function onResize() {
+    const ro = new ResizeObserver(() => {
       const parent = canvas.parentElement
-      if (!parent) return
-      resizeRenderer(refs, parent.clientWidth, parent.clientHeight)
-    }
-    const ro = new ResizeObserver(onResize)
+      if (engine && parent) {
+        engine.resize(parent.clientWidth, parent.clientHeight)
+      }
+    })
     ro.observe(canvas.parentElement!)
 
     return () => {
-      cancelAnimationFrame(rafRef.current)
+      disposed = true
       ro.disconnect()
-      renderer.dispose()
+      setEngine(null)
+      engine?.dispose()
     }
   }, [])
 

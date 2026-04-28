@@ -1,6 +1,4 @@
 import type { Block, Workspace } from 'blockly'
-import type { LegoMotor } from '../engine/components/LegoMotor'
-import type { LegoDistanceSensor } from '../engine/components/LegoDistanceSensor'
 
 // ── Drive constants ────────────────────────────────────────────────────────
 // Legacy drive_forward block: SPEED field is already in deg/s.
@@ -11,12 +9,26 @@ const DEFAULT_DRIVE_SPEED = 360
 const MAX_DRIVE_SPEED_DEG_S = 360
 
 // ── Turn geometry (approximate — chassis not yet built) ────────────────────
-// WHEEL_RADIUS_WU matches LegoMotor.ts WHEEL_RADIUS (2 studs × 0.08 = 0.16 WU).
-// WHEEL_BASE_DEFAULT is an estimate; override via SimpleRobot.wheelBaseWU once
-// the chassis exists with real measurements.
 const WHEEL_RADIUS_WU    = 0.16   // world units (1 WU = 10 cm)
 const WHEEL_BASE_DEFAULT = 0.48   // estimated 6-stud centre-to-centre separation
 const TURN_MOTOR_SPEED   = 180    // deg/s applied to each motor while turning
+
+/**
+ * Public motor API required by the interpreter.
+ * Both LegoMotor and the demo SimpleMotor in SimulationEngine satisfy this.
+ */
+export interface IMotor {
+  setSpeed(degreesPerSecond: number): void
+  stop(): void
+}
+
+/**
+ * Public sensor API required by the interpreter.
+ * LegoDistanceSensor satisfies this.
+ */
+export interface ISensor {
+  getValue(): number
+}
 
 /**
  * Minimal robot interface required by the interpreter.
@@ -30,10 +42,10 @@ const TURN_MOTOR_SPEED   = 180    // deg/s applied to each motor while turning
  */
 export interface SimpleRobot {
   motors: {
-    left: LegoMotor
-    right: LegoMotor
+    left: IMotor
+    right: IMotor
   }
-  sensor: LegoDistanceSensor
+  sensor: ISensor
   /** Wheel centre-to-centre distance in world units. Used by robot_turn. */
   wheelBaseWU?: number
 }
@@ -152,14 +164,9 @@ export class BlockInterpreter {
         const degrees   = Number(block.getFieldValue('DEGREES') ?? 90)
         const wheelBase = this.robot.wheelBaseWU ?? WHEEL_BASE_DEFAULT
 
-        // Arc each wheel must travel = robot_heading_change × (wheelBase/2).
-        // Motor rotation = arc / WHEEL_RADIUS.
-        // Duration = motor_rotation_deg / TURN_MOTOR_SPEED.
         const motorDeg = degrees * (wheelBase / 2) / WHEEL_RADIUS_WU
         const duration = motorDeg / TURN_MOTOR_SPEED  // seconds
 
-        // LEFT turn: left motor backward, right motor forward (CCW viewed from above).
-        // RIGHT turn: left motor forward, right motor backward.
         const leftSpeed  = direction === 'LEFT' ? -TURN_MOTOR_SPEED : +TURN_MOTOR_SPEED
         const rightSpeed = direction === 'LEFT' ? +TURN_MOTOR_SPEED : -TURN_MOTOR_SPEED
 
@@ -187,8 +194,89 @@ export class BlockInterpreter {
         break
       }
 
+      // ── Control flow ────────────────────────────────────────────────────────
+
+      case 'controls_if': {
+        // Supports the basic if block (no else-if / else arms for now).
+        const condition = this.evaluateValue(block.getInputTargetBlock('IF0'))
+        if (condition) {
+          await this.executeSequence(block.getInputTargetBlock('DO0'))
+        }
+        break
+      }
+
+      case 'controls_whileUntil': {
+        const mode = block.getFieldValue('MODE') ?? 'WHILE'
+        // Guard against tight infinite loops: each iteration yields at least 50 ms
+        // so the physics RAF loop can update sensor values between checks.
+        while (this._running) {
+          const cond = this.evaluateValue(block.getInputTargetBlock('BOOL'))
+          if (mode === 'WHILE' && !cond) break
+          if (mode === 'UNTIL' && cond)  break
+          await this.executeSequence(block.getInputTargetBlock('DO'))
+          await this.sleep(50)
+        }
+        break
+      }
+
+      case 'controls_repeat_ext': {
+        const times = Math.round(this.evaluateValue(block.getInputTargetBlock('TIMES')))
+        for (let i = 0; i < times && this._running; i++) {
+          await this.executeSequence(block.getInputTargetBlock('DO'))
+        }
+        break
+      }
+
       // Unknown block types are silently skipped so a workspace with experimental
       // blocks doesn't crash an otherwise valid program.
+    }
+  }
+
+  /**
+   * Evaluate a value block and return a number.
+   * Returns 0 for null / unknown block types.
+   */
+  private evaluateValue(block: Block | null): number {
+    if (!block) return 0
+
+    switch (block.type) {
+      case 'sensor_distance':
+        return this.robot.sensor.getValue()
+
+      case 'math_number':
+        return Number(block.getFieldValue('NUM') ?? 0)
+
+      case 'math_arithmetic': {
+        const a  = this.evaluateValue(block.getInputTargetBlock('A'))
+        const b  = this.evaluateValue(block.getInputTargetBlock('B'))
+        const op = block.getFieldValue('OP')
+        switch (op) {
+          case 'ADD':      return a + b
+          case 'MINUS':    return a - b
+          case 'MULTIPLY': return a * b
+          case 'DIVIDE':   return b !== 0 ? a / b : 0
+          case 'POWER':    return Math.pow(a, b)
+          default:         return 0
+        }
+      }
+
+      case 'math_compare': {
+        const a  = this.evaluateValue(block.getInputTargetBlock('A'))
+        const b  = this.evaluateValue(block.getInputTargetBlock('B'))
+        const op = block.getFieldValue('OP')
+        switch (op) {
+          case 'EQ':  return a === b ? 1 : 0
+          case 'NEQ': return a !== b ? 1 : 0
+          case 'LT':  return a <   b ? 1 : 0
+          case 'LTE': return a <=  b ? 1 : 0
+          case 'GT':  return a >   b ? 1 : 0
+          case 'GTE': return a >=  b ? 1 : 0
+          default:    return 0
+        }
+      }
+
+      default:
+        return 0
     }
   }
 

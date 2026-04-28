@@ -198,7 +198,57 @@ All blocks are registered with `registerRobotBlocks()` (call once at startup) an
 
 `ROBOT_TOOLBOX` exports a ready-to-use Blockly v9+ JSON toolbox definition. Pass it to the `toolbox` option of `Blockly.inject()` or the `BlocklyWorkspace` component.
 
-> **Note**: `BlockInterpreter` v1 handles `drive_forward`, `wait_seconds`, and `motor_stop`. The new `robot_*` block types require a corresponding interpreter update (Task 3.2).
+`BlockInterpreter` also handles `controls_if`, `controls_whileUntil`, and `controls_repeat_ext` via an internal `evaluateValue()` method that resolves `sensor_distance`, `math_number`, `math_compare`, and `math_arithmetic` value blocks. Unknown block types are silently skipped.
+
+---
+
+## SimulationEngine
+
+**File**: `src/engine/SimulationEngine.ts`
+
+`SimulationEngine` is the central runtime object created once per session. It owns:
+
+- A **Rapier world** (gravity –9.81 Y) and a **Three.js scene** (via `createScene`).
+- A blue **chassis mesh** (`BoxGeometry`, 4×2×6 studs) plus a **kinematic Rapier body** that the engine moves manually — no forces, no joints for Sprint 3.
+- A **front `LegoDistanceSensor`** whose world-space position is updated each tick via `setWorldPosition()`.
+- Two **`SimpleMotor`** instances (internal class) that record commanded speed without physics. The engine reads their speeds and integrates them into chassis Z-position each tick.
+- A **`BlockInterpreter`** wired to the above robot.
+
+### Per-frame loop (`_tick`)
+
+1. Compute `forwardWU = avg(left, right) × DEG_TO_RAD × WHEEL_RADIUS × dt`.
+2. Advance `chassisPos.z` by `−forwardWU` (robot faces −Z).
+3. `chassisBody.setNextKinematicTranslation(chassisPos)`.
+4. `world.step()` — commits the kinematic translation.
+5. `sensor.setWorldPosition(front of chassis)` then `sensor.step(world)`.
+6. Push `sensor.getValue()` to `simulationStore.sensorValues['front']`.
+7. Render via Three.js.
+
+### Why kinematic chassis
+
+Full differential-drive physics (revolute joints, wheel friction, traction) is deferred to Sprint 4. A kinematic body gives Sprint-3 kids a moving robot and working sensor without physics tuning.
+
+### Singletons
+
+`src/engine/engineSingleton.ts` and `src/blocks/workspaceSingleton.ts` expose module-level references so `ControlPanel` can access both without React context or prop drilling.
+
+---
+
+## Challenge 01
+
+**File**: `src/challenges/challenge-01.ts`
+
+| Property | Value |
+|----------|-------|
+| `id` | `'challenge-01'` |
+| Wall distance | 50 cm (wall front face at z = −5 WU) |
+| Success zone | Sensor reads 15–25 cm when stopped |
+| Wall body | Fixed Rapier body (not dynamic LegoBricks — avoids toppling) |
+
+`setup(engine)` creates the red wall and returns a dispose callback.  
+`evaluate(robot)` reads `robot.sensor.getValue()` and returns `ChallengeResult`.
+
+`ChallengeResult` is defined in `challengeStore.ts` and re-exported from `challenge-01.ts`.
 
 ---
 
