@@ -12,6 +12,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "@blockly/continuous-toolbox": "^7.0.9",
     "@dimforge/rapier3d-compat": "^0.19.3",
     "@tailwindcss/vite": "^4.2.4",
     "@types/three": "^0.184.0",

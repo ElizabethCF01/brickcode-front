@@ -260,7 +260,7 @@ export class BlockInterpreter {
         }
       }
 
-      case 'math_compare': {
+      case 'logic_compare': {
         const a  = this.evaluateValue(block.getInputTargetBlock('A'))
         const b  = this.evaluateValue(block.getInputTargetBlock('B'))
         const op = block.getFieldValue('OP')

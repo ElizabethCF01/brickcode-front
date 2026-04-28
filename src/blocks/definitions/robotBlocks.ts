@@ -91,6 +91,37 @@ const blockJsonArray: object[] = [
 export function registerRobotBlocks(): void {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Blockly.defineBlocksWithJsonArray(blockJsonArray as any[])
+  patchRemoveTopBlock()
+}
+
+/**
+ * Workaround for a Blockly v12 bug: when the flyout disposes a block whose
+ * shadow children get unplugged before disposal, the shadow's `dispose()`
+ * calls `workspace.removeTopBlock()` for a block that was never top-level,
+ * which throws and aborts the flyout's `clearOldBlocks` loop. After that the
+ * flyout gets stuck and the panel stops re-rendering when switching toolbox
+ * categories. We make `removeTopBlock` a no-op when the block is missing.
+ *
+ * Symptom: "Block not present in workspace's list of top-most blocks." in
+ * the console after switching between Mi Robot / Control / Matemáticas tabs.
+ */
+function patchRemoveTopBlock(): void {
+  const w = globalThis as unknown as { __brickcodeRemoveTopPatched?: boolean }
+  if (w.__brickcodeRemoveTopPatched) return
+  w.__brickcodeRemoveTopPatched = true
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const proto: any = (Blockly.Workspace as any).prototype
+  const original = proto.removeTopBlock
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  proto.removeTopBlock = function (this: any, block: any): void {
+    try {
+      return original.call(this, block)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.includes("top-most blocks")) return
+      throw err
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------

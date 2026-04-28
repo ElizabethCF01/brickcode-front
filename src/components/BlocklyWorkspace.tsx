@@ -1,5 +1,11 @@
 import { useEffect, useRef } from 'react'
 import * as Blockly from 'blockly'
+import { registerContinuousToolbox } from '@blockly/continuous-toolbox'
+
+// Register ContinuousToolbox / ContinuousFlyout / ContinuousMetrics /
+// RecyclableBlockFlyoutInflater in Blockly's global registry. Must run before
+// any Blockly.inject() call. Idempotent — registry overrides allowed.
+registerContinuousToolbox()
 import { ROBOT_TOOLBOX } from '../blocks/definitions/robotBlocks'
 import { setWorkspace } from '../blocks/workspaceSingleton'
 
@@ -15,7 +21,11 @@ const FULL_TOOLBOX: Blockly.utils.toolbox.ToolboxDefinition = {
       name: 'Control 🔁',
       colour: '#FF8C00',
       contents: [
-        { kind: 'block', type: 'controls_repeat_ext' },
+        // controls_repeat (no shadow inputs) instead of controls_repeat_ext
+        // (whose default math_number shadow triggers a Blockly bug:
+        // "Block not present in workspace's list of top-most blocks" when
+        // the flyout disposes blocks during category switch).
+        { kind: 'block', type: 'controls_repeat' },
         { kind: 'block', type: 'controls_whileUntil' },
         { kind: 'block', type: 'controls_if' },
       ],
@@ -27,7 +37,7 @@ const FULL_TOOLBOX: Blockly.utils.toolbox.ToolboxDefinition = {
       contents: [
         { kind: 'block', type: 'math_number' },
         { kind: 'block', type: 'math_arithmetic' },
-        { kind: 'block', type: 'math_compare' },
+        { kind: 'block', type: 'logic_compare' },
       ],
     } as ToolboxItem,
   ],
@@ -50,6 +60,16 @@ export default function BlocklyWorkspace() {
       renderer: 'zelos',
       trashcan: true,
       sounds: false,
+      // Continuous toolbox: keeps all category blocks rendered in one flyout
+      // and scrolls between sections instead of disposing/recreating blocks per
+      // category click. Sidesteps a Blockly v12 bug where shadow children get
+      // removed twice from the workspace's top-block list, eventually corrupting
+      // the flyout so it stops showing any blocks.
+      plugins: {
+        toolbox: 'ContinuousToolbox',
+        flyoutsVerticalToolbox: 'ContinuousFlyout',
+        metricsManager: 'ContinuousMetrics',
+      },
       move: {
         scrollbars: { horizontal: true, vertical: true },
         drag: true,
