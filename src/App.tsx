@@ -10,13 +10,14 @@ import { resizeWorkspace } from './blocks/workspaceSingleton'
 export default function App() {
   const { showEditor, toggleEditor } = useSimulationStore()
 
-  // When the drawer becomes visible, Blockly's SVG may have stale dimensions
-  // (it was laid out while hidden). Resize on the next paint so blocks don't
-  // appear clipped or misaligned.
+  // The drawer slides in via a 200ms CSS transform transition. Resizing
+  // Blockly before the transition completes leaves it with stale flyout/toolbox
+  // metrics — the symptom is that the flyout doesn't reappear on the second
+  // category click. Wait until after the transition to call svgResize.
   useEffect(() => {
-    if (showEditor) {
-      requestAnimationFrame(resizeWorkspace)
-    }
+    if (!showEditor) return
+    const t = window.setTimeout(resizeWorkspace, 220)
+    return () => window.clearTimeout(t)
   }, [showEditor])
 
   return (
@@ -48,7 +49,7 @@ export default function App() {
         {/* Blockly editor drawer — always in the DOM so blocks are never lost.
             Visibility toggled via CSS so Blockly's workspace isn't disposed. */}
         <div
-          className={`absolute top-0 right-0 bottom-0 w-120 flex flex-col
+          className={`absolute top-0 right-0 bottom-0 w-1/2 min-w-[420px] flex flex-col
             bg-gray-900 border-l border-gray-700 shadow-2xl z-10
             transition-transform duration-200
             ${showEditor ? 'translate-x-0' : 'translate-x-full'}`}

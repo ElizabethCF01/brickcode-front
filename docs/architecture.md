@@ -277,3 +277,15 @@ Full differential-drive physics (revolute joints, wheel friction, traction) is d
 - **Sensor key convention**: `simulationStore.sensorValues['front']` holds the front distance sensor reading in cm. `SensorPanel` reads this key; the bar fills relative to `SENSOR_MAX_CM = 100`. When the key is absent the display shows `— cm`.
 - **Control buttons**: Run/Stop/Reset toggle `simulationStore.status` only. Wiring to `BlockInterpreter` is deferred to the task that builds `SimpleRobot`.
 - **Status labels**: `stopped` → "En reposo", `running` → "Ejecutando", `paused` → "Pausado".
+
+## Block Editor UX
+
+**Files**: `src/components/BlocklyWorkspace.tsx`, `src/App.tsx`, `src/blocks/definitions/robotBlocks.ts`, `src/index.css`
+
+- **Renderer `zelos`**: rounded-edge blocks (Scratch-style), better suited for ages 8–12 than the default `geras`.
+- **`move` + `zoom` enabled**: scrollbars on both axes, wheel pan, wheel-zoom, pinch-zoom, on-screen zoom controls. `startScale: 0.9`, `[0.5, 2]` range.
+- **`grid.snap: true`** (spacing 20px): drag placement snaps to a grid so the workspace stays tidy.
+- **Drawer width is 50vw with `min-w-[420px]`**: fills half the viewport on desktop while staying usable on small screens.
+- **Drawer resize timing**: the drawer animates in via a 200ms CSS transform. `App.tsx` schedules `Blockly.svgResize` via a 220ms timeout (not `requestAnimationFrame`) so flyout/toolbox metrics are computed *after* the transform settles. Resizing earlier was the cause of "flyout doesn't reappear on second category click".
+- **Toolbox uses `kind: 'label'` instead of `kind: 'sep'`**: the previous separator items rendered visible horizontal bars in the flyout. Labels (`Movimiento`, `Sensores`, `Tiempo`) provide grouping without the bar.
+- **Theme contrast**: toolbox `#0f172a`, flyout `#111827`, workspace `#1f2937` — three distinct shades so the panes visually separate. `flyoutOpacity: 1` (was 0.9 — caused blending).

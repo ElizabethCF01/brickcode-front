@@ -11,3 +11,18 @@ html, body, #root {
   height: 100%;
   overflow: hidden;
 }
+
+/* Blockly: keep the flyout layered inside the drawer */
+.blocklyFlyout { z-index: 1; }
+
+/* Roomier toolbox category rows */
+.blocklyTreeRow { padding: 6px 8px !important; }
+.blocklyTreeLabel { font-size: 14px !important; }
+
+/* Section labels (replacing the old separator bars) */
+.blocklyFlyoutLabelText {
+  font-size: 11px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  fill: #9ca3af !important;
+}
