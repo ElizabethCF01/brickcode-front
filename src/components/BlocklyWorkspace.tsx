@@ -46,7 +46,7 @@ export default function BlocklyWorkspace() {
     while (container.firstChild) container.removeChild(container.firstChild)
 
     const workspace = Blockly.inject(container, {
-      toolbox: FULL_TOOLBOX,
+      toolbox: structuredClone(FULL_TOOLBOX),
       scrollbars: true,
       trashcan: true,
       theme: Blockly.Theme.defineTheme('brickcode-dark', {
