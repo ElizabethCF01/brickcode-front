@@ -8,9 +8,9 @@ const DEFAULT_DRIVE_SPEED = 360
 // 100 % maps to MAX_DRIVE_SPEED_DEG_S.
 const MAX_DRIVE_SPEED_DEG_S = 360
 
-// ── Turn geometry (approximate — chassis not yet built) ────────────────────
-const WHEEL_RADIUS_WU    = 0.16   // world units (1 WU = 10 cm)
-const WHEEL_BASE_DEFAULT = 0.48   // estimated 6-stud centre-to-centre separation
+// ── Turn geometry (matches SimpleRobot dimensions) ────────────────────────
+const WHEEL_RADIUS_WU    = 0.28   // world units (1 WU = 10 cm) — LDraw 3483 large wheel
+const WHEEL_BASE_DEFAULT = 1.75   // SimpleRobot wheel-centre to wheel-centre
 const TURN_MOTOR_SPEED   = 180    // deg/s applied to each motor while turning
 
 /**

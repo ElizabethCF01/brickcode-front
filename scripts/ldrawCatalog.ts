@@ -20,6 +20,7 @@ export const LDRAW_CATALOG: LDrawCatalogEntry[] = [
   { id: 'brick-2x4',       file: 'parts/3001.dat',  displayName: 'Brick 2×4' },
   { id: 'baseplate-32x32', file: 'parts/3811.dat',  displayName: 'Baseplate 32×32' },
   { id: 'wheel',           file: 'parts/3483.dat',  displayName: 'Wheel hub' },
+  { id: 'tire',            file: 'parts/3482.dat',  displayName: 'Tyre 17.5×6 Solid Smooth' },
   { id: 'hub-ev3',         file: 'parts/95646.dat', displayName: 'EV3 Intelligent Brick' },
   { id: 'motor-m',         file: 'parts/99455.dat', displayName: 'EV3 Medium Motor' },
   { id: 'motor-l',         file: 'parts/95658.dat', displayName: 'EV3 Large Motor' },

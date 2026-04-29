@@ -19,8 +19,9 @@ export function createScene(canvas: HTMLCanvasElement): SceneRefs {
     0.1,
     100,
   )
-  camera.position.set(0, 6, 10)
-  camera.lookAt(0, 0, 0)
+  // Tuned for the SimpleRobot scale (hub ~1.13 × 1.12 × 0.45 WU, wheel base 1.75 WU).
+  camera.position.set(0, 4, 7)
+  camera.lookAt(0, 0.4, 0)
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
   renderer.setSize(canvas.clientWidth, canvas.clientHeight)

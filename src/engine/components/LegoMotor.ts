@@ -20,7 +20,7 @@ export interface MotorConfig {
   /**
    * The Rapier rigid body this motor will spin.
    * Must be a dynamic body created at the same position as `config.position` so the
-   * revolute joint anchor offset is zero in both local frames.
+   * revolute joint anchor offset is zero in the attachedBody local frame.
    */
   attachedBody: RAPIER.RigidBody
   /** The axis around which the motor rotates, expressed in the local frame of attachedBody. */
@@ -30,6 +30,18 @@ export interface MotorConfig {
    * by the WHEEL_LARGE LDraw clone. The revolute joint and physics are unchanged.
    */
   ldraw?: LDrawLibraryManager
+  /**
+   * Optional anchor body for the revolute joint. When provided (e.g. a robot
+   * chassis), the joint is anchored to this body instead of a fresh world-fixed
+   * anchor — letting the motor move with the robot. The motor does not own the
+   * anchor body and will not remove it on dispose().
+   *
+   * When set, `anchorLocalPoint` must give the joint anchor's coordinates in
+   * the anchorBody local frame (typically `position − anchorBody.translation`).
+   */
+  anchorBody?: RAPIER.RigidBody
+  /** Joint anchor point in the anchorBody local frame. Defaults to (0,0,0). */
+  anchorLocalPoint?: { x: number; y: number; z: number }
 }
 
 export class LegoMotor {
@@ -38,6 +50,7 @@ export class LegoMotor {
 
   private readonly joint:        RAPIER.RevoluteImpulseJoint
   private readonly anchor:       RAPIER.RigidBody
+  private readonly ownsAnchor:   boolean
   private readonly group:        THREE.Group
   private readonly wheelVisual:  THREE.Object3D
   private readonly geometry:     THREE.CylinderGeometry | null
@@ -53,11 +66,17 @@ export class LegoMotor {
 
     // ── Three.js wheel visual ──────────────────────────────────────────────────
     if (config.ldraw) {
-      this.wheelVisual = config.ldraw.getPart('WHEEL_LARGE')
-      this.wheelVisual.traverse((obj) => {
+      // Compose rim (3483) + tyre (3482). Both share the LDraw axle origin so a
+      // single Group with both children renders the complete wheel. The tyre
+      // mounts concentrically with the rim — no extra offset needed.
+      const wheelGroup = new THREE.Group()
+      wheelGroup.add(config.ldraw.getPart('WHEEL_LARGE'))
+      wheelGroup.add(config.ldraw.getPart('WHEEL_TIRE'))
+      wheelGroup.traverse((obj) => {
         const m = obj as THREE.Mesh
         if (m.isMesh) m.castShadow = true
       })
+      this.wheelVisual = wheelGroup
       this.geometry = null
       this.material = null
     } else {
@@ -80,24 +99,33 @@ export class LegoMotor {
     this.group.add(this.wheelVisual)
     scene.add(this.group)
 
-    // ── Rapier anchor (fixed body — the motor housing) ─────────────────────────
-    const anchorDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(
-      config.position.x,
-      config.position.y,
-      config.position.z,
-    )
-    this.anchor = world.createRigidBody(anchorDesc)
+    // ── Anchor body ────────────────────────────────────────────────────────────
+    // External anchor (e.g. robot chassis) lets the motor travel with a moving
+    // body. Otherwise create a world-fixed anchor at config.position.
+    if (config.anchorBody) {
+      this.anchor = config.anchorBody
+      this.ownsAnchor = false
+    } else {
+      const anchorDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(
+        config.position.x,
+        config.position.y,
+        config.position.z,
+      )
+      this.anchor = world.createRigidBody(anchorDesc)
+      this.ownsAnchor = true
+    }
 
     // ── RevoluteImpulseJoint ───────────────────────────────────────────────────
-    // Both local anchors at origin (0,0,0) — valid when attachedBody was created
-    // at the same world position as config.position.
+    // attachedBody was created at config.position → its local anchor is (0,0,0).
+    // anchorBody (when external) needs the joint point expressed in *its* frame.
     const AXES = {
       x: { x: 1, y: 0, z: 0 },
       y: { x: 0, y: 1, z: 0 },
       z: { x: 0, y: 0, z: 1 },
     }
+    const localA = config.anchorLocalPoint ?? { x: 0, y: 0, z: 0 }
     const jointDesc = RAPIER.JointData.revolute(
-      { x: 0, y: 0, z: 0 },  // attachment point in anchor local space
+      localA,                // attachment point in anchor local space
       { x: 0, y: 0, z: 0 },  // attachment point in attachedBody local space
       AXES[config.axis],
     )
@@ -142,6 +170,11 @@ export class LegoMotor {
     this.currentAngle += this.targetSpeed * deltaTime
   }
 
+  /** Hide/show the wheel visual without affecting the rigid body or joint. */
+  setVisualVisible(visible: boolean): void {
+    this.group.visible = visible
+  }
+
   dispose(): void {
     this.geometry?.dispose()
     this.material?.dispose()
@@ -152,7 +185,7 @@ export class LegoMotor {
     })
     this.scene.remove(this.group)
     this.world.removeImpulseJoint(this.joint, /* wakeUp */ true)
-    this.world.removeRigidBody(this.anchor)
-    // attachedBody is owned by the caller — not removed here
+    if (this.ownsAnchor) this.world.removeRigidBody(this.anchor)
+    // attachedBody (and external anchorBody) are owned by the caller — not removed here
   }
 }

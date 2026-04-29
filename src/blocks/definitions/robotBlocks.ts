@@ -134,7 +134,7 @@ export const ROBOT_TOOLBOX: Blockly.utils.toolbox.ToolboxDefinition = {
   contents: [
     {
       kind: 'category',
-      name: 'Mi Robot 🤖',
+      name: 'Mi Robot',
       colour: LEGO_RED,
       contents: [
         { kind: 'label', text: 'Movimiento' },

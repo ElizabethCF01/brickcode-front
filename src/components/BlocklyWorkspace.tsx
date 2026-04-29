@@ -18,7 +18,7 @@ const FULL_TOOLBOX: Blockly.utils.toolbox.ToolboxDefinition = {
     ...((ROBOT_TOOLBOX as { contents: ToolboxItem[] }).contents),
     {
       kind: 'category',
-      name: 'Control 🔁',
+      name: 'Control',
       colour: '#FF8C00',
       contents: [
         // controls_repeat (no shadow inputs) instead of controls_repeat_ext
@@ -32,7 +32,7 @@ const FULL_TOOLBOX: Blockly.utils.toolbox.ToolboxDefinition = {
     } as ToolboxItem,
     {
       kind: 'category',
-      name: 'Matemáticas 🔢',
+      name: 'Matemáticas',
       colour: '#5C81A6',
       contents: [
         { kind: 'block', type: 'math_number' },
@@ -59,7 +59,7 @@ export default function BlocklyWorkspace() {
       toolbox: structuredClone(FULL_TOOLBOX),
       renderer: 'zelos',
       trashcan: true,
-      sounds: false,
+      sounds: true,
       // Continuous toolbox: keeps all category blocks rendered in one flyout
       // and scrolls between sections instead of disposing/recreating blocks per
       // category click. Sidesteps a Blockly v12 bug where shadow children get
@@ -78,7 +78,7 @@ export default function BlocklyWorkspace() {
       zoom: {
         controls: true,
         wheel: true,
-        startScale: 0.9,
+        startScale: 0.7,
         maxScale: 2,
         minScale: 0.5,
         scaleSpeed: 1.1,
@@ -92,7 +92,7 @@ export default function BlocklyWorkspace() {
       },
       theme: Blockly.Theme.defineTheme('brickcode-dark', {
         name: 'brickcode-dark',
-        base: Blockly.Themes.Classic,
+        base: Blockly.Themes.Zelos,
         componentStyles: {
           workspaceBackgroundColour: '#1f2937',
           toolboxBackgroundColour:   '#0f172a',

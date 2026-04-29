@@ -17,10 +17,11 @@ export interface ChallengeEngine {
 
 export type { ChallengeResult }
 
-// Wall dimensions (all in world units, scale 1 WU = 10 cm)
-const WALL_WIDTH_WU  = 0.64   // 8 studs wide
-const WALL_HEIGHT_WU = 0.288  // 3 bricks tall (3 × 0.096 WU)
-const WALL_DEPTH_WU  = 0.16   // 2 studs deep
+// Wall dimensions (all in world units, scale 1 WU = 10 cm). Sized to read as
+// an obstacle next to the SimpleRobot (~1.75 WU wide × 1.16 WU tall).
+const WALL_WIDTH_WU  = 1.6    // 16 cm
+const WALL_HEIGHT_WU = 0.6    // 6 cm
+const WALL_DEPTH_WU  = 0.2    // 2 cm
 
 // Front face of wall sits at z = -0.5 WU (exactly 50 cm from the robot origin along −z).
 // Body centre is half the depth further back.

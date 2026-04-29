@@ -4,7 +4,9 @@
   box-sizing: border-box;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -13,11 +15,42 @@ html, body, #root {
 }
 
 /* Blockly: keep the flyout layered inside the drawer */
-.blocklyFlyout { z-index: 1; }
+.blocklyFlyout {
+  z-index: 1;
+}
+
+.blocklyToolboxCategory {
+  display: flex;
+}
+
+.blocklyTreeRowContentContainer {
+  flex-direction: row;
+  min-height: 24px;
+}
+
+.blocklyToolboxCategoryLabel {
+  font-size: 14px;
+}
+
+.categoryBubble {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3px;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  margin-right: 8px;
+}
 
 /* Roomier toolbox category rows */
-.blocklyTreeRow { padding: 6px 8px !important; }
-.blocklyTreeLabel { font-size: 14px !important; }
+.blocklyTreeRow {
+  padding: 6px 8px !important;
+}
+
+.blocklyTreeLabel {
+  font-size: 12px !important;
+}
 
 /* Section labels (replacing the old separator bars) */
 .blocklyFlyoutLabelText {

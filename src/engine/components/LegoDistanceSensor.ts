@@ -130,6 +130,11 @@ export class LegoDistanceSensor {
     if (this.bodyMesh) this.bodyMesh.position.copy(pos)
   }
 
+  /** Hide/show the LDraw sensor body. The ray continues to fire either way. */
+  setBodyVisible(visible: boolean): void {
+    if (this.bodyMesh) this.bodyMesh.visible = visible
+  }
+
   /** Toggle the red debug ray visible in the 3D scene. */
   setDebugVisible(visible: boolean): void {
     this.rayLine.visible = visible

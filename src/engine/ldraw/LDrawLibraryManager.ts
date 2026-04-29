@@ -20,7 +20,8 @@ export const BRICKCODE_PARTS = {
   MOTOR_L:         'motor-l',          // 95658.dat — EV3 Large Motor
   SENSOR_DISTANCE: 'sensor-distance',  // 95652.dat — EV3 Ultrasonic Sensor
   SENSOR_COLOR:    'sensor-color',     // 95650.dat — EV3 Color Sensor
-  WHEEL_LARGE:     'wheel',            // 3483.dat  — Technic Wheel hub
+  WHEEL_LARGE:     'wheel',            // 3483.dat  — Technic Wheel hub (rim only)
+  WHEEL_TIRE:      'tire',             // 3482.dat  — Tyre that mounts on 3483
   BEAM_3:          'beam-3',           // 32523.dat — Technic Beam 3
   BEAM_5:          'beam-5',           // 32316.dat — Technic Beam 5
   BASEPLATE_32:    'baseplate-32x32',  // 3811.dat  — Baseplate 32×32
@@ -75,6 +76,20 @@ export class LDrawLibraryManager {
     const clone = cached.clone(true)
     if (color !== undefined) this.applyColor(clone, color)
     return clone
+  }
+
+  /**
+   * Loads an arbitrary packed model (e.g. a Studio 2.0 export packed via
+   * `npm run pack-ldraw`) and returns a scaled THREE.Group ready to add to the
+   * scene. Not cached — each call re-parses. For repeated use, store the
+   * returned group and clone it.
+   *
+   * @param url Public URL of the packed `.mpd` (e.g. `/ldraw/models/packed/speed-bot.mpd`).
+   */
+  async loadModel(url: string): Promise<THREE.Group> {
+    const group = (await this.loader.loadAsync(url)) as THREE.Group
+    group.scale.setScalar(LDU_TO_WU)
+    return group
   }
 
   /**

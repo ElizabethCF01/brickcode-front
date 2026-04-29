@@ -1,9 +1,9 @@
 import * as THREE from 'three'
 import RAPIER from '@dimforge/rapier3d-compat'
 import { createScene, resizeRenderer, type SceneRefs } from './renderer/SceneSetup'
-import { LegoDistanceSensor } from './components/LegoDistanceSensor'
+import { SimpleRobot } from './components/SimpleRobot'
 import { getLDrawManager } from './ldraw/ldrawSingleton'
-import { BlockInterpreter, type IMotor, type SimpleRobot } from '../interpreter/BlockInterpreter'
+import { BlockInterpreter } from '../interpreter/BlockInterpreter'
 import { useSimulationStore } from '../store/simulationStore'
 import type { ChallengeEngine } from '../challenges/challenge-01'
 
@@ -16,34 +16,6 @@ function ensureRapierInit(): Promise<void> {
   return _rapierInitPromise
 }
 
-// Scale: 1 WU = 10 cm — see docs/architecture.md §Scale Convention.
-const DEG_TO_RAD   = Math.PI / 180
-const WHEEL_RADIUS = 0.16   // WU — 2 studs; matches LegoMotor.ts
-
-// Robot chassis dimensions
-const CHASSIS_W = 0.32    // 4 studs wide
-const CHASSIS_H = 0.192   // 2 bricks tall
-const CHASSIS_D = 0.48    // 6 studs deep
-
-// Sensor origin relative to chassis centre (front face, same height as centre)
-const SENSOR_Z_OFFSET = -(CHASSIS_D / 2)
-
-// Chassis sits on the floor: centre is half-height above y = 0.
-const START_Y = CHASSIS_H / 2
-
-/**
- * Minimal motor for the Sprint-3 demo: records commanded speed; no physics joint.
- * SimulationEngine reads the speeds and moves the kinematic chassis each frame.
- * Satisfies IMotor so BlockInterpreter drives it unchanged.
- */
-class SimpleMotor implements IMotor {
-  private _speed = 0
-
-  setSpeed(degreesPerSecond: number): void { this._speed = degreesPerSecond }
-  stop(): void { this._speed = 0 }
-  getTargetSpeed(): number { return this._speed }
-}
-
 export class SimulationEngine implements ChallengeEngine {
   // ChallengeEngine surface
   readonly world: RAPIER.World
@@ -52,51 +24,17 @@ export class SimulationEngine implements ChallengeEngine {
   readonly robot:       SimpleRobot
   readonly interpreter: BlockInterpreter
 
-  private readonly _refs:        SceneRefs
-  private readonly _chassisBody: RAPIER.RigidBody
-  private readonly _chassisMesh: THREE.Mesh
-  private readonly _chassisGeo:  THREE.BoxGeometry
-  private readonly _chassisMat:  THREE.MeshStandardMaterial
-  private readonly _sensor:      LegoDistanceSensor
-  private readonly _leftMotor:   SimpleMotor
-  private readonly _rightMotor:  SimpleMotor
-
-  // Mutable chassis world position (kinematic — not driven by physics forces)
-  private _chassisPos = new THREE.Vector3(0, START_Y, 0)
-  // Reusable vector to avoid per-frame allocation when updating sensor position
-  private _sensorPos  = new THREE.Vector3()
+  private readonly _refs: SceneRefs
 
   private _rafId    = 0
   private _lastTime = 0
   private _challengeDispose: (() => void) | null = null
 
-  private constructor(
-    world:       RAPIER.World,
-    refs:        SceneRefs,
-    chassisBody: RAPIER.RigidBody,
-    chassisMesh: THREE.Mesh,
-    chassisGeo:  THREE.BoxGeometry,
-    chassisMat:  THREE.MeshStandardMaterial,
-    sensor:      LegoDistanceSensor,
-    leftMotor:   SimpleMotor,
-    rightMotor:  SimpleMotor,
-  ) {
-    this.world        = world
-    this.scene        = refs.scene
-    this._refs        = refs
-    this._chassisBody = chassisBody
-    this._chassisMesh = chassisMesh
-    this._chassisGeo  = chassisGeo
-    this._chassisMat  = chassisMat
-    this._sensor      = sensor
-    this._leftMotor   = leftMotor
-    this._rightMotor  = rightMotor
-
-    this.robot = {
-      motors:      { left: leftMotor, right: rightMotor },
-      sensor,
-      wheelBaseWU: 0.48,
-    }
+  private constructor(world: RAPIER.World, refs: SceneRefs, robot: SimpleRobot) {
+    this.world       = world
+    this.scene       = refs.scene
+    this._refs       = refs
+    this.robot       = robot
     this.interpreter = new BlockInterpreter(this.robot)
   }
 
@@ -106,46 +44,59 @@ export class SimulationEngine implements ChallengeEngine {
     await ensureRapierInit()
     const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 })
 
-    // Three.js scene (reuses camera/renderer/controls from SceneSetup)
-    const refs = createScene(canvas)
-
-    // ── Chassis mesh ──────────────────────────────────────────────────────────
-    const chassisGeo  = new THREE.BoxGeometry(CHASSIS_W, CHASSIS_H, CHASSIS_D)
-    const chassisMat  = new THREE.MeshStandardMaterial({ color: '#1565C0' })
-    const chassisMesh = new THREE.Mesh(chassisGeo, chassisMat)
-    chassisMesh.castShadow    = true
-    chassisMesh.receiveShadow = true
-    chassisMesh.position.set(0, START_Y, 0)
-    refs.scene.add(chassisMesh)
-
-    // ── Kinematic Rapier body (no collider — avoids sensor self-hit) ──────────
-    // The wall collider is the only thing the sensor needs to detect.
-    const chassisBody = world.createRigidBody(
-      RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(0, START_Y, 0),
+    // Static ground plane so the robot's wheels have something to push against.
+    // (The decorative floor mesh is added by createScene; this is the collider.)
+    world.createCollider(
+      RAPIER.ColliderDesc.cuboid(50, 0.05, 50)
+        .setTranslation(0, -0.05, 0)
+        .setFriction(1.0),
+      world.createRigidBody(RAPIER.RigidBodyDesc.fixed()),
     )
 
-    // ── Front distance sensor ─────────────────────────────────────────────────
-    // Pull the preloaded LDraw manager from the singleton (set in main.tsx
-    // after preloadAll resolves). null in tests / before preload.
+    const refs = createScene(canvas)
+
+    // Robot hub initial position: hub centre is at y = HUB_Y inside SimpleRobot.
+    // Place at world origin — wheels will rest on the ground plane.
     const ldraw = getLDrawManager() ?? undefined
-    const sensor = new LegoDistanceSensor(
+    const robot = new SimpleRobot(
       {
-        position:  new THREE.Vector3(0, START_Y, SENSOR_Z_OFFSET),
-        direction: new THREE.Vector3(0, 0, -1),
-        maxRange:  200,  // cm
+        position: new THREE.Vector3(0, 0.6, 0),
         ldraw,
       },
+      world,
       refs.scene,
     )
 
-    const leftMotor  = new SimpleMotor()
-    const rightMotor = new SimpleMotor()
+    // Optional: attach a user-imported LDraw model (visual only, level 1).
+    // Set VITE_IMPORTED_ROBOT_MODEL to a packed .mpd URL — e.g.
+    // `/ldraw/models/packed/speed-bot.mpd` — and run `npm run pack-ldraw`
+    // first so the file exists.
+    const importedModelUrl = import.meta.env.VITE_IMPORTED_ROBOT_MODEL as string | undefined
+    if (importedModelUrl && ldraw) {
+      try {
+        const group = await ldraw.loadModel(importedModelUrl)
+        // Optional fine-tune knobs for the imported model — level-1 visuals
+        // can never match a physics rig with a different wheel layout, so
+        // these let you nudge the chassis up/down (and yaw) until it looks
+        // right. Set in `.env.local`:
+        //   VITE_IMPORTED_ROBOT_OFFSET_Y=0.05   # raise 5 cm
+        //   VITE_IMPORTED_ROBOT_OFFSET_X=0
+        //   VITE_IMPORTED_ROBOT_OFFSET_Z=0
+        //   VITE_IMPORTED_ROBOT_YAW_DEG=0
+        const ox = Number(import.meta.env.VITE_IMPORTED_ROBOT_OFFSET_X ?? 0)
+        const oy = Number(import.meta.env.VITE_IMPORTED_ROBOT_OFFSET_Y ?? 0)
+        const oz = Number(import.meta.env.VITE_IMPORTED_ROBOT_OFFSET_Z ?? 0)
+        const yawDeg = Number(import.meta.env.VITE_IMPORTED_ROBOT_YAW_DEG ?? 0)
+        robot.attachImportedVisual(group, {
+          extraOffset: new THREE.Vector3(ox, oy, oz),
+          extraRotationY: (yawDeg * Math.PI) / 180,
+        })
+      } catch (err) {
+        console.warn(`[SimulationEngine] failed to load imported model "${importedModelUrl}":`, err)
+      }
+    }
 
-    return new SimulationEngine(
-      world, refs,
-      chassisBody, chassisMesh, chassisGeo, chassisMat,
-      sensor, leftMotor, rightMotor,
-    )
+    return new SimulationEngine(world, refs, robot)
   }
 
   // ── Challenge management ───────────────────────────────────────────────────
@@ -175,13 +126,9 @@ export class SimulationEngine implements ChallengeEngine {
 
   // ── Robot control ──────────────────────────────────────────────────────────
 
-  /** Move chassis back to origin and brake both motors. */
+  /** Snap robot back to its initial pose; brake motors. */
   resetRobot(): void {
-    this._chassisPos.set(0, START_Y, 0)
-    this._chassisBody.setNextKinematicTranslation({ x: 0, y: START_Y, z: 0 })
-    this._chassisMesh.position.copy(this._chassisPos)
-    this._leftMotor.stop()
-    this._rightMotor.stop()
+    this.robot.reset()
   }
 
   /** Notify the renderer of a canvas size change. */
@@ -193,48 +140,23 @@ export class SimulationEngine implements ChallengeEngine {
   dispose(): void {
     this.stopRAF()
     this._challengeDispose?.()
-    this._sensor.dispose()
-    this._chassisGeo.dispose()
-    this._chassisMat.dispose()
-    this._refs.scene.remove(this._chassisMesh)
-    this.world.removeRigidBody(this._chassisBody)
+    this.robot.dispose()
     this._refs.renderer.dispose()
   }
 
   // ── Per-frame step ─────────────────────────────────────────────────────────
 
   private _tick(dt: number): void {
-    // 1. Compute chassis velocity from commanded motor speeds.
-    //    forward (WU/s) = avg(left, right) in deg/s × deg→rad × wheel_radius
-    const leftDeg   = this._leftMotor.getTargetSpeed()
-    const rightDeg  = this._rightMotor.getTargetSpeed()
-    const forwardWU = ((leftDeg + rightDeg) / 2) * DEG_TO_RAD * WHEEL_RADIUS
-
-    // 2. Advance chassis position along −Z (robot faces away from camera).
-    this._chassisPos.z -= forwardWU * dt
-    this._chassisBody.setNextKinematicTranslation({
-      x: this._chassisPos.x,
-      y: this._chassisPos.y,
-      z: this._chassisPos.z,
-    })
-    this._chassisMesh.position.copy(this._chassisPos)
-
-    // 3. Step the Rapier world (commits kinematic translation).
+    // 1. Step physics (revolute joint motors push the wheels, wheels push the hub).
     this.world.step()
 
-    // 4. Update sensor to the current front-face position, then fire the ray.
-    this._sensorPos.set(
-      this._chassisPos.x,
-      this._chassisPos.y,
-      this._chassisPos.z + SENSOR_Z_OFFSET,
-    )
-    this._sensor.setWorldPosition(this._sensorPos)
-    this._sensor.step(this.world)
+    // 2. Sync visuals + sensor origin.
+    this.robot.step(dt)
 
-    // 5. Push sensor reading to the UI store so SensorPanel updates.
-    useSimulationStore.getState().setSensorValue('front', this._sensor.getValue())
+    // 3. Push sensor reading + render.
+    this.robot.sensor.step(this.world)
+    useSimulationStore.getState().setSensorValue('front', this.robot.sensor.getValue())
 
-    // 6. Render.
     this._refs.controls.update()
     this._refs.renderer.render(this._refs.scene, this._refs.camera)
   }

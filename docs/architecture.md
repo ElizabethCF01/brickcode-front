@@ -60,6 +60,14 @@ Three alternatives were considered:
 | B | `attachedBodyId: string` + body registry | Extra infrastructure before any robot exists |
 | C | Motor owns its own wheel body | Motor becomes a composite — breaks the "driver of external body" architecture intent |
 
+### Optional external anchor body (Task 4.4)
+
+`MotorConfig` also accepts `anchorBody?: RAPIER.RigidBody` and `anchorLocalPoint?: {x,y,z}`.
+When provided, the joint anchors to that body (e.g. a robot chassis) instead of a fresh
+world-fixed anchor — letting the motor travel with a moving robot. The motor does not own
+the anchor body and `dispose()` does not remove it. When `anchorBody` is omitted, the
+original world-fixed anchor path is used unchanged (so existing tests/usages keep working).
+
 ### Physics: RevoluteImpulseJoint + configureMotorVelocity
 
 The motor creates a **fixed anchor body** at `config.position` and connects it to `attachedBody`
@@ -209,24 +217,17 @@ All blocks are registered with `registerRobotBlocks()` (call once at startup) an
 `SimulationEngine` is the central runtime object created once per session. It owns:
 
 - A **Rapier world** (gravity –9.81 Y) and a **Three.js scene** (via `createScene`).
-- A blue **chassis mesh** (`BoxGeometry`, 4×2×6 studs) plus a **kinematic Rapier body** that the engine moves manually — no forces, no joints for Sprint 3.
-- A **front `LegoDistanceSensor`** whose world-space position is updated each tick via `setWorldPosition()`.
-- Two **`SimpleMotor`** instances (internal class) that record commanded speed without physics. The engine reads their speeds and integrates them into chassis Z-position each tick.
-- A **`BlockInterpreter`** wired to the above robot.
+- A static **ground collider** (`50 × 0.1 × 50` cuboid at `y = -0.05`) so the dynamic robot has something to push against. The decorative green plane in `SceneSetup` is visual only.
+- A **`SimpleRobot`** (Hub EV3 + 2 motors + 2 wheels + front distance sensor) at `(0, 0.6, 0)`.
+- A **`BlockInterpreter`** wired to that robot.
 
 ### Per-frame loop (`_tick`)
 
-1. Compute `forwardWU = avg(left, right) × DEG_TO_RAD × WHEEL_RADIUS × dt`.
-2. Advance `chassisPos.z` by `−forwardWU` (robot faces −Z).
-3. `chassisBody.setNextKinematicTranslation(chassisPos)`.
-4. `world.step()` — commits the kinematic translation.
-5. `sensor.setWorldPosition(front of chassis)` then `sensor.step(world)`.
-6. Push `sensor.getValue()` to `simulationStore.sensorValues['front']`.
-7. Render via Three.js.
-
-### Why kinematic chassis
-
-Full differential-drive physics (revolute joints, wheel friction, traction) is deferred to Sprint 4. A kinematic body gives Sprint-3 kids a moving robot and working sensor without physics tuning.
+1. `world.step()` — Rapier integrates the dynamic hub + wheels under the revolute joint motors.
+2. `robot.step(dt)` — syncs hub visual to physics, integrates motor angle, repositions sensor origin to the (rotated) hub-front offset.
+3. `robot.sensor.step(world)` — fires the ray.
+4. Push `sensor.getValue()` to `simulationStore.sensorValues['front']`.
+5. Render via Three.js.
 
 ### Singletons
 
@@ -314,7 +315,8 @@ The script writes `public/ldraw/models/packed/<id>.mpd` for each entry in `LDRAW
 |---|---|---|
 | `brick-2x4` | `parts/3001.dat` | `LegoBrick` |
 | `baseplate-32x32` | `parts/3811.dat` | `Baseplate` |
-| `wheel` | `parts/3483.dat` | `LegoMotor` (wheel visual) |
+| `wheel` | `parts/3483.dat` | `LegoMotor` (wheel rim) |
+| `tire`  | `parts/3482.dat` | `LegoMotor` (tyre — mounts on 3483) |
 
 Adding a part = append to `LDRAW_CATALOG`, run `npm run pack-ldraw`, commit the new `.mpd`.
 
@@ -407,12 +409,180 @@ to the LDraw clone.
 ### Wiring at runtime
 
 `SimulationEngine.create` reads the manager from `getLDrawManager()` (set in
-`main.tsx` after `preloadAll`) and forwards it to the front
-`LegoDistanceSensor`. `LegoBrick` and `LegoMotor` are not yet instantiated by
-the engine (the runtime currently uses a kinematic chassis box and a
-`SimpleMotor` stub that records commanded speed without physics) — their
-LDraw paths are dormant until Task 4.4 (build a real `SimpleRobot`) wires
-them in.
+`main.tsx` after `preloadAll`) and forwards it to `SimpleRobot`, which
+distributes it to the hub/motor visuals, both `LegoMotor` wheel clones, and the
+`LegoDistanceSensor`. The kinematic chassis box and `SimpleMotor` stub that
+existed during Sprints 3-4.3 are gone.
+
+---
+
+## SimpleRobot (Task 4.4)
+
+**File**: `src/engine/components/SimpleRobot.ts`
+
+`SimpleRobot` is a full LEGO robot built from LDraw parts. It replaces the
+former `BoxGeometry` chassis + `SimpleMotor` stub.
+
+### Decisions
+
+- **(b) Real LDraw scale.** Robot is sized 1:1 to LDraw geometry (Hub EV3 ≈ 1.13 × 1.12 × 0.45 WU). Camera (`SceneSetup.ts`) was retuned to `(0, 4, 7)` looking at `(0, 0.4, 0)` and the challenge-01 wall was enlarged to 1.6 × 0.6 × 0.2 WU so it reads as an obstacle next to the robot.
+- **(β) Dynamic body with revolute-joint wheels.** The hub is a single dynamic body with a *compound collider* (hub box + 2 motor boxes); the sensor is intentionally not part of the compound (its ray would self-hit). Each wheel is a separate dynamic cylinder body. Two `LegoMotor` instances anchor on the hub and drive each wheel via `RevoluteImpulseJoint`. This required adding `anchorBody` + `anchorLocalPoint` to `MotorConfig` (see *LegoMotor → Optional external anchor body*).
+
+### Layout (in world units, robot faces −Z)
+
+| Part        | Half-extents (X,Y,Z)         | Centre (world)                |
+|-------------|------------------------------|-------------------------------|
+| Hub (cuboid) | 0.565 × 0.56 × 0.225        | `(0, 0.6, 0)`                 |
+| Motor M ×2   | 0.12 × 0.19 × 0.19           | `(±0.685, 0.28, 0)` (compound)|
+| Wheel ×2     | r = 0.28, half-h = 0.07      | `(±0.875, 0.28, 0)`           |
+| Sensor       | 0.28 × 0.14 × 0.13 (visual only) | `(0, 0.4, -0.355)`        |
+
+`wheelBaseWU = 1.75` (`2 × 0.875`). `BlockInterpreter` constants updated to
+`WHEEL_RADIUS_WU = 0.28`, `WHEEL_BASE_DEFAULT = 1.75` so `robot_turn` duration
+math matches the new geometry.
+
+### Drive direction inversion
+
+Both `LegoMotor` instances share `axis: 'x'`, so a positive joint motor
+velocity spins both wheels the *same* way relative to the chassis. To keep the
+`BlockInterpreter` convention (`left.setSpeed(+n) && right.setSpeed(+n)` =
+forward), the `motors.left` IMotor wrapper inverts its sign before delegating
+to the underlying `LegoMotor`. The right side passes through unchanged.
+
+### Sensor origin
+
+The sensor has no rigid body. `SimpleRobot.step(dt)` projects the
+hub-local sensor offset through the hub's current rotation each frame and
+calls `sensor.setWorldPosition(world)`. **Direction is not rotated** — for
+straight-line driving the hub yaw is ≈ 0; if `robot_turn` is used during
+sensing, the ray will still point along world −Z. Adding a `setWorldDirection`
+to `LegoDistanceSensor` is left to a follow-up.
+
+### reset()
+
+The hub and both wheels are dynamic, so `reset()` snaps each body's
+translation/rotation back to its initial pose and zeros both linear and
+angular velocity. Both motors are braked via `stop()`.
+
+---
+
+## Imported LDraw Models (level 1 — visual only)
+
+**Files**: `scripts/packLDrawParts.ts`, `src/engine/ldraw/LDrawLibraryManager.ts`,
+`src/engine/components/SimpleRobot.ts` (`attachImportedVisual`),
+`src/engine/SimulationEngine.ts` (env-flag wiring), `public/ldraw/models/source/`.
+
+### Goal
+
+Let a kid (or designer) export a robot model from Studio 2.0 (`File → Export As → LDraw .ldr`),
+drop it into `public/ldraw/models/source/<name>.ldr`, and see it rendered in the simulator.
+The physics is **unchanged**: `SimpleRobot` still has the same compound hub
+collider, two dynamic wheels, two `LegoMotor` joints, and the front
+`LegoDistanceSensor`. The imported model is decoration parented to the hub —
+when the hub moves/rotates, the model moves with it; the procedural hub/motor
+visuals are hidden so they don't bleed through.
+
+### Pipeline
+
+1. Place `<name>.ldr` (or `.mpd`) under `public/ldraw/models/source/`.
+2. Run `LDRAW_LIB_PATH=~/ldraw-library npm run pack-ldraw`. The packer
+   processes both `LDRAW_CATALOG` and every file in `models/source/`,
+   inlining all referenced parts. Output: `public/ldraw/models/packed/<name>.mpd`.
+3. Set `VITE_IMPORTED_ROBOT_MODEL=/ldraw/models/packed/<name>.mpd` in
+   `.env.local` (or omit it to keep the procedural robot).
+4. `LDrawLibraryManager.loadModel(url)` is called from `SimulationEngine.create`;
+   the resulting `THREE.Group` is handed to `SimpleRobot.attachImportedVisual`,
+   which auto-recentres it (bottom-centre → hub origin) and parents it to the
+   hub.
+
+### Why a Vite env var
+
+`VITE_IMPORTED_ROBOT_MODEL` is read at build time, so a project without the
+flag (or without a packed model) falls back to the existing procedural robot
+with zero runtime cost and no exception path. CI / unit tests stay unchanged.
+
+### Limitations of level 1
+
+- **All procedural meshes are hidden, but the bodies still drive motion.**
+  `attachImportedVisual` calls `setVisualVisible(false)` on both motors (hides
+  the wheel cylinders, parented to scene root) and `setBodyVisible(false)` on
+  the distance sensor (hides the EV3 sensor LDraw mesh). The underlying
+  Rapier wheel cylinders, motor joints, and ray cast continue to function —
+  the robot still drives, the sensor still reads. The imported model is
+  purely cosmetic on top.
+- **Default 180° X-flip + bottom-to-ground alignment.** Studio 2.0 exports
+  often come out upside-down relative to `LDrawLoader`'s Y-flip (same issue
+  as the EV3 hub 95646.dat, which carries the same rotation patch in
+  `SimpleRobot`). `attachImportedVisual` applies `rotation.x = π` by default,
+  centres the model on X/Z by its bounding-box centroid, and translates Y so
+  the bbox bottom sits at the world ground plane (y=0).
+- **Wheel mismatch is inherent at level 1.** Physics has exactly two
+  cylindrical wheels (radius 0.28 WU) parented to the procedural rig. If the
+  imported model has 3 wheels, casters, balloon tyres, or different radii,
+  not all of them can touch the floor visually — the bbox alignment can pin
+  one set to the floor but the others will sink or float. This is a level-3
+  problem (read wheel positions from the `.ldr` and rebuild the physics rig
+  to match). For level 1, use the `VITE_IMPORTED_ROBOT_OFFSET_{X,Y,Z}` and
+  `VITE_IMPORTED_ROBOT_YAW_DEG` env vars in `.env.local` to nudge the model
+  by hand until the visual mismatch is acceptable.
+- Sensors, motors, and beams in the imported model are not detected — if the
+  user's robot has no distance sensor (e.g. `speed-bot.ldr`), the simulator's
+  ray still casts from a virtual front offset; it will simply read max range.
+- Recentring is naive (axis-aligned bounding box, bottom-centre). Models with
+  trailing tails or off-axis hubs may sit visually off-centre and need
+  `extraOffset` / `extraRotationY` overrides.
+
+### Path to level 3 (semantic parsing — "which part is what, and where")
+
+Yes, the `.ldr`/`.mpd` text format makes level 3 viable. Each non-comment line
+is `1 <colour> <x> <y> <z> <a..i (3×3 rotation matrix)> <part>.dat` — i.e. one
+referenced part with full position and orientation in LDU. We can scan that
+text before handing it to the loader and extract a structured robot
+description without any geometry inference. Concretely:
+
+1. **Part dictionary**: map known LDraw `.dat` ids to semantic roles.
+   - `95646.dat` → Hub EV3 (single, defines chassis frame)
+   - `99455.dat` → Medium motor (drives a wheel — axis = motor's local +X)
+   - `95658.dat` → Large motor
+   - `95652.dat` → Distance sensor (sensor origin = part origin, ray axis = part −Z)
+   - `95650.dat` → Color sensor
+   - `3483.dat` (+ optional `3482.dat` tyre) → Wheel — match by spatial proximity
+     to a motor to decide which motor drives which wheel.
+   - Beams (`32523`, `32316`, …) → structural-only, ignored physically.
+2. **Frame conversion**: every line gives a 3×3 rotation + translation in LDU.
+   Multiply translation by `LDU_TO_WU = 1/250` and convert the rotation matrix
+   to a `THREE.Quaternion`. LDraw is right-handed Y-down; `LDrawLoader` flips
+   Y for rendering, so for physics we either replicate that flip (negate Y on
+   translation, conjugate the rotation) or skip the loader's flip and apply
+   the conversion ourselves once. Pick one and stay consistent.
+3. **Pairing**: for each motor, find the nearest wheel (Euclidean distance in
+   chassis-local space) within a threshold (e.g. < 0.5 WU). The wheel's centre
+   becomes the joint anchor; the motor's local +X (after rotation) is the
+   joint axis.
+4. **Hub frame**: the hub part's transform defines the chassis pose. All other
+   parts are converted into hub-local space by left-multiplying with the
+   inverse of the hub transform — that gives stable offsets independent of
+   where the user placed the model in Studio.
+5. **Synthesis**: emit a `RobotDescription` (`{ hub: {halfExtents}, motors:
+   [{anchorLocal, axisLocal, wheel: {radius, halfWidth, anchorLocal}}],
+   sensors: [{kind, originLocal, directionLocal}] }`). `SimpleRobot` takes
+   that instead of the hard-coded `HUB_HALF` / `WHEEL_X` / etc. Compound
+   colliders are sized from the part dictionary (each known part has a known
+   bounding box in LDU).
+
+So the answer to "if we move imported models to pieces, can we know how and
+where each piece goes?" is **yes** — the `.ldr` text already encodes
+`(part_id, position, rotation)` for every brick. We don't need geometry
+heuristics; we need a part-id → role lookup table plus a pair-matching pass.
+The hardest part is decisions, not parsing: handedness (which side is "left"),
+caster wheels vs driven wheels, and what to do with structural beams that
+should not produce colliders.
+
+The `speed-bot.ldr` already in the repo (61 lines) is a good acceptance test
+for the parser: one `95646` (hub), two `99455` (motors), at least one wheel
+pair, and structural beams. If a parser produces a motor count of 2, a wheel
+count matching the wheel `.dat` lines, and a hub count of 1, the round-trip
+sanity-checks.
 
 ---
 
