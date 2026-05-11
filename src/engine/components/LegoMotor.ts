@@ -8,9 +8,32 @@ const WHEEL_WIDTH   = 0.08   // 1 stud = 8 mm
 
 // Motor model constants for configureMotorVelocity(targetVel, damping):
 // DRIVE_DAMPING — stiff enough to track target speed against moderate loads.
-// BRAKE_DAMPING — ~10× higher to kill residual velocity quickly on stop().
-const DRIVE_DAMPING = 50
-const BRAKE_DAMPING = 500
+// Raised from 50 → 300: dynamic chassis bodies built from imported `.ldr`
+// (e.g. speed-bot) carry significant mass — at damping 50 the joint motor
+// reaches only a fraction of the commanded velocity before the chassis
+// inertia dominates, so the robot appears not to drive.
+const DRIVE_DAMPING = 300
+
+// At rest we brake with configureMotorVelocity(0, damping) — a viscous
+// damper that opposes any angular velocity around the joint axis. Earlier
+// we used configureMotorPosition(currentAngle, k, d) to lock the wheel
+// at its commanded angle, but that approach failed in two distinct ways:
+//
+//   1. "Lurch" at end of drive: the integrated `currentAngle` diverges
+//      from the physical wheel angle whenever the wheel slips against
+//      the floor (any non-trivial drive). At stop(), the PD spring snaps
+//      the wheel to the divergent target with high stiffness, kicking
+//      the chassis.
+//   2. Spontaneous re-acceleration: with a divergent target, the PD can
+//      pump energy back into the system over cycles, producing the
+//      "robot accelerates without stopping" behaviour.
+//
+// Velocity-zero brake removes both problems: there is no absolute angle
+// target that can diverge, so the brake torque vanishes when the wheel
+// is actually still. The earlier objection (residual-velocity fighting
+// → lateral drift through the joint) is resolved by the wheel friction
+// being low enough (0.5) for Rapier to put the bodies to sleep at rest.
+const BRAKE_DAMPING = 100
 
 const DEG_TO_RAD = Math.PI / 180
 
@@ -99,6 +122,12 @@ export class LegoMotor {
     this.group.add(this.wheelVisual)
     scene.add(this.group)
 
+    // Diagnostic toggle: hide procedural cylinders in DynamicRobot so the
+    // imported LDraw model is the only visible thing. Physics stays active.
+    if (!config.ldraw && import.meta.env.VITE_HIDE_PROCEDURAL_WHEELS === 'true') {
+      this.wheelVisual.visible = false
+    }
+
     // ── Anchor body ────────────────────────────────────────────────────────────
     // External anchor (e.g. robot chassis) lets the motor travel with a moving
     // body. Otherwise create a world-fixed anchor at config.position.
@@ -135,6 +164,9 @@ export class LegoMotor {
       config.attachedBody,
       /* wakeUp */ true,
     ) as RAPIER.RevoluteImpulseJoint
+
+    // Start braked: target velocity 0 with viscous damping.
+    this.joint.configureMotorVelocity(0, BRAKE_DAMPING)
   }
 
   /** Spin the motor at `degreesPerSecond`. Negative values reverse direction. */
@@ -143,7 +175,7 @@ export class LegoMotor {
     this.joint.configureMotorVelocity(degreesPerSecond * DEG_TO_RAD, DRIVE_DAMPING)
   }
 
-  /** Brake the motor to a stop. */
+  /** Brake the motor to a stop — viscous damping of any joint-axis angular velocity. */
   stop(): void {
     this.targetSpeed = 0
     this.joint.configureMotorVelocity(0, BRAKE_DAMPING)

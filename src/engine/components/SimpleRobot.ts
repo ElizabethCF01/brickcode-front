@@ -59,9 +59,10 @@ export interface SimpleRobotConfig {
  * Implements the `ISimpleRobot` shape consumed by `BlockInterpreter`.
  */
 export class SimpleRobot implements ISimpleRobot {
-  readonly hubBody:     RAPIER.RigidBody
-  readonly sensor:      LegoDistanceSensor
-  readonly wheelBaseWU: number = WHEEL_BASE_WU
+  readonly hubBody:       RAPIER.RigidBody
+  readonly sensor:        LegoDistanceSensor
+  readonly wheelBaseWU:   number = WHEEL_BASE_WU
+  readonly wheelRadiusWU: number = WHEEL_RADIUS
 
   /** IMotor wrappers consumed by BlockInterpreter (left side inverts direction). */
   readonly motors: { left: IMotor; right: IMotor }
@@ -131,24 +132,30 @@ export class SimpleRobot implements ISimpleRobot {
     const rightWheelPos = { x: p.x + WHEEL_ANCHOR_R.x, y: p.y + WHEEL_ANCHOR_R.y, z: p.z }
 
     this.leftWheelBody = world.createRigidBody(
-      RAPIER.RigidBodyDesc.dynamic().setTranslation(leftWheelPos.x, leftWheelPos.y, leftWheelPos.z),
+      RAPIER.RigidBodyDesc.dynamic()
+        .setTranslation(leftWheelPos.x, leftWheelPos.y, leftWheelPos.z)
+        .setAngularDamping(1.0),
     )
     world.createCollider(
       RAPIER.ColliderDesc.cylinder(WHEEL_HALF_W, WHEEL_RADIUS)
         .setRotation(wheelColliderRot)
         .setFriction(1.4)
-        .setRestitution(0.0),
+        .setRestitution(0.0)
+        .setDensity(5.0),
       this.leftWheelBody,
     )
 
     this.rightWheelBody = world.createRigidBody(
-      RAPIER.RigidBodyDesc.dynamic().setTranslation(rightWheelPos.x, rightWheelPos.y, rightWheelPos.z),
+      RAPIER.RigidBodyDesc.dynamic()
+        .setTranslation(rightWheelPos.x, rightWheelPos.y, rightWheelPos.z)
+        .setAngularDamping(1.0),
     )
     world.createCollider(
       RAPIER.ColliderDesc.cylinder(WHEEL_HALF_W, WHEEL_RADIUS)
         .setRotation(wheelColliderRot)
         .setFriction(1.4)
-        .setRestitution(0.0),
+        .setRestitution(0.0)
+        .setDensity(5.0),
       this.rightWheelBody,
     )
 

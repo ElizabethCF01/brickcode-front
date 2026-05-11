@@ -48,6 +48,8 @@ export interface SimpleRobot {
   sensor: ISensor
   /** Wheel centre-to-centre distance in world units. Used by robot_turn. */
   wheelBaseWU?: number
+  /** Driven-wheel rolling radius in world units. Used by robot_turn. */
+  wheelRadiusWU?: number
 }
 
 export class BlockInterpreter {
@@ -162,9 +164,10 @@ export class BlockInterpreter {
       case 'robot_turn': {
         const direction = block.getFieldValue('DIRECTION') ?? 'LEFT'
         const degrees   = Number(block.getFieldValue('DEGREES') ?? 90)
-        const wheelBase = this.robot.wheelBaseWU ?? WHEEL_BASE_DEFAULT
+        const wheelBase   = this.robot.wheelBaseWU   ?? WHEEL_BASE_DEFAULT
+        const wheelRadius = this.robot.wheelRadiusWU ?? WHEEL_RADIUS_WU
 
-        const motorDeg = degrees * (wheelBase / 2) / WHEEL_RADIUS_WU
+        const motorDeg = degrees * (wheelBase / 2) / wheelRadius
         const duration = motorDeg / TURN_MOTOR_SPEED  // seconds
 
         const leftSpeed  = direction === 'LEFT' ? -TURN_MOTOR_SPEED : +TURN_MOTOR_SPEED

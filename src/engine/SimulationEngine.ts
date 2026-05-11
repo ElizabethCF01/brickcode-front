@@ -2,7 +2,22 @@ import * as THREE from 'three'
 import RAPIER from '@dimforge/rapier3d-compat'
 import { createScene, resizeRenderer, type SceneRefs } from './renderer/SceneSetup'
 import { SimpleRobot } from './components/SimpleRobot'
+import { DynamicRobot } from './components/DynamicRobot'
 import { getLDrawManager } from './ldraw/ldrawSingleton'
+import { parseLDraw } from './ldraw/ldrParser'
+import { buildRobotDescription } from './ldraw/buildRobotDescription'
+import type { SimpleRobot as ISimpleRobot } from '../interpreter/BlockInterpreter'
+
+/**
+ * Runtime robot shape — superset of ISimpleRobot adding lifecycle methods.
+ * Both `SimpleRobot` (procedural) and `DynamicRobot` (LDraw-derived) implement it.
+ */
+type RuntimeRobot = ISimpleRobot & {
+  step(dt: number): void
+  reset(): void
+  dispose(): void
+  sensor: ISimpleRobot['sensor'] & { step?(world: RAPIER.World): void }
+}
 import { BlockInterpreter } from '../interpreter/BlockInterpreter'
 import { useSimulationStore } from '../store/simulationStore'
 import type { ChallengeEngine } from '../challenges/challenge-01'
@@ -21,7 +36,7 @@ export class SimulationEngine implements ChallengeEngine {
   readonly world: RAPIER.World
   readonly scene: THREE.Scene
 
-  readonly robot:       SimpleRobot
+  readonly robot:       RuntimeRobot
   readonly interpreter: BlockInterpreter
 
   private readonly _refs: SceneRefs
@@ -30,7 +45,23 @@ export class SimulationEngine implements ChallengeEngine {
   private _lastTime = 0
   private _challengeDispose: (() => void) | null = null
 
-  private constructor(world: RAPIER.World, refs: SceneRefs, robot: SimpleRobot) {
+  // Physics-step accumulator. world.step() advances simulation by a fixed
+  // PHYSICS_DT regardless of how often rAF fires; we accumulate real elapsed
+  // time and run as many fixed steps as needed to keep simulated time aligned
+  // with wall-clock time. Without this, on a 120 Hz display the simulator
+  // runs at 2× speed (rAF fires twice per physics step's worth of real time).
+  private _physicsAccumulator = 0
+  private static readonly PHYSICS_DT      = 1 / 60  // seconds — Rapier default
+  private static readonly MAX_FRAME_DT    = 0.25    // cap when tab regains focus
+
+  // Temporary tremor-diagnosis instrumentation. Logs hub linvel/angvel/pos
+  // every TREMOR_LOG_EVERY physics steps so we can quantify the residual
+  // oscillation at rest and the "lurch" after a drive_forward/stop. Remove
+  // once tuned.
+  private _tremorFrame = 0
+  private static readonly TREMOR_LOG_EVERY = 30  // ~0.5 s of simulated time
+
+  private constructor(world: RAPIER.World, refs: SceneRefs, robot: RuntimeRobot) {
     this.world       = world
     this.scene       = refs.scene
     this._refs       = refs
@@ -44,6 +75,13 @@ export class SimulationEngine implements ChallengeEngine {
     await ensureRapierInit()
     const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 })
 
+    // Solver iterations — defaults are 4 / 1, which leaves visible residual
+    // motion in the chassis-with-revolute-joint configuration (≈ 2 mm vertical
+    // bounce, slow lateral drift). 8 / 2 converges contact + joint constraints
+    // tightly enough that the robot truly rests when stopped, at modest CPU cost.
+    world.integrationParameters.numSolverIterations = 8
+    world.integrationParameters.numInternalPgsIterations = 2
+
     // Static ground plane so the robot's wheels have something to push against.
     // (The decorative floor mesh is added by createScene; this is the collider.)
     world.createCollider(
@@ -55,45 +93,63 @@ export class SimulationEngine implements ChallengeEngine {
 
     const refs = createScene(canvas)
 
-    // Robot hub initial position: hub centre is at y = HUB_Y inside SimpleRobot.
-    // Place at world origin — wheels will rest on the ground plane.
     const ldraw = getLDrawManager() ?? undefined
-    const robot = new SimpleRobot(
-      {
-        position: new THREE.Vector3(0, 0.6, 0),
-        ldraw,
-      },
-      world,
-      refs.scene,
-    )
+    const initialPosition = new THREE.Vector3(0, 0.6, 0)
 
-    // Optional: attach a user-imported LDraw model (visual only, level 1).
-    // Set VITE_IMPORTED_ROBOT_MODEL to a packed .mpd URL — e.g.
-    // `/ldraw/models/packed/speed-bot.mpd` — and run `npm run pack-ldraw`
-    // first so the file exists.
-    const importedModelUrl = import.meta.env.VITE_IMPORTED_ROBOT_MODEL as string | undefined
-    if (importedModelUrl && ldraw) {
+    // Try to build a DynamicRobot from an imported `.ldr` (level 3). On any
+    // error fall back to the procedural `SimpleRobot` so the demo still runs.
+    //
+    // Env vars (.env.local):
+    //   VITE_IMPORTED_ROBOT_SOURCE  — public URL of the source .ldr (parsed for roles + positions)
+    //   VITE_IMPORTED_ROBOT_MODEL   — public URL of the packed .mpd (loaded for geometry)
+    //                                  If only ROBOT_MODEL is set and points at /packed/<x>.mpd,
+    //                                  we derive ROBOT_SOURCE as /source/<x>.ldr.
+    //   VITE_IMPORTED_ROBOT_FLIP    — "true" to apply a 180° X-flip (Studio Y-down workaround)
+    let robot: RuntimeRobot | null = null
+    const packedUrl = import.meta.env.VITE_IMPORTED_ROBOT_MODEL as string | undefined
+    if (packedUrl && ldraw) {
+      const sourceUrl = (import.meta.env.VITE_IMPORTED_ROBOT_SOURCE as string | undefined)
+        ?? packedUrl.replace('/packed/', '/source/').replace(/\.mpd$/i, '.ldr')
+      const flip = String(import.meta.env.VITE_IMPORTED_ROBOT_FLIP ?? '').toLowerCase() === 'true'
       try {
-        const group = await ldraw.loadModel(importedModelUrl)
-        // Optional fine-tune knobs for the imported model — level-1 visuals
-        // can never match a physics rig with a different wheel layout, so
-        // these let you nudge the chassis up/down (and yaw) until it looks
-        // right. Set in `.env.local`:
-        //   VITE_IMPORTED_ROBOT_OFFSET_Y=0.05   # raise 5 cm
-        //   VITE_IMPORTED_ROBOT_OFFSET_X=0
-        //   VITE_IMPORTED_ROBOT_OFFSET_Z=0
-        //   VITE_IMPORTED_ROBOT_YAW_DEG=0
-        const ox = Number(import.meta.env.VITE_IMPORTED_ROBOT_OFFSET_X ?? 0)
-        const oy = Number(import.meta.env.VITE_IMPORTED_ROBOT_OFFSET_Y ?? 0)
-        const oz = Number(import.meta.env.VITE_IMPORTED_ROBOT_OFFSET_Z ?? 0)
-        const yawDeg = Number(import.meta.env.VITE_IMPORTED_ROBOT_YAW_DEG ?? 0)
-        robot.attachImportedVisual(group, {
-          extraOffset: new THREE.Vector3(ox, oy, oz),
-          extraRotationY: (yawDeg * Math.PI) / 180,
-        })
+        const [sourceText, loadedModel] = await Promise.all([
+          fetch(sourceUrl).then((r) => {
+            if (!r.ok) throw new Error(`HTTP ${r.status} fetching ${sourceUrl}`)
+            return r.text()
+          }),
+          ldraw.loadModel(packedUrl),
+        ])
+        const parts = parseLDraw(sourceText)
+        const description = buildRobotDescription(parts)
+        robot = new DynamicRobot(
+          {
+            description,
+            parts,
+            loadedModel,
+            ldraw,
+            position: initialPosition,
+            flipUpsideDown: flip,
+          },
+          world,
+          refs.scene,
+        )
+        console.info(
+          `[SimulationEngine] DynamicRobot built from ${sourceUrl}: ` +
+          `${description.motors.length} motor(s), ${description.casters.length} caster(s), ` +
+          `${description.sensors.length} sensor(s)`,
+        )
       } catch (err) {
-        console.warn(`[SimulationEngine] failed to load imported model "${importedModelUrl}":`, err)
+        console.warn(`[SimulationEngine] DynamicRobot build failed, falling back to SimpleRobot:`, err)
+        robot = null
       }
+    }
+
+    if (!robot) {
+      robot = new SimpleRobot(
+        { position: initialPosition, ldraw },
+        world,
+        refs.scene,
+      )
     }
 
     return new SimulationEngine(world, refs, robot)
@@ -113,9 +169,9 @@ export class SimulationEngine implements ChallengeEngine {
     this._lastTime = performance.now()
     const loop = (now: number) => {
       this._rafId = requestAnimationFrame(loop)
-      const dt = Math.min((now - this._lastTime) / 1000, 0.05)  // cap at 50 ms
+      const dt = (now - this._lastTime) / 1000
       this._lastTime = now
-      this._tick(dt)
+      this._tick(dt)  // _tick clamps the accumulator to MAX_FRAME_DT internally
     }
     this._rafId = requestAnimationFrame(loop)
   }
@@ -146,18 +202,57 @@ export class SimulationEngine implements ChallengeEngine {
 
   // ── Per-frame step ─────────────────────────────────────────────────────────
 
-  private _tick(dt: number): void {
-    // 1. Step physics (revolute joint motors push the wheels, wheels push the hub).
-    this.world.step()
+  private _tick(rafDt: number): void {
+    // Decouple physics rate from rAF rate. Each world.step() advances
+    // simulation by exactly PHYSICS_DT regardless of display refresh rate;
+    // we accumulate real elapsed time and run as many steps as needed.
+    this._physicsAccumulator += Math.min(rafDt, SimulationEngine.MAX_FRAME_DT)
+    while (this._physicsAccumulator >= SimulationEngine.PHYSICS_DT) {
+      this.world.step()
+      this.robot.step(SimulationEngine.PHYSICS_DT)
+      if (this.robot.sensor.step) this.robot.sensor.step(this.world)
+      this._physicsAccumulator -= SimulationEngine.PHYSICS_DT
+      this._tickInstrumentation()
+    }
 
-    // 2. Sync visuals + sensor origin.
-    this.robot.step(dt)
-
-    // 3. Push sensor reading + render.
-    this.robot.sensor.step(this.world)
+    // Render once per rAF, regardless of how many physics steps ran.
     useSimulationStore.getState().setSensorValue('front', this.robot.sensor.getValue())
-
     this._refs.controls.update()
     this._refs.renderer.render(this._refs.scene, this._refs.camera)
+  }
+
+  private _tickInstrumentation(): void {
+    // ── TEMPORARY: tremor diagnosis (remove once tuned) ───────────────────────
+    this._tremorFrame++
+    if (this._tremorFrame % SimulationEngine.TREMOR_LOG_EVERY === 0) {
+      const r = this.robot as {
+        hubBody?: RAPIER.RigidBody
+        drivenWheelBodies?: { body: RAPIER.RigidBody }[]
+      }
+      const f = (n: number) => n.toFixed(4).padStart(8)
+      if (r.hubBody) {
+        const p = r.hubBody.translation()
+        const v = r.hubBody.linvel()
+        const a = r.hubBody.angvel()
+        console.log(
+          `[tremor f${this._tremorFrame}] hub ` +
+          `pos=(${f(p.x)}, ${f(p.y)}, ${f(p.z)}) ` +
+          `linvel=(${f(v.x)}, ${f(v.y)}, ${f(v.z)}) ` +
+          `angvel=(${f(a.x)}, ${f(a.y)}, ${f(a.z)})`,
+        )
+      }
+      if (r.drivenWheelBodies) {
+        for (let i = 0; i < r.drivenWheelBodies.length; i++) {
+          const wb = r.drivenWheelBodies[i].body
+          const v = wb.linvel()
+          const a = wb.angvel()
+          console.log(
+            `[tremor f${this._tremorFrame}] wheel[${i}] ` +
+            `linvel=(${f(v.x)}, ${f(v.y)}, ${f(v.z)}) ` +
+            `angvel=(${f(a.x)}, ${f(a.y)}, ${f(a.z)})`,
+          )
+        }
+      }
+    }
   }
 }

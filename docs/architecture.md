@@ -74,8 +74,14 @@ The motor creates a **fixed anchor body** at `config.position` and connects it t
 via `RAPIER.JointData.revolute(origin, origin, axis)`. The joint motor is driven each call to
 `setSpeed()` / `stop()` via `joint.configureMotorVelocity(rad/s, damping)`:
 
-- `DRIVE_DAMPING = 50` — tracks target velocity against moderate loads
-- `BRAKE_DAMPING = 500` — 10× higher; kills residual velocity quickly on `stop()`
+- `DRIVE_DAMPING = 300` — raised from the original 50 once `DynamicRobot` started
+  attaching the joint to a heavy parsed-`.ldr` chassis. With damping 50 the
+  joint solver reached only a small fraction of the commanded velocity before
+  chassis inertia dominated, so imported robots appeared not to drive even
+  though `setSpeed` was firing. 300 tracks the target accurately while
+  remaining stable for the lighter `SimpleRobot` hub.
+- `BRAKE_DAMPING = 100` — kills residual velocity quickly on `stop()` without
+  oscillating on light wheel bodies.
 
 **Constraint for callers**: `attachedBody` must be created at the same world position as
 `config.position`. Both local anchor offsets are `(0, 0, 0)` — if the body was placed elsewhere
@@ -169,7 +175,7 @@ motorDeg = DEGREES × (wheelBase/2) / WHEEL_RADIUS
 duration = motorDeg / TURN_MOTOR_SPEED
 ```
 
-Constants: `WHEEL_RADIUS_WU = 0.16`, `TURN_MOTOR_SPEED = 180 deg/s`. `wheelBase` defaults to `0.48 WU` (6 studs, estimated) until the chassis is built; override via `SimpleRobot.wheelBaseWU`.
+Fallback constants: `WHEEL_RADIUS_WU = 0.28`, `WHEEL_BASE_DEFAULT = 1.75`, `TURN_MOTOR_SPEED = 180 deg/s`. The interpreter prefers per-robot values when available — `SimpleRobot.wheelBaseWU` and `SimpleRobot.wheelRadiusWU` (both optional on the `ISimpleRobot` interface). `DynamicRobot` populates `wheelRadiusWU` from `description.motors[0].wheel.radius`, so imported models with wheels of any size (e.g. spike-taxi at `r = 0.176 WU`) get an accurate turn duration instead of one scaled by the procedural `SimpleRobot`'s `r = 0.28 WU`.
 
 Turn direction: LEFT = left motor backward + right motor forward (CCW from above). RIGHT = opposite.
 
@@ -526,7 +532,7 @@ with zero runtime cost and no exception path. CI / unit tests stay unchanged.
   `VITE_IMPORTED_ROBOT_YAW_DEG` env vars in `.env.local` to nudge the model
   by hand until the visual mismatch is acceptable.
 - Sensors, motors, and beams in the imported model are not detected — if the
-  user's robot has no distance sensor (e.g. `speed-bot.ldr`), the simulator's
+  user's robot has no distance sensor (e.g. `spike-taxi.ldr`), the simulator's
   ray still casts from a virtual front offset; it will simply read max range.
 - Recentring is naive (axis-aligned bounding box, bottom-centre). Models with
   trailing tails or off-axis hubs may sit visually off-centre and need
@@ -542,12 +548,17 @@ description without any geometry inference. Concretely:
 
 1. **Part dictionary**: map known LDraw `.dat` ids to semantic roles.
    - `95646.dat` → Hub EV3 (single, defines chassis frame)
+   - `67351.dat` (+ `c01` variant) → Hub Spike Essential / Powered Up 2-port
    - `99455.dat` → Medium motor (drives a wheel — axis = motor's local +X)
    - `95658.dat` → Large motor
+   - `68488.dat` (+ `c01` variant) → Spike Essential small angular motor
    - `95652.dat` → Distance sensor (sensor origin = part origin, ray axis = part −Z)
    - `95650.dat` → Color sensor
    - `3483.dat` (+ optional `3482.dat` tyre) → Wheel — match by spatial proximity
      to a motor to decide which motor drives which wheel.
+   - `65834p01.dat` → Spike wheel with integral azure tyre (single-piece)
+   - `4185.dat` (+ `2815.dat` tyre) → Wedge belt wheel (used as front caster on
+     spike-taxi)
    - Beams (`32523`, `32316`, …) → structural-only, ignored physically.
 2. **Frame conversion**: every line gives a 3×3 rotation + translation in LDU.
    Multiply translation by `LDU_TO_WU = 1/250` and convert the rotation matrix
@@ -578,11 +589,98 @@ The hardest part is decisions, not parsing: handedness (which side is "left"),
 caster wheels vs driven wheels, and what to do with structural beams that
 should not produce colliders.
 
-The `speed-bot.ldr` already in the repo (61 lines) is a good acceptance test
-for the parser: one `95646` (hub), two `99455` (motors), at least one wheel
-pair, and structural beams. If a parser produces a motor count of 2, a wheel
-count matching the wheel `.dat` lines, and a hub count of 1, the round-trip
-sanity-checks.
+The `spike-taxi.ldr` already in the repo is a good acceptance test for the
+parser: one `67351` (Spike Essential hub), two `68488c01` (Spike small motors)
+in the back, two `65834p01` driven wheels paired with them, and two front
+`4185`/`2815` wedge-belt wheels that become free casters. If a parser
+produces a hub count of 1, a motor count of 2, two driven wheels, and two
+casters, the round-trip sanity-checks.
+
+**Note on Studio export quirk:** Studio 2.0 emits part filenames with a
+`-bl.dat` suffix or `bl_` prefix for any piece sourced from the BrickLink
+catalog (e.g. `67351-bl.dat`, `bl_973c07.dat`). The official LDraw equivalents
+(without those affixes) live in the standard library. Strip the affixes
+before packing — the geometry is identical and the packer otherwise fails to
+resolve the references. CRLF line endings (Studio default on Windows exports)
+also need normalising to LF.
+
+---
+
+## DynamicRobot (parsed `.ldr` → physics rig)
+
+**Files**: `src/engine/components/DynamicRobot.ts`,
+`src/engine/ldraw/buildRobotDescription.ts`.
+
+`DynamicRobot` consumes a `RobotDescription` produced by
+`buildRobotDescription` from a parsed `.ldr` and synthesises a Rapier rig:
+one dynamic chassis body, one dynamic cylinder per driven wheel, one
+`LegoMotor` revolute joint per motor, plus optional caster bodies and a
+distance sensor. It implements `ISimpleRobot`, so the `BlockInterpreter` does
+not know whether it is driving the procedural `SimpleRobot` or a parsed
+robot.
+
+### Wheel axle deduction
+
+`buildRobotDescription` does **not** hardcode the wheel axle. For each wheel
+instance it applies the part's world rotation (extracted from the LDraw 3×3
+matrix) to the part's authored axle direction `(0, 1, 0)`, then snaps the
+result to the dominant horizontal world axis (`±X` or `±Z`). Both the
+`WheelSpec` and the paired `MotorDriveSpec` adopt that axle, so the
+`RevoluteImpulseJoint` axes always agree with the physical orientation in the
+`.ldr`. Without this, every wheel ended up with a hardcoded `+X` axle, which
+worked for the procedural robot but produced wheels-spin-but-robot-rotates
+behaviour for any imported model whose wheels are mounted along Z.
+
+### Chassis cuboid lifted off the floor
+
+The hub body sits at `chassisY = wheelMaxRadius` so the lowest wheel's
+contact point lands on the floor. But the AABB-derived `hubHalfExtents.y`
+can be tall enough (≈ 0.43 WU for speed-bot) that a centred cuboid would
+poke below `y = 0`. `DynamicRobot` therefore offsets the cuboid collider
+inside the body by
+
+```
+chassisLocalY = FLOOR_CLEARANCE + half.y - (chassisY - wheelMaxRadius)
+              = FLOOR_CLEARANCE + half.y               (in practice)
+```
+
+with `FLOOR_CLEARANCE = 0.05`. Without this offset the cuboid rested on the
+floor, the joints dragged the wheel bodies down, and the wheels could not
+roll even when the joint motors were firing.
+
+### Pitch/roll lock for differential-drive imports
+
+Studio-exported robots driven by two motors (whether bicicles or 4-wheel
+cars with rear drive + front casters, like `spike-taxi.ldr`) all share the
+same instability profile: small per-wheel solver imbalances accumulate as
+chassis pitch/roll torques. With three free rotation axes the chassis tips
+over on the first torque pulse and the cuboid pins itself to the floor.
+`hubBody` is built with `enabledRotations(false, true, false)` so only yaw
+is dynamic; pitch and roll are clamped. This is exactly the approximation a
+differential-drive simulator wants and matches what kids expect ("the robot
+turns but does not fall over"). Free front casters do not stabilise pitch
+on their own — the lock is still required.
+
+The angular damping is set to **`12`** (vs the original 4): with only yaw
+free, small per-wheel solver imbalances would otherwise produce a visible
+side-to-side wobble while driving straight. 12 still leaves `robot_turn`
+responsive at the interpreter's 180 deg/s default.
+
+### Drive direction
+
+After the axle snap, both wheels share the same world axis. A positive
+joint motor velocity therefore spins both wheels the *same* way around that
+axis. For a chassis facing −Z (typical Studio export), that direction
+pushes the robot **backwards** in world coordinates, so `DynamicRobot`
+inverts the sign on **both** sides in the `IMotor` wrappers — `setSpeed(+n)`
+on the interpreter side ⇒ robot moves forward as kids expect. Differential
+turning (left = −right) is preserved because the inversion is symmetric.
+
+### Collision groups
+
+Chassis is in bit 0, wheels in bit 1; chassis filters out wheel bit and
+vice versa. The chassis cuboid (often wider than the wheelbase) therefore
+never pushes wheels around, but both still collide with the floor.
 
 ---
 
