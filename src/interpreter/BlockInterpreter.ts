@@ -50,6 +50,14 @@ export interface SimpleRobot {
   wheelBaseWU?: number
   /** Driven-wheel rolling radius in world units. Used by robot_turn. */
   wheelRadiusWU?: number
+  /**
+   * Multiplier applied to commanded degrees in `robot_turn` to compensate for
+   * friction / chassis damping / joint saturation losses that the kinematic
+   * formula doesn't capture. Same role as the calibration step on real LEGO
+   * Spike/Mindstorms robots: measure how much the robot actually rotates and
+   * adjust until commanded == observed. 1.0 = no calibration.
+   */
+  turnCalibration?: number
 }
 
 export class BlockInterpreter {
@@ -164,10 +172,11 @@ export class BlockInterpreter {
       case 'robot_turn': {
         const direction = block.getFieldValue('DIRECTION') ?? 'LEFT'
         const degrees   = Number(block.getFieldValue('DEGREES') ?? 90)
-        const wheelBase   = this.robot.wheelBaseWU   ?? WHEEL_BASE_DEFAULT
-        const wheelRadius = this.robot.wheelRadiusWU ?? WHEEL_RADIUS_WU
+        const wheelBase   = this.robot.wheelBaseWU      ?? WHEEL_BASE_DEFAULT
+        const wheelRadius = this.robot.wheelRadiusWU    ?? WHEEL_RADIUS_WU
+        const calibration = this.robot.turnCalibration  ?? 1.0
 
-        const motorDeg = degrees * (wheelBase / 2) / wheelRadius
+        const motorDeg = (degrees * calibration) * (wheelBase / 2) / wheelRadius
         const duration = motorDeg / TURN_MOTOR_SPEED  // seconds
 
         const leftSpeed  = direction === 'LEFT' ? -TURN_MOTOR_SPEED : +TURN_MOTOR_SPEED

@@ -54,13 +54,6 @@ export class SimulationEngine implements ChallengeEngine {
   private static readonly PHYSICS_DT      = 1 / 60  // seconds — Rapier default
   private static readonly MAX_FRAME_DT    = 0.25    // cap when tab regains focus
 
-  // Temporary tremor-diagnosis instrumentation. Logs hub linvel/angvel/pos
-  // every TREMOR_LOG_EVERY physics steps so we can quantify the residual
-  // oscillation at rest and the "lurch" after a drive_forward/stop. Remove
-  // once tuned.
-  private _tremorFrame = 0
-  private static readonly TREMOR_LOG_EVERY = 30  // ~0.5 s of simulated time
-
   private constructor(world: RAPIER.World, refs: SceneRefs, robot: RuntimeRobot) {
     this.world       = world
     this.scene       = refs.scene
@@ -212,47 +205,11 @@ export class SimulationEngine implements ChallengeEngine {
       this.robot.step(SimulationEngine.PHYSICS_DT)
       if (this.robot.sensor.step) this.robot.sensor.step(this.world)
       this._physicsAccumulator -= SimulationEngine.PHYSICS_DT
-      this._tickInstrumentation()
     }
 
     // Render once per rAF, regardless of how many physics steps ran.
     useSimulationStore.getState().setSensorValue('front', this.robot.sensor.getValue())
     this._refs.controls.update()
     this._refs.renderer.render(this._refs.scene, this._refs.camera)
-  }
-
-  private _tickInstrumentation(): void {
-    // ── TEMPORARY: tremor diagnosis (remove once tuned) ───────────────────────
-    this._tremorFrame++
-    if (this._tremorFrame % SimulationEngine.TREMOR_LOG_EVERY === 0) {
-      const r = this.robot as {
-        hubBody?: RAPIER.RigidBody
-        drivenWheelBodies?: { body: RAPIER.RigidBody }[]
-      }
-      const f = (n: number) => n.toFixed(4).padStart(8)
-      if (r.hubBody) {
-        const p = r.hubBody.translation()
-        const v = r.hubBody.linvel()
-        const a = r.hubBody.angvel()
-        console.log(
-          `[tremor f${this._tremorFrame}] hub ` +
-          `pos=(${f(p.x)}, ${f(p.y)}, ${f(p.z)}) ` +
-          `linvel=(${f(v.x)}, ${f(v.y)}, ${f(v.z)}) ` +
-          `angvel=(${f(a.x)}, ${f(a.y)}, ${f(a.z)})`,
-        )
-      }
-      if (r.drivenWheelBodies) {
-        for (let i = 0; i < r.drivenWheelBodies.length; i++) {
-          const wb = r.drivenWheelBodies[i].body
-          const v = wb.linvel()
-          const a = wb.angvel()
-          console.log(
-            `[tremor f${this._tremorFrame}] wheel[${i}] ` +
-            `linvel=(${f(v.x)}, ${f(v.y)}, ${f(v.z)}) ` +
-            `angvel=(${f(a.x)}, ${f(a.y)}, ${f(a.z)})`,
-          )
-        }
-      }
-    }
   }
 }

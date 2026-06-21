@@ -177,6 +177,8 @@ duration = motorDeg / TURN_MOTOR_SPEED
 
 Fallback constants: `WHEEL_RADIUS_WU = 0.28`, `WHEEL_BASE_DEFAULT = 1.75`, `TURN_MOTOR_SPEED = 180 deg/s`. The interpreter prefers per-robot values when available — `SimpleRobot.wheelBaseWU` and `SimpleRobot.wheelRadiusWU` (both optional on the `ISimpleRobot` interface). `DynamicRobot` populates `wheelRadiusWU` from `description.motors[0].wheel.radius`, so imported models with wheels of any size (e.g. spike-taxi at `r = 0.176 WU`) get an accurate turn duration instead of one scaled by the procedural `SimpleRobot`'s `r = 0.28 WU`.
 
+The kinematic formula assumes pure pivot at commanded wheel speed, but in practice the joint motor saturates (chassis `angularDamping` and caster drag dissipate energy faster than the joint can supply), so the chassis only rotates ~60 % of the predicted amount. To compensate, `ISimpleRobot.turnCalibration?: number` multiplies the commanded degrees: `motorDeg = (DEGREES × calibration) × (wheelBase/2) / wheelRadius`. `SimpleRobot` (idealised procedural rig) uses 1.0; `DynamicRobot` ships with 1.67, measured on spike-taxi by comparing commanded vs observed heading change. This is the same calibration step LEGO Spike/Mindstorms users perform per-robot.
+
 Turn direction: LEFT = left motor backward + right motor forward (CCW from above). RIGHT = opposite.
 
 ### Supported block types

@@ -59,10 +59,13 @@ export interface SimpleRobotConfig {
  * Implements the `ISimpleRobot` shape consumed by `BlockInterpreter`.
  */
 export class SimpleRobot implements ISimpleRobot {
-  readonly hubBody:       RAPIER.RigidBody
-  readonly sensor:        LegoDistanceSensor
-  readonly wheelBaseWU:   number = WHEEL_BASE_WU
-  readonly wheelRadiusWU: number = WHEEL_RADIUS
+  readonly hubBody:         RAPIER.RigidBody
+  readonly sensor:          LegoDistanceSensor
+  readonly wheelBaseWU:     number = WHEEL_BASE_WU
+  readonly wheelRadiusWU:   number = WHEEL_RADIUS
+  // Procedural rig: idealised geometry, no decorative casters → kinematic
+  // turn formula matches reality closely. No calibration needed.
+  readonly turnCalibration: number = 1.0
 
   /** IMotor wrappers consumed by BlockInterpreter (left side inverts direction). */
   readonly motors: { left: IMotor; right: IMotor }

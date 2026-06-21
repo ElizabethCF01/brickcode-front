@@ -44,10 +44,11 @@ export interface DynamicRobotConfig {
  *     renders right-side-up under LDrawLoader's convention.
  */
 export class DynamicRobot implements ISimpleRobot {
-  readonly hubBody:       RAPIER.RigidBody
-  readonly sensor:        ISimpleRobot['sensor']
-  readonly wheelBaseWU:   number
-  readonly wheelRadiusWU: number
+  readonly hubBody:         RAPIER.RigidBody
+  readonly sensor:          ISimpleRobot['sensor']
+  readonly wheelBaseWU:     number
+  readonly wheelRadiusWU:   number
+  readonly turnCalibration: number
 
   readonly motors: { left: IMotor; right: IMotor }
 
@@ -56,10 +57,8 @@ export class DynamicRobot implements ISimpleRobot {
   private readonly chassisGroup:    THREE.Group
   private readonly initialPosition: THREE.Vector3
 
-  private readonly drivenMotors:    LegoMotor[]
-  // Public so SimulationEngine's tremor instrumentation can read wheel
-  // linvel/angvel each frame. Treat as read-only.
-  readonly drivenWheelBodies: { body: RAPIER.RigidBody; centreLocal: THREE.Vector3 }[]
+  private readonly drivenMotors:      LegoMotor[]
+  private readonly drivenWheelBodies: { body: RAPIER.RigidBody; centreLocal: THREE.Vector3 }[]
   private readonly casterBodies:    {
     body:        RAPIER.RigidBody
     visualGroup: THREE.Group
@@ -143,9 +142,18 @@ export class DynamicRobot implements ISimpleRobot {
     //     at rest (translates to a visible side-to-side wobble at the wheels).
     //     12 kills it without making robot_turn feel sluggish at 180 deg/s.
     const willAddVirtualCaster = description.casters.length === 0 && description.motors.length >= 2
-    // Tested 30: chassis wobble unchanged. Yaw damping is not the lever for
-    // the dominant mode — see wheel-friction investigation. Reverted to 12.
-    const angularDamping = willAddVirtualCaster ? 8.0 : 12.0
+    // Why these numbers:
+    //   - virtual-caster branch (8): the synthesised low-friction ball provides
+    //     a stable yaw-damping ground contact, so 8 is plenty.
+    //   - real-caster branch (6): MEASURED bottleneck during robot_turn. With
+    //     opposite-spinning wheels, the joint motors' chassis reactions ADD
+    //     into a net yaw torque, and `angularDamping × ω_yaw` is the only
+    //     sink. At 12, equilibrium was at ω_yaw ≈ 0.52 rad/s vs the ~1.26
+    //     rad/s implied by the commanded differential — 41% of ideal. Halving
+    //     to 6 frees the turn without losing post-brake wobble control,
+    //     because caster friction was also reduced (0.5 → 0.1) and the wheel
+    //     friction at 0.5 already lets the bodies sleep.
+    const angularDamping = willAddVirtualCaster ? 8.0 : 6.0
     this.hubBody = world.createRigidBody(
       RAPIER.RigidBodyDesc.dynamic()
         .setTranslation(finalPos.x, finalPos.y, finalPos.z)
@@ -235,54 +243,6 @@ export class DynamicRobot implements ISimpleRobot {
       this.casterBodies.push(this._buildCaster(c, world, scene))
     }
 
-    // TEMPORARY: tremor diagnosis — dump wheel/caster geometry once so we can
-    // verify driven wheels and casters don't graze each other (they share the
-    // WHEEL collision group; if their centres are within (rA+rB) they'd
-    // collide and produce a force path that bypasses the joint analysis).
-    {
-      const driven = description.motors.map((m, i) => ({
-        i,
-        c: m.wheel.centreLocal,
-        r: m.wheel.radius,
-        hw: m.wheel.halfWidth,
-        axis: m.wheel.axisLocal,
-      }))
-      const casters = description.casters.map((w, i) => ({
-        i,
-        c: w.centreLocal,
-        r: w.radius,
-        hw: w.halfWidth,
-        axis: w.axisLocal,
-      }))
-      const fmt = (v: { x: number; y: number; z: number }) =>
-        `(${v.x.toFixed(3)}, ${v.y.toFixed(3)}, ${v.z.toFixed(3)})`
-      console.log('[tremor:geom] chassisY=', chassisY.toFixed(4),
-        ' hubHalf=', fmt(half),
-        ' chassisLocalY=', chassisLocalY.toFixed(4))
-      for (const d of driven) {
-        console.log(`[tremor:geom] driven[${d.i}] r=${d.r.toFixed(3)} hw=${d.hw.toFixed(3)} c=${fmt(d.c)} axis=${fmt(d.axis)}`)
-      }
-      for (const c of casters) {
-        console.log(`[tremor:geom] caster[${c.i}] r=${c.r.toFixed(3)} hw=${c.hw.toFixed(3)} c=${fmt(c.c)} axis=${fmt(c.axis)}`)
-      }
-      // Pairwise centre distance vs sum of radii — graze check.
-      const all = [
-        ...driven.map((d) => ({ tag: `driven[${d.i}]`, c: d.c, r: d.r })),
-        ...casters.map((c) => ({ tag: `caster[${c.i}]`, c: c.c, r: c.r })),
-      ]
-      for (let i = 0; i < all.length; i++) {
-        for (let j = i + 1; j < all.length; j++) {
-          const dx = all[i].c.x - all[j].c.x
-          const dy = all[i].c.y - all[j].c.y
-          const dz = all[i].c.z - all[j].c.z
-          const d = Math.sqrt(dx * dx + dy * dy + dz * dz)
-          const sum = all[i].r + all[j].r
-          const margin = d - sum
-          console.log(`[tremor:geom] ${all[i].tag}↔${all[j].tag} dist=${d.toFixed(3)} sumR=${sum.toFixed(3)} margin=${margin.toFixed(3)}${margin < 0 ? ' <-- OVERLAP' : ''}`)
-        }
-      }
-    }
-
     // ── Virtual ball caster (2-wheel models only) ───────────────────────────
     // Real differential robots use a passive caster ball as their third
     // ground contact. Imported 2-wheel-only models ship without one, so we
@@ -370,6 +330,21 @@ export class DynamicRobot implements ISimpleRobot {
     // Driven-wheel radius (used by BlockInterpreter for robot_turn duration).
     // Falls back to the SimpleRobot procedural value if no motor is defined.
     this.wheelRadiusWU = description.motors[0]?.wheel.radius ?? 0.28
+
+    // Empirical calibration for robot_turn. Kinematic formula assumes pure
+    // pivot at commanded wheel speed; reality (joint saturation + chassis
+    // angularDamping + caster drag + wheel-floor lateral skid) loses
+    // significant rotation. Measured on spike-taxi for a 90° command:
+    //   cal=1.00 → 54°  (uncalibrated kinematic prediction)
+    //   cal=1.67 → 78°  (linear extrapolation under-shoots: extra damping
+    //                    accumulates over the longer duration)
+    //   cal=1.80 → 85°  (chosen sweet spot — measured)
+    // 1.80 is a deliberate middle ground: close enough to commanded that
+    // simple programs feel correct, but with ~5° residual slip preserved so
+    // a future gyro-feedback turn block has visible pedagogical value. Same
+    // trade-off the real LEGO Spike Essential makes with its default turn
+    // block, which uses motor encoders and not the hub's IMU.
+    this.turnCalibration = 1.80
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
