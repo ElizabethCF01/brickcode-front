@@ -77,6 +77,13 @@ export class DynamicRobot implements ISimpleRobot {
   } | null = null
   private readonly _tmpVec = new THREE.Vector3()
 
+  // Visible wheel meshes extracted from the imported LDraw model and spun in
+  // place by their physics body's rotation each frame. See
+  // `_attachSpinningWheelVisuals`.
+  private readonly wheelVisuals: { pivot: THREE.Group; body: RAPIER.RigidBody }[] = []
+  private readonly _chassisQuatInv = new THREE.Quaternion()
+  private readonly _wheelBodyQuat  = new THREE.Quaternion()
+
   constructor(config: DynamicRobotConfig, world: RAPIER.World, scene: THREE.Scene) {
     this.world = world
     this.scene = scene
@@ -242,6 +249,12 @@ export class DynamicRobot implements ISimpleRobot {
     for (const c of description.casters) {
       this.casterBodies.push(this._buildCaster(c, world, scene))
     }
+
+    // ── Make the imported model's OWN wheels spin ───────────────────────────
+    // The procedural cylinders above are the physics-driven spinners but are
+    // hidden by VITE_HIDE_PROCEDURAL_WHEELS; extract the matching LDraw wheel
+    // sub-groups from `loadedModel` and rotate them in place to match physics.
+    this._attachSpinningWheelVisuals(loadedModel, description, config.parts)
 
     // ── Virtual ball caster (2-wheel models only) ───────────────────────────
     // Real differential robots use a passive caster ball as their third
@@ -509,6 +522,117 @@ export class DynamicRobot implements ISimpleRobot {
     return 'z'
   }
 
+  /**
+   * Extract each wheel's mesh from the imported LDraw model and re-parent it to
+   * a pivot Group that spins with the wheel's physics body.
+   *
+   * Why not just attach the mesh to the physics body's world transform?
+   * `LDrawLoader`'s frame plus DynamicRobot's `Rx(π)` flip leave the imported
+   * model **Z-mirrored** relative to `buildRobotDescription`'s frame: the
+   * visible wheel and its physics body share X but have opposite Z. Snapping
+   * the mesh onto the body would teleport it to the wrong (mirrored) Z and make
+   * it orbit. Instead we KEEP the mesh where it visually sits (a child of the
+   * chassis at its model position) and only copy the body's *rotation*: each
+   * frame `pivot.worldQuat = wheelBodyQuat`. The spin axis (X here) is shared
+   * across the mirror and a round wheel has no chirality, so the visual rolls
+   * in the correct sense.
+   *
+   * Only DRIVEN wheels are extracted. Casters (free, jointless bodies) tumble
+   * arbitrarily, and spike-taxi's wedge-belt front wheels don't roll on the
+   * real model anyway — so their meshes are left in `loadedModel` as static
+   * decoration that travels with the chassis but never spins.
+   *
+   * Matching is by part filename + side (axle-axis coordinate), NOT by nearest
+   * 3D distance — the Z-mirror makes 3D-nearest pair driven wheels with casters.
+   */
+  private _attachSpinningWheelVisuals(
+    loadedModel: THREE.Group,
+    description: RobotDescription,
+    parts: LDrawInstance[],
+  ): void {
+    this.chassisGroup.updateMatrixWorld(true)
+    loadedModel.updateMatrixWorld(true)
+
+    // Snapshot every model child with its world-space centre BEFORE any
+    // re-parenting (attach() mutates loadedModel.children).
+    const candidates = loadedModel.children.map((obj) => {
+      const world = new THREE.Vector3()
+      new THREE.Box3().setFromObject(obj).getCenter(world)
+      return { obj, world, used: false }
+    })
+
+    const baseName = (p: string) => p.toLowerCase().replace(/^.*\//, '')
+
+    // Claim the model child for a wheel: filter by part name, then nearest on
+    // the axle axis (the side coordinate — preserved across the Z-mirror).
+    const claim = (
+      partFile: string,
+      axle: 'x' | 'y' | 'z',
+      sideValue: number,
+    ): { obj: THREE.Object3D; world: THREE.Vector3 } | null => {
+      const want = baseName(partFile)
+      let best: (typeof candidates)[number] | null = null
+      let bestD = Infinity
+      for (const c of candidates) {
+        if (c.used) continue
+        if (baseName(c.obj.name) !== want) continue
+        const d = Math.abs(c.world[axle] - sideValue)
+        if (d < bestD) { bestD = d; best = c }
+      }
+      if (!best) return null
+      best.used = true
+      return { obj: best.obj, world: best.world }
+    }
+
+    // Build a spinning pivot at `primary`'s world centre, pulling in any other
+    // unused child within `clusterRadius` (e.g. a separate tyre part 2815 that
+    // rides on a rim 4185), and bind it to the physics body.
+    const buildPivot = (
+      primary: { obj: THREE.Object3D; world: THREE.Vector3 },
+      clusterRadius: number,
+      body: RAPIER.RigidBody,
+    ): void => {
+      const members = [primary.obj]
+      for (const c of candidates) {
+        if (c.used) continue
+        if (c.world.distanceTo(primary.world) <= clusterRadius) {
+          c.used = true
+          members.push(c.obj)
+        }
+      }
+      const pivot = new THREE.Group()
+      pivot.position.copy(this.chassisGroup.worldToLocal(primary.world.clone()))
+      this.chassisGroup.add(pivot)
+      this.chassisGroup.updateMatrixWorld(true)
+      for (const m of members) pivot.attach(m) // attach() preserves world transform
+      this.wheelVisuals.push({ pivot, body })
+    }
+
+    // Driven wheels (one part each; integral tyre on spike-taxi's 65834p01).
+    description.motors.forEach((m, i) => {
+      const partFile = parts[m.wheel.partIndex]?.partFile
+      if (!partFile) return
+      const axle = this._dominantAxis(m.wheel.axisLocal)
+      const body = this.drivenWheelBodies[i].body
+      const claimed = claim(partFile, axle, body.translation()[axle])
+      if (!claimed) {
+        console.warn(`[DynamicRobot] no LDraw mesh matched driven wheel ${baseName(partFile)} — visual wheel will not spin`)
+        return
+      }
+      // 65834p01 is a single integral-tyre part — claim only the exact rim
+      // (tiny cluster radius so nearby pins/bushes aren't dragged in).
+      buildPivot(claimed, 0.02, body)
+    })
+
+    // Casters (e.g. spike-taxi's wedge-belt front wheels 4185 + 2815) are
+    // intentionally NOT extracted/spun: this wheel type does not roll on the
+    // real model — it stays fixed. Leaving its meshes inside `loadedModel`
+    // keeps them as decoration that moves with the chassis but never rotates.
+    // (Their free physics bodies still provide ground contact for stability;
+    // those bodies tumble freely, which is exactly why we must NOT bind the
+    // visual to them — doing so made the front wheels spin and skew on turns.)
+  }
+
   // ── ISimpleRobot lifecycle ──────────────────────────────────────────────────
 
   step(deltaTime: number): void {
@@ -518,6 +642,19 @@ export class DynamicRobot implements ISimpleRobot {
     const r = this.hubBody.rotation()
     this.chassisGroup.position.set(t.x, t.y, t.z)
     this.chassisGroup.quaternion.set(r.x, r.y, r.z, r.w)
+
+    // Spin each extracted wheel mesh to match its physics body. The pivot is a
+    // child of chassisGroup, so setting its LOCAL quat = chassisQuat⁻¹·bodyQuat
+    // gives it WORLD quat = bodyQuat — the visual wheel rotates exactly as the
+    // physics wheel, while staying at its (Z-mirrored) visual position.
+    if (this.wheelVisuals.length > 0) {
+      this._chassisQuatInv.copy(this.chassisGroup.quaternion).invert()
+      for (const wv of this.wheelVisuals) {
+        const br = wv.body.rotation()
+        this._wheelBodyQuat.set(br.x, br.y, br.z, br.w)
+        wv.pivot.quaternion.copy(this._chassisQuatInv).multiply(this._wheelBodyQuat)
+      }
+    }
 
     for (const c of this.casterBodies) {
       const ct = c.body.translation()

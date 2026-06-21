@@ -684,6 +684,52 @@ Chassis is in bit 0, wheels in bit 1; chassis filters out wheel bit and
 vice versa. The chassis cuboid (often wider than the wheelbase) therefore
 never pushes wheels around, but both still collide with the floor.
 
+### Spinning wheel visuals (`_attachSpinningWheelVisuals`)
+
+Originally the only *spinning* visual was the `LegoMotor` procedural cylinder
+(and the caster cylinder), while the imported `.ldr` model — including its own
+wheel meshes — was parented to the chassis as **static** decoration. With
+`VITE_HIDE_PROCEDURAL_WHEELS=true` the cylinders are hidden, so the robot drove
+but the visible LEGO wheels never turned. The `partIndex` fields on `WheelSpec`
+/ `RobotDescription` were added for this step but had never been wired up.
+
+`_attachSpinningWheelVisuals` now extracts each wheel's sub-group from the
+loaded model and spins it in place to match physics:
+
+- **Matching is by part filename + side, not 3D distance.** `LDrawLoader`'s
+  frame plus DynamicRobot's `Rx(π)` flip leave the imported model
+  **Z-mirrored** relative to `buildRobotDescription`'s Y-only reflection: the
+  visible wheel and its physics body share X but have *opposite* Z. So
+  3D-nearest pairs driven wheels with casters. Instead we filter model children
+  by `parts[wheel.partIndex].partFile` (handling `LDrawLoader`'s `parts/`
+  name prefix) and pick the nearest on the axle axis (the side coordinate,
+  which the mirror preserves). `LDrawLoader` exposes each top-level part
+  instance as a named, positioned child `Group` (`subobjectGroup.name =
+  fileName`), so this is reliable.
+- **The wheel stays at its visual position; only rotation comes from physics.**
+  Each matched sub-group is re-parented (via `Object3D.attach`, which preserves
+  world transform) to a pivot `Group` placed at the wheel's *visual* centre,
+  child of `chassisGroup`. Each frame `step()` sets
+  `pivot.quaternion = chassisQuat⁻¹ · wheelBodyQuat`, giving the pivot world
+  quaternion = the physics wheel's quaternion. The spin axis is shared across
+  the mirror and a round wheel has no chirality, so the visual rolls in the
+  physically correct sense and direction — no commanded-angle integration and
+  no sign guessing.
+- **Only DRIVEN wheels spin; casters stay fixed.** Casters are free, jointless
+  bodies whose rotation tumbles arbitrarily (the revolute joint that keeps a
+  driven wheel rolling cleanly about its axle is absent). Binding a visual to
+  that free rotation made spike-taxi's front wheels spin constantly, roll
+  backwards, and skew on turns. Those wedge-belt front wheels (`4185` + `2815`)
+  don't roll on the real model anyway, so their meshes are intentionally left
+  inside `loadedModel` as static decoration — they travel and yaw with the
+  chassis but never rotate. The free caster physics bodies still provide ground
+  contact for stability.
+- **Graceful degradation.** If no model mesh matches a wheel (unknown export),
+  a warning is logged and that wheel simply doesn't spin; the rest are
+  unaffected. `VITE_HIDE_PROCEDURAL_WHEELS=true` stays the intended setting —
+  the extracted LDraw wheels are the spinners; the procedural cylinders remain
+  hidden.
+
 ---
 
 ## Block Editor UX
