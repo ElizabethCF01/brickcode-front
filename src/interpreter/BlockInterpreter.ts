@@ -46,6 +46,18 @@ export interface SimpleRobot {
     right: IMotor
   }
   sensor: ISensor
+  /**
+   * Whether this robot actually carries a distance sensor. Procedural robots
+   * (`SimpleRobot`) are `true`; imported `.ldr` robots are `true` only when the
+   * parsed model contains a sensor part. The UI uses this to hide sensor-only
+   * panels/blocks for motors-only robots. When omitted, treat as `false`.
+   */
+  hasSensor?: boolean
+  /**
+   * Current world-space position of the chassis centre, in world units.
+   * Used by motor-only challenges to measure how far the robot has driven.
+   */
+  getPosition?(): { x: number; y: number; z: number }
   /** Wheel centre-to-centre distance in world units. Used by robot_turn. */
   wheelBaseWU?: number
   /** Driven-wheel rolling radius in world units. Used by robot_turn. */

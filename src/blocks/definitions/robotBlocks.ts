@@ -128,25 +128,53 @@ function patchRemoveTopBlock(): void {
 // Toolbox configuration (Blockly v9+ JSON format)
 // ---------------------------------------------------------------------------
 
-/** Blockly JSON toolbox config for the "Mi Robot 🤖" category. */
-export const ROBOT_TOOLBOX: Blockly.utils.toolbox.ToolboxDefinition = {
-  kind: 'categoryToolbox',
-  contents: [
-    {
-      kind: 'category',
-      name: 'Mi Robot',
-      colour: LEGO_RED,
-      contents: [
-        { kind: 'label', text: 'Movimiento' },
-        { kind: 'block', type: 'robot_drive_forward' },
-        { kind: 'block', type: 'robot_drive_backward' },
-        { kind: 'block', type: 'robot_turn' },
-        { kind: 'block', type: 'robot_stop' },
-        { kind: 'label', text: 'Sensores' },
-        { kind: 'block', type: 'sensor_distance' },
-        { kind: 'label', text: 'Tiempo' },
-        { kind: 'block', type: 'wait_seconds' },
-      ],
-    },
-  ],
+/**
+ * Build the "Mi Robot 🤖" toolbox category.
+ *
+ * `includeSensor` is data-driven from the active robot: motors-only robots
+ * (e.g. an imported `.ldr` with no sensor part) omit the "Sensores" label and
+ * the `sensor_distance` block, so kids only see blocks their robot can run.
+ */
+export function buildRobotToolbox(
+  includeSensor: boolean,
+): Blockly.utils.toolbox.ToolboxDefinition {
+  const robotContents: Blockly.utils.toolbox.ToolboxItemInfo[] = [
+    { kind: 'label', text: 'Movimiento' },
+    { kind: 'block', type: 'robot_drive_forward' },
+    { kind: 'block', type: 'robot_drive_backward' },
+    { kind: 'block', type: 'robot_turn' },
+    { kind: 'block', type: 'robot_stop' },
+  ]
+
+  if (includeSensor) {
+    robotContents.push(
+      { kind: 'label', text: 'Sensores' },
+      { kind: 'block', type: 'sensor_distance' },
+    )
+  }
+
+  robotContents.push(
+    { kind: 'label', text: 'Tiempo' },
+    { kind: 'block', type: 'wait_seconds' },
+  )
+
+  return {
+    kind: 'categoryToolbox',
+    contents: [
+      {
+        kind: 'category',
+        name: 'Mi Robot',
+        colour: LEGO_RED,
+        contents: robotContents,
+      },
+    ],
+  }
 }
+
+/**
+ * Ready-to-use toolbox including the sensor block. Kept for backward
+ * compatibility; prefer `buildRobotToolbox(hasSensor)` where the robot's
+ * sensor presence is known.
+ */
+export const ROBOT_TOOLBOX: Blockly.utils.toolbox.ToolboxDefinition =
+  buildRobotToolbox(true)

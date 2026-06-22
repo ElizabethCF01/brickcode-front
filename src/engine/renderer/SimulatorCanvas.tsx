@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { SimulationEngine } from '../SimulationEngine'
 import { setEngine } from '../engineSingleton'
 import { challenge01 } from '../../challenges/challenge-01'
+import { useSimulationStore } from '../../store/simulationStore'
 
 export default function SimulatorCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -21,6 +22,9 @@ export default function SimulatorCanvas() {
       engine.loadChallenge(challenge01.setup.bind(challenge01))
       engine.startRAF()
       setEngine(engine)
+      // Tell the UI whether this robot has a sensor so sensor-only panels and
+      // toolbox blocks can hide themselves for motors-only robots.
+      useSimulationStore.getState().setHasSensor(engine.robot.hasSensor ?? false)
     })
 
     const ro = new ResizeObserver(() => {

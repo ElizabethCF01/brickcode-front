@@ -208,7 +208,11 @@ export class SimulationEngine implements ChallengeEngine {
     }
 
     // Render once per rAF, regardless of how many physics steps ran.
-    useSimulationStore.getState().setSensorValue('front', this.robot.sensor.getValue())
+    // Only publish a sensor reading when the robot actually has a sensor —
+    // motors-only robots would otherwise feed the panel a meaningless value.
+    if (this.robot.hasSensor) {
+      useSimulationStore.getState().setSensorValue('front', this.robot.sensor.getValue())
+    }
     this._refs.controls.update()
     this._refs.renderer.render(this._refs.scene, this._refs.camera)
   }

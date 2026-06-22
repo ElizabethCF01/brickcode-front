@@ -46,6 +46,10 @@ export interface DynamicRobotConfig {
 export class DynamicRobot implements ISimpleRobot {
   readonly hubBody:         RAPIER.RigidBody
   readonly sensor:          ISimpleRobot['sensor']
+  // True only when the parsed `.ldr` contained a sensor part. Imported
+  // motors-only robots (e.g. spike-taxi) are `false`, which the UI uses to
+  // hide sensor-only panels/blocks.
+  readonly hasSensor:       boolean
   readonly wheelBaseWU:     number
   readonly wheelRadiusWU:   number
   readonly turnCalibration: number
@@ -273,6 +277,7 @@ export class DynamicRobot implements ISimpleRobot {
     }
 
     // ── Sensor (optional) ──────────────────────────────────────────────────
+    this.hasSensor = description.sensors.length > 0
     if (description.sensors.length > 0) {
       const s = description.sensors[0]
       this.sensorOriginLocal = s.originLocal.clone()
@@ -634,6 +639,12 @@ export class DynamicRobot implements ISimpleRobot {
   }
 
   // ── ISimpleRobot lifecycle ──────────────────────────────────────────────────
+
+  /** Current world-space position of the chassis centre (world units). */
+  getPosition(): { x: number; y: number; z: number } {
+    const t = this.hubBody.translation()
+    return { x: t.x, y: t.y, z: t.z }
+  }
 
   step(deltaTime: number): void {
     for (const m of this.drivenMotors) m.step(deltaTime)

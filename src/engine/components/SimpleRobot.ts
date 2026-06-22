@@ -61,6 +61,8 @@ export interface SimpleRobotConfig {
 export class SimpleRobot implements ISimpleRobot {
   readonly hubBody:         RAPIER.RigidBody
   readonly sensor:          LegoDistanceSensor
+  // Procedural rig always carries a front distance sensor.
+  readonly hasSensor:       boolean = true
   readonly wheelBaseWU:     number = WHEEL_BASE_WU
   readonly wheelRadiusWU:   number = WHEEL_RADIUS
   // Procedural rig: idealised geometry, no decorative casters → kinematic
@@ -329,6 +331,12 @@ export class SimpleRobot implements ISimpleRobot {
       }
     })
     this.hubGroup.add(group)
+  }
+
+  /** Current world-space position of the hub centre (world units). */
+  getPosition(): { x: number; y: number; z: number } {
+    const t = this.hubBody.translation()
+    return { x: t.x, y: t.y, z: t.z }
   }
 
   /** Step motors and update sensor origin from the hub transform. Call after world.step(). */

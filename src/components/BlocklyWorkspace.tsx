@@ -6,46 +6,62 @@ import { registerContinuousToolbox } from '@blockly/continuous-toolbox'
 // RecyclableBlockFlyoutInflater in Blockly's global registry. Must run before
 // any Blockly.inject() call. Idempotent — registry overrides allowed.
 registerContinuousToolbox()
-import { ROBOT_TOOLBOX } from '../blocks/definitions/robotBlocks'
+import { buildRobotToolbox } from '../blocks/definitions/robotBlocks'
 import { setWorkspace } from '../blocks/workspaceSingleton'
+import { useSimulationStore } from '../store/simulationStore'
 
 type ToolboxItem = Blockly.utils.toolbox.ToolboxItemInfo
 
-const FULL_TOOLBOX: Blockly.utils.toolbox.ToolboxDefinition = {
-  kind: 'categoryToolbox',
-  contents: [
-    // Spread the robot category from ROBOT_TOOLBOX.
-    ...((ROBOT_TOOLBOX as { contents: ToolboxItem[] }).contents),
-    {
-      kind: 'category',
-      name: 'Control',
-      colour: '#FF8C00',
-      contents: [
-        // controls_repeat (no shadow inputs) instead of controls_repeat_ext
-        // (whose default math_number shadow triggers a Blockly bug:
-        // "Block not present in workspace's list of top-most blocks" when
-        // the flyout disposes blocks during category switch).
-        { kind: 'block', type: 'controls_repeat' },
-        { kind: 'block', type: 'controls_whileUntil' },
-        { kind: 'block', type: 'controls_if' },
-      ],
-    } as ToolboxItem,
-    {
-      kind: 'category',
-      name: 'Matemáticas',
-      colour: '#5C81A6',
-      contents: [
-        { kind: 'block', type: 'math_number' },
-        { kind: 'block', type: 'math_arithmetic' },
-        { kind: 'block', type: 'logic_compare' },
-      ],
-    } as ToolboxItem,
-  ],
+/**
+ * Combine the robot category (sensor block included only when the active robot
+ * has a sensor) with the built-in Control and Matemáticas categories.
+ */
+function buildFullToolbox(hasSensor: boolean): Blockly.utils.toolbox.ToolboxDefinition {
+  return {
+    kind: 'categoryToolbox',
+    contents: [
+      // Spread the robot category from the data-driven robot toolbox.
+      ...((buildRobotToolbox(hasSensor) as { contents: ToolboxItem[] }).contents),
+      {
+        kind: 'category',
+        name: 'Control',
+        colour: '#FF8C00',
+        contents: [
+          // controls_repeat (no shadow inputs) instead of controls_repeat_ext
+          // (whose default math_number shadow triggers a Blockly bug:
+          // "Block not present in workspace's list of top-most blocks" when
+          // the flyout disposes blocks during category switch).
+          { kind: 'block', type: 'controls_repeat' },
+          { kind: 'block', type: 'controls_whileUntil' },
+          { kind: 'block', type: 'controls_if' },
+        ],
+      } as ToolboxItem,
+      {
+        kind: 'category',
+        name: 'Matemáticas',
+        colour: '#5C81A6',
+        contents: [
+          { kind: 'block', type: 'math_number' },
+          { kind: 'block', type: 'math_arithmetic' },
+          { kind: 'block', type: 'logic_compare' },
+        ],
+      } as ToolboxItem,
+    ],
+  }
 }
 
 export default function BlocklyWorkspace() {
   const containerRef = useRef<HTMLDivElement>(null)
   const workspaceRef = useRef<Blockly.WorkspaceSvg | null>(null)
+  const hasSensor = useSimulationStore((s) => s.hasSensor)
+
+  // Rebuild the toolbox when the active robot's sensor presence becomes known
+  // (the engine sets `hasSensor` asynchronously after this component mounts).
+  useEffect(() => {
+    const workspace = workspaceRef.current
+    if (!workspace) return
+    workspace.updateToolbox(structuredClone(buildFullToolbox(hasSensor)))
+  }, [hasSensor])
 
   useEffect(() => {
     const container = containerRef.current
@@ -56,7 +72,7 @@ export default function BlocklyWorkspace() {
     while (container.firstChild) container.removeChild(container.firstChild)
 
     const workspace = Blockly.inject(container, {
-      toolbox: structuredClone(FULL_TOOLBOX),
+      toolbox: structuredClone(buildFullToolbox(hasSensor)),
       renderer: 'zelos',
       trashcan: true,
       sounds: true,
@@ -123,6 +139,10 @@ export default function BlocklyWorkspace() {
       workspace.dispose()
       workspaceRef.current = null
     }
+    // Mount-once: injects with the current `hasSensor` for the initial toolbox.
+    // Later changes are handled by the separate updateToolbox effect above —
+    // re-injecting here would dispose the kid's blocks.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

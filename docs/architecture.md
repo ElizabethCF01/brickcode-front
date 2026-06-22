@@ -243,21 +243,68 @@ All blocks are registered with `registerRobotBlocks()` (call once at startup) an
 
 ---
 
-## Challenge 01
+## Challenge 01 (motors-only)
 
 **File**: `src/challenges/challenge-01.ts`
+
+Originally a sensor challenge ("stop before the wall when the distance sensor
+reads < 20 cm"). Rewritten as a **motors-only** challenge so it is satisfiable
+by the default imported robot (`spike-taxi`), which has motors but no sensor —
+see *Model-driven sensor UI*. A sensor-based challenge cannot be "made
+consistent" with a sensorless robot, so the success condition was moved from a
+sensor reading to chassis displacement.
 
 | Property | Value |
 |----------|-------|
 | `id` | `'challenge-01'` |
-| Wall distance | 50 cm (wall front face at z = −5 WU) |
-| Success zone | Sensor reads 15–25 cm when stopped |
-| Wall body | Fixed Rapier body (not dynamic LegoBricks — avoids toppling) |
+| Goal | Drive forward and stop inside a green floor zone ~30 cm ahead |
+| Forward target | `GOAL_FORWARD_CM = 30`, depth tolerance `±GOAL_TOL_CM = 7` |
+| Straightness | sideways drift `|x|` ≤ `LATERAL_TOL_CM = 12` |
+| Goal marker | Translucent green slab on the floor (visual only — **no collider**) |
 
-`setup(engine)` creates the red wall and returns a dispose callback.  
-`evaluate(robot)` reads `robot.sensor.getValue()` and returns `ChallengeResult`.
+`setup(engine)` adds the floor marker and returns a dispose callback.
+`evaluate(robot)` reads `robot.getPosition()` (forward = −z, drift = |x|) and
+returns `ChallengeResult`. The robot exposes `getPosition()` (both `SimpleRobot`
+and `DynamicRobot`) so challenges measure displacement without the interpreter
+interface leaking Rapier types.
 
 `ChallengeResult` is defined in `challengeStore.ts` and re-exported from `challenge-01.ts`.
+
+---
+
+## Model-driven sensor UI
+
+**Files**: `src/store/simulationStore.ts`, `src/engine/renderer/SimulatorCanvas.tsx`,
+`src/components/SensorPanel.tsx`, `src/components/BlocklyWorkspace.tsx`,
+`src/blocks/definitions/robotBlocks.ts`, `src/engine/SimulationEngine.ts`,
+robot classes (`SimpleRobot`, `DynamicRobot`).
+
+The demo robot is whatever `.ldr` is configured (default `spike-taxi`, which is
+motors-only). The surrounding UI used to assume a distance sensor always
+existed (sensor panel, "Sensores" toolbox block, per-frame sensor push), which
+mismatched a sensorless robot — the panel showed `Infinity cm` and the sensor
+block always read max range.
+
+**Decision (chosen by the user): drive sensor UI off the model, not remove the
+sensor subsystem.** The `robot.sensor` contract and `LegoDistanceSensor` stay
+intact (reversible; a future `.ldr` with a sensor part lights the UI back up
+automatically), but the UI hides sensor-only affordances when the active robot
+has none.
+
+- Each robot exposes `hasSensor: boolean`. `SimpleRobot` = `true`;
+  `DynamicRobot` = `description.sensors.length > 0`.
+- `SimulatorCanvas` pushes `engine.robot.hasSensor` into
+  `simulationStore.hasSensor` once the engine resolves.
+- `SensorPanel` renders the distance readout only when `hasSensor` (the status
+  label is always shown). It also treats non-finite readings as "no value".
+- `robotBlocks.buildRobotToolbox(includeSensor)` builds the "Mi Robot" category
+  with/without the "Sensores" label + `sensor_distance` block. `ROBOT_TOOLBOX`
+  is kept (`= buildRobotToolbox(true)`) for compatibility.
+- `BlocklyWorkspace` injects with the current `hasSensor` and calls
+  `workspace.updateToolbox()` in a `[hasSensor]` effect when it changes — it
+  does **not** re-inject (that would dispose the kid's blocks).
+- `SimulationEngine._tick` only publishes `sensor.getValue()` to the store when
+  `robot.hasSensor`.
 
 ---
 
