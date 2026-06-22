@@ -7,7 +7,7 @@ Adapted from [three.js](https://github.com/mrdoob/three.js/blob/master/utils/pac
 License: MIT (three.js authors). Original copyright preserved upstream.
 
 This script is **not** distributed via npm — it lives only in the three.js
-GitHub repo. Vendored here so `npm run pack-ldraw` works without a separate
+GitHub repo. Vendored here so `pnpm run pack-ldraw` works without a separate
 checkout.
 
 ### Adaptation

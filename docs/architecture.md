@@ -356,7 +356,7 @@ To regenerate packed parts:
 
 1. Download `complete.zip` from https://library.ldraw.org/library/updates/complete.zip.
 2. Unzip somewhere local (e.g. `~/ldraw-library/`). Verify it contains `LDConfig.ldr`, `parts/`, `p/`.
-3. `LDRAW_LIB_PATH=~/ldraw-library npm run pack-ldraw`.
+3. `LDRAW_LIB_PATH=~/ldraw-library pnpm run pack-ldraw`.
 
 The script writes `public/ldraw/models/packed/<id>.mpd` for each entry in `LDRAW_CATALOG`.
 
@@ -373,7 +373,7 @@ The script writes `public/ldraw/models/packed/<id>.mpd` for each entry in `LDRAW
 | `wheel` | `parts/3483.dat` | `LegoMotor` (wheel rim) |
 | `tire`  | `parts/3482.dat` | `LegoMotor` (tyre — mounts on 3483) |
 
-Adding a part = append to `LDRAW_CATALOG`, run `npm run pack-ldraw`, commit the new `.mpd`.
+Adding a part = append to `LDRAW_CATALOG`, run `pnpm run pack-ldraw`, commit the new `.mpd`.
 
 ### Vendored packer
 
@@ -399,7 +399,7 @@ LDraw also flips the Y axis relative to three.js (LDraw Y points down). `LDrawLo
 
 **File**: `src/engine/ldraw/LDrawLibraryManager.ts`
 
-Runtime cache for the packed LDraw parts produced by `npm run pack-ldraw`. One instance is created at app startup, `preloadAll()` is awaited before the simulator scene mounts, and components retrieve clones via `getPart(key, color?)` instead of authoring `BoxGeometry`/`CylinderGeometry` themselves.
+Runtime cache for the packed LDraw parts produced by `pnpm run pack-ldraw`. One instance is created at app startup, `preloadAll()` is awaited before the simulator scene mounts, and components retrieve clones via `getPart(key, color?)` instead of authoring `BoxGeometry`/`CylinderGeometry` themselves.
 
 ### Key mapping
 
@@ -423,7 +423,7 @@ The manager loads and caches; it never adds objects to the scene. Each component
 
 1. Append entry to `LDRAW_CATALOG` in `scripts/ldrawCatalog.ts`.
 2. Add semantic key in `BRICKCODE_PARTS`.
-3. Run `LDRAW_LIB_PATH=… npm run pack-ldraw` and commit the new `.mpd`.
+3. Run `LDRAW_LIB_PATH=… pnpm run pack-ldraw` and commit the new `.mpd`.
 
 Steps 1 and 2 are committed; step 3 produces an asset that is also committed. Without step 3 the part 404s at preload.
 
@@ -540,7 +540,7 @@ visuals are hidden so they don't bleed through.
 ### Pipeline
 
 1. Place `<name>.ldr` (or `.mpd`) under `public/ldraw/models/source/`.
-2. Run `LDRAW_LIB_PATH=~/ldraw-library npm run pack-ldraw`. The packer
+2. Run `LDRAW_LIB_PATH=~/ldraw-library pnpm run pack-ldraw`. The packer
    processes both `LDRAW_CATALOG` and every file in `models/source/`,
    inlining all referenced parts. Output: `public/ldraw/models/packed/<name>.mpd`.
 3. Set `VITE_IMPORTED_ROBOT_MODEL=/ldraw/models/packed/<name>.mpd` in
