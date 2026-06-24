@@ -13,6 +13,48 @@ const WHEEL_RADIUS_WU    = 0.28   // world units (1 WU = 10 cm) — LDraw 3483 l
 const WHEEL_BASE_DEFAULT = 1.75   // SimpleRobot wheel-centre to wheel-centre
 const TURN_MOTOR_SPEED   = 180    // deg/s applied to each motor while turning
 
+// ── Movement (SPIKE-style "move for N rotations/degrees/seconds") ──────────
+// SPIKE separates speed from the move block; we drive `robot_move_for` at a
+// fixed comfortable pace (≈ 50 % of MAX_DRIVE_SPEED_DEG_S) so the block needs
+// no inline speed field — matching SPIKE Essential's Movement palette.
+const MOVE_SPEED_DEG_S = 180      // wheel deg/s used by robot_move_for and motor_* blocks
+
+// ── Sound (SPIKE Essential hub speaker) ────────────────────────────────────
+const BEEP_HZ = 880               // default beep pitch (A5)
+// Musical notes for `sound_play_note` (C4 octave). Keys match the block dropdown.
+const NOTE_HZ: Record<string, number> = {
+  DO:  261.63, RE: 293.66, MI: 329.63, FA: 349.23,
+  SOL: 392,    LA:  440,   SI: 493.88,
+}
+
+// ── Hub 3×3 light-matrix preset images (row-major, 0–100 brightness) ───────
+// SPIKE Essential's hub carries a 3×3 light matrix. These named patterns back
+// the `light_display_image` dropdown; keys must match the block's options.
+const PRESET_IMAGES: Record<string, number[]> = {
+  // Heart: two bumps on top, full middle, point at the bottom.
+  CORAZON:  [100,   0, 100, 100, 100, 100,   0, 100,   0],
+  CARA:     [100,   0, 100,   0,   0,   0, 100, 100, 100],
+  CUADRADO: [100, 100, 100, 100,   0, 100, 100, 100, 100],
+  EQUIS:    [100,   0, 100,   0, 100,   0, 100,   0, 100],
+  // Up arrow: tip, barbs, stem.
+  FLECHA:   [  0, 100,   0, 100, 100, 100,   0, 100,   0],
+  LLENO:    [100, 100, 100, 100, 100, 100, 100, 100, 100],
+}
+
+/**
+ * Convert a `field_bitmap` value (a row-major `number[][]` of 0/1) into the
+ * flat 9-value brightness array `IHub.displayImage` expects: lit pixel → 100,
+ * off → 0. Returns all-off for a missing/malformed value.
+ */
+function matrixToPattern(grid: number[][] | null): number[] {
+  if (!Array.isArray(grid)) return new Array<number>(9).fill(0)
+  const pattern: number[] = []
+  for (const row of grid) {
+    if (Array.isArray(row)) for (const cell of row) pattern.push(cell ? 100 : 0)
+  }
+  return pattern
+}
+
 /**
  * Public motor API required by the interpreter.
  * Both LegoMotor and the demo SimpleMotor in SimulationEngine satisfy this.
@@ -31,6 +73,41 @@ export interface ISensor {
 }
 
 /**
+ * Hub effects surface for the SPIKE Essential 3×3 light matrix.
+ * The engine supplies an implementation that writes to `simulationStore`;
+ * headless tests can pass a mock or omit it (light blocks become no-ops).
+ *
+ * Coordinates: `row`/`col` are 0–2 (row 0 = top); `brightness` is 0–100.
+ * `displayImage` takes a 9-value row-major array.
+ */
+export interface IHub {
+  setPixel(row: number, col: number, brightness: number): void
+  displayImage(pattern: number[]): void
+  clearDisplay(): void
+}
+
+/**
+ * A single motor addressed by hub port (SPIKE Essential has ports A and B).
+ * `getAngle` backs the `motor_position` reporter; optional so simple mocks can
+ * omit it.
+ */
+export interface IMotorPort {
+  setSpeed(degreesPerSecond: number): void
+  stop(): void
+  getAngle?(): number
+}
+
+/**
+ * Hub speaker surface. The engine supplies a WebAudio-backed implementation;
+ * headless tests pass a mock or omit it (sound blocks become no-ops).
+ */
+export interface ISound {
+  /** Play a tone at `frequencyHz` for `durationMs`, then stop automatically. */
+  playTone(frequencyHz: number, durationMs: number): void
+  stop(): void
+}
+
+/**
  * Minimal robot interface required by the interpreter.
  *
  * Drive convention: left.setSpeed(+n) and right.setSpeed(+n) both spin their
@@ -45,6 +122,12 @@ export interface SimpleRobot {
     left: IMotor
     right: IMotor
   }
+  /**
+   * Motors addressed by SPIKE hub port (e.g. `{ A: …, B: … }`). Backs the
+   * single-motor `motor_*` blocks. Optional — robots without a port map make
+   * those blocks no-ops. `SimpleRobot` exposes A→left, B→right.
+   */
+  motorsByPort?: Record<string, IMotorPort>
   sensor: ISensor
   /**
    * Whether this robot actually carries a distance sensor. Procedural robots
@@ -76,9 +159,13 @@ export class BlockInterpreter {
   private _running = false
   private cancelToken: (() => void) | null = null
   private readonly robot: SimpleRobot
+  private readonly hub: IHub | null
+  private readonly sound: ISound | null
 
-  constructor(robot: SimpleRobot) {
+  constructor(robot: SimpleRobot, hub?: IHub, sound?: ISound) {
     this.robot = robot
+    this.hub = hub ?? null
+    this.sound = sound ?? null
   }
 
   /**
@@ -111,6 +198,7 @@ export class BlockInterpreter {
     }
     this.robot.motors.left.stop()
     this.robot.motors.right.stop()
+    this.sound?.stop()
   }
 
   isRunning(): boolean {
@@ -210,6 +298,126 @@ export class BlockInterpreter {
         break
       }
 
+      // ── Movement: SPIKE-style "move for N rotations / degrees / seconds" ────
+
+      case 'robot_move_for': {
+        const direction = block.getFieldValue('DIRECTION') ?? 'FORWARD'
+        const amount    = Number(block.getFieldValue('AMOUNT') ?? 1)
+        const unit      = block.getFieldValue('UNIT') ?? 'ROTATIONS'
+
+        // Convert the requested amount into a drive duration (seconds).
+        let durationSec: number
+        if (unit === 'SECONDS') durationSec = amount
+        else {
+          const wheelDeg = unit === 'ROTATIONS' ? amount * 360 : amount
+          durationSec = wheelDeg / MOVE_SPEED_DEG_S
+        }
+
+        const speed = direction === 'BACKWARD' ? -MOVE_SPEED_DEG_S : MOVE_SPEED_DEG_S
+        this.robot.motors.left.setSpeed(speed)
+        this.robot.motors.right.setSpeed(speed)
+        await this.sleep(durationSec * 1000)
+        if (this._running) {
+          this.robot.motors.left.stop()
+          this.robot.motors.right.stop()
+        }
+        break
+      }
+
+      // ── Events ─────────────────────────────────────────────────────────────
+      // Hat block: a cosmetic stack header. Execution falls through to the
+      // blocks connected below it (handled by getNextBlock in executeSequence).
+      case 'event_when_started':
+        break
+
+      // ── Hub 3×3 light matrix ───────────────────────────────────────────────
+
+      case 'light_display_matrix': {
+        // `field_bitmap` value is a number[][] of 0/1 (row-major). Convert each
+        // lit pixel to full brightness for the hub.
+        const grid = block.getFieldValue('MATRIX') as unknown as number[][] | null
+        this.hub?.displayImage(matrixToPattern(grid))
+        break
+      }
+
+      case 'light_display_image': {
+        const name = block.getFieldValue('IMAGE') ?? 'CORAZON'
+        this.hub?.displayImage(PRESET_IMAGES[name] ?? PRESET_IMAGES.CORAZON)
+        break
+      }
+
+      case 'light_set_pixel': {
+        const row        = Number(block.getFieldValue('ROW') ?? 1)
+        const col        = Number(block.getFieldValue('COL') ?? 1)
+        const brightness = Number(block.getFieldValue('BRIGHTNESS') ?? 100)
+        // Blocks are 1-based for kids; the hub API is 0-based.
+        this.hub?.setPixel(row - 1, col - 1, brightness)
+        break
+      }
+
+      case 'light_off':
+        this.hub?.clearDisplay()
+        break
+
+      // ── Motors addressed by port (SPIKE Essential ports A / B) ─────────────
+
+      case 'motor_run_for': {
+        const port      = block.getFieldValue('PORT') ?? 'A'
+        const direction = block.getFieldValue('DIRECTION') ?? 'CW'
+        const amount    = Number(block.getFieldValue('AMOUNT') ?? 1)
+        const unit      = block.getFieldValue('UNIT') ?? 'ROTATIONS'
+        const motor     = this.robot.motorsByPort?.[port]
+        if (!motor) break
+
+        let durationSec: number
+        if (unit === 'SECONDS') durationSec = amount
+        else {
+          const motorDeg = unit === 'ROTATIONS' ? amount * 360 : amount
+          durationSec = motorDeg / MOVE_SPEED_DEG_S
+        }
+
+        motor.setSpeed(direction === 'CCW' ? -MOVE_SPEED_DEG_S : MOVE_SPEED_DEG_S)
+        await this.sleep(durationSec * 1000)
+        if (this._running) motor.stop()
+        break
+      }
+
+      case 'motor_start': {
+        const port      = block.getFieldValue('PORT') ?? 'A'
+        const direction = block.getFieldValue('DIRECTION') ?? 'CW'
+        this.robot.motorsByPort?.[port]?.setSpeed(
+          direction === 'CCW' ? -MOVE_SPEED_DEG_S : MOVE_SPEED_DEG_S,
+        )
+        break
+      }
+
+      case 'motor_stop_port': {
+        const port = block.getFieldValue('PORT') ?? 'A'
+        this.robot.motorsByPort?.[port]?.stop()
+        break
+      }
+
+      // ── Sound (hub speaker) ────────────────────────────────────────────────
+
+      case 'sound_beep': {
+        const duration = Number(block.getFieldValue('DURATION') ?? 0.5)
+        this.sound?.playTone(BEEP_HZ, duration * 1000)
+        await this.sleep(duration * 1000)
+        break
+      }
+
+      case 'sound_play_note': {
+        const note     = block.getFieldValue('NOTE') ?? 'DO'
+        const duration = Number(block.getFieldValue('DURATION') ?? 0.5)
+        this.sound?.playTone(NOTE_HZ[note] ?? NOTE_HZ.DO, duration * 1000)
+        await this.sleep(duration * 1000)
+        break
+      }
+
+      case 'sound_stop':
+        this.sound?.stop()
+        break
+
       // ── Timing ─────────────────────────────────────────────────────────────
 
       case 'wait_seconds': {
@@ -221,10 +429,19 @@ export class BlockInterpreter {
       // ── Control flow ────────────────────────────────────────────────────────
 
       case 'controls_if': {
-        // Supports the basic if block (no else-if / else arms for now).
-        const condition = this.evaluateValue(block.getInputTargetBlock('IF0'))
-        if (condition) {
-          await this.executeSequence(block.getInputTargetBlock('DO0'))
+        // Supports the full if / else-if / else mutation: arms IF0/DO0,
+        // IF1/DO1, … evaluated in order, with an optional ELSE branch.
+        let matched = false
+        for (let i = 0; block.getInputTargetBlock(`IF${i}`); i++) {
+          if (this.evaluateValue(block.getInputTargetBlock(`IF${i}`))) {
+            await this.executeSequence(block.getInputTargetBlock(`DO${i}`))
+            matched = true
+            break
+          }
+        }
+        if (!matched) {
+          const elseBranch = block.getInputTargetBlock('ELSE')
+          if (elseBranch) await this.executeSequence(elseBranch)
         }
         break
       }
@@ -266,6 +483,19 @@ export class BlockInterpreter {
     switch (block.type) {
       case 'sensor_distance':
         return this.robot.sensor.getValue()
+
+      case 'motor_position': {
+        const port = block.getFieldValue('PORT') ?? 'A'
+        return this.robot.motorsByPort?.[port]?.getAngle?.() ?? 0
+      }
+
+      case 'operator_random': {
+        const from = Number(block.getFieldValue('FROM') ?? 1)
+        const to   = Number(block.getFieldValue('TO') ?? 10)
+        const lo   = Math.min(from, to)
+        const hi   = Math.max(from, to)
+        return Math.floor(Math.random() * (hi - lo + 1)) + lo
+      }
 
       case 'math_number':
         return Number(block.getFieldValue('NUM') ?? 0)

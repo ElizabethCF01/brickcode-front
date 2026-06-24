@@ -11,6 +11,9 @@ importers:
       '@blockly/continuous-toolbox':
         specifier: ^7.0.9
         version: 7.0.9(blockly@12.5.1)
+      '@blockly/field-bitmap':
+        specifier: ^6.0.9
+        version: 6.0.9(blockly@12.5.1)
       '@dimforge/rapier3d-compat':
         specifier: ^0.19.3
         version: 0.19.3
@@ -175,6 +178,12 @@ packages:
 
   '@blockly/continuous-toolbox@7.0.9':
     resolution: {integrity: sha512-luFNC9GX4GAEqTrag07jV3DrY2WEeYfyBJnP932/xb27hs6oVaAw1bJPzI/NtyBxdU3LOkQZ826fEVbCVoXzAQ==}
+    engines: {node: '>=8.17.0'}
+    peerDependencies:
+      blockly: ^12.0.0
+
+  '@blockly/field-bitmap@6.0.9':
+    resolution: {integrity: sha512-n3pKG0MlMIq4fjIyKTtsyne8sQT8td/vfXICn3FUg4wsc6859v4by9muHcF64TOsGREqYNJIPqu4MZSkX7LuMg==}
     engines: {node: '>=8.17.0'}
     peerDependencies:
       blockly: ^12.0.0
@@ -2186,6 +2195,10 @@ snapshots:
       '@babel/helper-validator-identifier': 7.28.5
 
   '@blockly/continuous-toolbox@7.0.9(blockly@12.5.1)':
+    dependencies:
+      blockly: 12.5.1
+
+  '@blockly/field-bitmap@6.0.9(blockly@12.5.1)':
     dependencies:
       blockly: 12.5.1
 

@@ -3,7 +3,7 @@ import RAPIER from '@dimforge/rapier3d-compat'
 import { LegoMotor } from './LegoMotor'
 import { LegoDistanceSensor } from './LegoDistanceSensor'
 import type { LDrawLibraryManager } from '../ldraw/LDrawLibraryManager'
-import type { IMotor, SimpleRobot as ISimpleRobot } from '../../interpreter/BlockInterpreter'
+import type { IMotor, IMotorPort, SimpleRobot as ISimpleRobot } from '../../interpreter/BlockInterpreter'
 
 // All values in world units (1 WU = 10 cm).
 //
@@ -71,6 +71,9 @@ export class SimpleRobot implements ISimpleRobot {
 
   /** IMotor wrappers consumed by BlockInterpreter (left side inverts direction). */
   readonly motors: { left: IMotor; right: IMotor }
+
+  /** Per-port motors for the single-motor `motor_*` blocks (A→left, B→right). */
+  readonly motorsByPort: Record<string, IMotorPort>
 
   // Raw underlying motors — both spin around +X. Direction inversion lives in
   // `motors.left` so a positive setSpeed on both produces forward motion.
@@ -199,6 +202,14 @@ export class SimpleRobot implements ISimpleRobot {
     this.motors = {
       left:  { setSpeed: (s) => leftRaw.setSpeed(-s),  stop: () => leftRaw.stop()  },
       right: { setSpeed: (s) => rightRaw.setSpeed(s),  stop: () => rightRaw.stop() },
+    }
+
+    // Per-port motors for the single-motor blocks. Uses the raw (un-inverted)
+    // motors so the block's own direction dropdown decides the spin sign;
+    // `getAngle()` backs the `motor_position` reporter.
+    this.motorsByPort = {
+      A: { setSpeed: (s) => leftRaw.setSpeed(s),  stop: () => leftRaw.stop(),  getAngle: () => leftRaw.getAngle()  },
+      B: { setSpeed: (s) => rightRaw.setSpeed(s), stop: () => rightRaw.stop(), getAngle: () => rightRaw.getAngle() },
     }
 
     // ── Hub visual group (Three.js) ───────────────────────────────────────────

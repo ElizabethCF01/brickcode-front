@@ -3,7 +3,7 @@ import RAPIER from '@dimforge/rapier3d-compat'
 import { LegoMotor } from './LegoMotor'
 import { LegoDistanceSensor } from './LegoDistanceSensor'
 import type { LDrawLibraryManager } from '../ldraw/LDrawLibraryManager'
-import type { IMotor, SimpleRobot as ISimpleRobot } from '../../interpreter/BlockInterpreter'
+import type { IMotor, IMotorPort, SimpleRobot as ISimpleRobot } from '../../interpreter/BlockInterpreter'
 import type { LDrawInstance } from '../ldraw/ldrParser'
 import type { RobotDescription, MotorDriveSpec, WheelSpec } from '../ldraw/RobotDescription'
 
@@ -55,6 +55,9 @@ export class DynamicRobot implements ISimpleRobot {
   readonly turnCalibration: number
 
   readonly motors: { left: IMotor; right: IMotor }
+
+  /** Per-port motors for the single-motor `motor_*` blocks (A→left, B→right). */
+  readonly motorsByPort: Record<string, IMotorPort>
 
   private readonly world:           RAPIER.World
   private readonly scene:           THREE.Scene
@@ -331,6 +334,19 @@ export class DynamicRobot implements ISimpleRobot {
     this.motors = {
       left:  wrap(leftFound?.motor ?? null, true),
       right: wrap(rightFound?.motor ?? null, true),
+    }
+
+    // Per-port motors for the single-motor `motor_*` blocks (A→left, B→right).
+    // Uses the raw (un-inverted) LegoMotors so the block's own direction
+    // dropdown decides the sign; `getAngle()` backs the `motor_position` reporter.
+    // Falls back to a no-op port when a side wasn't found in the parsed model.
+    const port = (m: LegoMotor | null): IMotorPort =>
+      m
+        ? { setSpeed: (s) => m.setSpeed(s), stop: () => m.stop(), getAngle: () => m.getAngle() }
+        : { setSpeed: () => {}, stop: () => {}, getAngle: () => 0 }
+    this.motorsByPort = {
+      A: port(leftFound?.motor ?? null),
+      B: port(rightFound?.motor ?? null),
     }
 
     const sideCoord = (s: MotorDriveSpec) =>

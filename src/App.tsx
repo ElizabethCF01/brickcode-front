@@ -3,6 +3,7 @@ import ControlPanel from './components/ControlPanel'
 import SensorPanel from './components/SensorPanel'
 import Attribution from './components/Attribution'
 import ChallengePanel from './components/ChallengePanel'
+import HubMatrixPanel from './components/HubMatrixPanel'
 import BlocklyWorkspace from './components/BlocklyWorkspace'
 import SimulatorCanvas from './engine/renderer/SimulatorCanvas'
 import { useSimulationStore } from './store/simulationStore'
@@ -29,9 +30,12 @@ export default function App() {
       <div className="flex-1 relative overflow-hidden">
         <SimulatorCanvas />
 
-        {/* Orbit hint */}
-        <div className="absolute top-3 left-3 bg-black/50 text-white text-xs px-2 py-1 rounded pointer-events-none">
-          Arrastra para orbitar · Rueda para zoom
+        {/* Top-left overlay stack: orbit hint + hub 3×3 light matrix */}
+        <div className="absolute top-3 left-3 flex flex-col gap-2 items-start">
+          <div className="bg-black/50 text-white text-xs px-2 py-1 rounded pointer-events-none">
+            Arrastra para orbitar · Rueda para zoom
+          </div>
+          <HubMatrixPanel />
         </div>
 
         {/* Challenge strip pinned to the bottom of the canvas */}

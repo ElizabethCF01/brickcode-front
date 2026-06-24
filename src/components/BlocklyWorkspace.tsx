@@ -44,6 +44,7 @@ function buildFullToolbox(hasSensor: boolean): Blockly.utils.toolbox.ToolboxDefi
           { kind: 'block', type: 'math_number' },
           { kind: 'block', type: 'math_arithmetic' },
           { kind: 'block', type: 'logic_compare' },
+          { kind: 'block', type: 'operator_random' },
         ],
       } as ToolboxItem,
     ],
@@ -109,6 +110,8 @@ export default function BlocklyWorkspace() {
       theme: Blockly.Theme.defineTheme('brickcode-dark', {
         name: 'brickcode-dark',
         base: Blockly.Themes.Zelos,
+        // SPIKE-style: event "hat" blocks (event_when_started) get a rounded cap.
+        startHats: true,
         componentStyles: {
           workspaceBackgroundColour: '#1f2937',
           toolboxBackgroundColour:   '#0f172a',

@@ -19,6 +19,8 @@ type RuntimeRobot = ISimpleRobot & {
   sensor: ISimpleRobot['sensor'] & { step?(world: RAPIER.World): void }
 }
 import { BlockInterpreter } from '../interpreter/BlockInterpreter'
+import { HubLights } from './HubLights'
+import { HubSound } from './HubSound'
 import { useSimulationStore } from '../store/simulationStore'
 import type { ChallengeEngine } from '../challenges/challenge-01'
 
@@ -38,6 +40,8 @@ export class SimulationEngine implements ChallengeEngine {
 
   readonly robot:       RuntimeRobot
   readonly interpreter: BlockInterpreter
+  readonly hub:         HubLights
+  readonly sound:       HubSound
 
   private readonly _refs: SceneRefs
 
@@ -59,7 +63,9 @@ export class SimulationEngine implements ChallengeEngine {
     this.scene       = refs.scene
     this._refs       = refs
     this.robot       = robot
-    this.interpreter = new BlockInterpreter(this.robot)
+    this.hub         = new HubLights()
+    this.sound       = new HubSound()
+    this.interpreter = new BlockInterpreter(this.robot, this.hub, this.sound)
   }
 
   // ── Factory ────────────────────────────────────────────────────────────────
@@ -175,9 +181,11 @@ export class SimulationEngine implements ChallengeEngine {
 
   // ── Robot control ──────────────────────────────────────────────────────────
 
-  /** Snap robot back to its initial pose; brake motors. */
+  /** Snap robot back to its initial pose; brake motors; clear the hub lights. */
   resetRobot(): void {
     this.robot.reset()
+    this.hub.clearDisplay()
+    this.sound.stop()
   }
 
   /** Notify the renderer of a canvas size change. */
@@ -190,6 +198,7 @@ export class SimulationEngine implements ChallengeEngine {
     this.stopRAF()
     this._challengeDispose?.()
     this.robot.dispose()
+    this.sound.dispose()
     this._refs.renderer.dispose()
   }
 

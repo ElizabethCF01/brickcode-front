@@ -790,3 +790,109 @@ loaded model and spins it in place to match physics:
 - **Drawer resize timing**: the drawer animates in via a 200ms CSS transform. `App.tsx` schedules `Blockly.svgResize` via a 220ms timeout (not `requestAnimationFrame`) so flyout/toolbox metrics are computed *after* the transform settles. Resizing earlier was the cause of "flyout doesn't reappear on second category click".
 - **Toolbox uses `kind: 'label'` instead of `kind: 'sep'`**: the previous separator items rendered visible horizontal bars in the flyout. Labels (`Movimiento`, `Sensores`, `Tiempo`) provide grouping without the bar.
 - **Theme contrast**: toolbox `#0f172a`, flyout `#111827`, workspace `#1f2937` — three distinct shades so the panes visually separate. `flyoutOpacity: 1` (was 0.9 — caused blending).
+
+---
+
+## SPIKE Essential Blocks & Hub Light Matrix
+
+**Files**: `src/blocks/definitions/robotBlocks.ts`, `src/interpreter/BlockInterpreter.ts`, `src/engine/HubLights.ts`, `src/components/HubMatrixPanel.tsx`, `src/store/simulationStore.ts`
+
+The block palette is being aligned with **LEGO Education SPIKE Essential** (see
+`docs/spike-essential-blocks.md` for the full catalog, roadmap, and reference-repo
+learnings). We took the **superset** path: the existing distance sensor (a SPIKE
+*Prime* sensor) stays, and SPIKE Essential hardware is layered on top, so
+`challenge-01` and the physics code are untouched.
+
+### Toolbox restructure
+
+`buildRobotToolbox(includeSensor)` now returns **multiple SPIKE-style categories**
+(Eventos · Movimiento · Luz · Sensores · Tiempo) with the SPIKE colour palette,
+instead of the previous single "Mi Robot" category. `BlocklyWorkspace` still
+appends the built-in Control and Matemáticas categories. `ROBOT_TOOLBOX` remains
+exported (`= buildRobotToolbox(true)`) for backward compatibility.
+
+### New blocks (Phase 1)
+
+| Block | Category | Interpreter behaviour |
+|-------|----------|------------------------|
+| `event_when_started` | Eventos | Cosmetic hat. No-op in `executeStatement`; `executeSequence` runs the blocks connected beneath via `getNextBlock()`. |
+| `robot_move_for` | Movimiento | `DIRECTION` (FORWARD/BACKWARD) × `AMOUNT` × `UNIT` (ROTATIONS/DEGREES/SECONDS). Converts amount → drive duration at `MOVE_SPEED_DEG_S = 180` (rotations → ×360 wheel-deg; seconds → used directly), drives both motors, auto-stops. |
+| `light_display_matrix` | Luz | Drawable 3×3 pixel editor on the block (official `@blockly/field-bitmap`, Apache-2.0). Field value is `number[][]` of 0/1; `matrixToPattern` flattens row-major and maps lit→100. |
+| `light_display_image` | Luz | `hub.displayImage(PRESET_IMAGES[name])` — 9-value row-major patterns (CORAZON, CARA, CUADRADO, EQUIS, FLECHA, LLENO). Quick presets, kept alongside the drawable editor. |
+| `light_set_pixel` | Luz | `hub.setPixel(row-1, col-1, brightness)` — block fields are 1-based for kids; hub API is 0-based. |
+| `light_off` | Luz | `hub.clearDisplay()`. |
+| `motor_run_for` | Motores | `motorsByPort[PORT].setSpeed(±180)` for a computed duration (rotations/degrees/seconds), then stop. Direction dropdown (→/←) sets the sign. |
+| `motor_start` / `motor_stop_port` | Motores | Continuous start / stop of one port. |
+| `motor_position` *(reporter)* | Motores | `motorsByPort[PORT].getAngle()` → degrees (in `evaluateValue`). |
+| `sound_beep` / `sound_play_note` | Sonido | `sound.playTone(hz, ms)` + `await sleep(ms)` (plays until done). Beep = 880 Hz; notes Do–Si map to C4-octave frequencies. |
+| `sound_stop` | Sonido | `sound.stop()`. |
+| `operator_random` *(reporter)* | Operadores | Random integer in `[FROM, TO]` (in `evaluateValue`; lives in the Matemáticas category). |
+| `controls_if` *(extended)* | Control | Now walks `IF0..n`/`DO0..n` else-if arms plus an optional `ELSE` branch, so Blockly's if/else mutation is interpreted. |
+
+### Hub 3×3 light matrix (`IHub` → `HubLights` → store → panel)
+
+SPIKE Essential's signature hub feature is a 3×3 light matrix. It is modelled as
+**pure state**, not 3D geometry, so it runs headlessly in Vitest:
+
+- **`IHub`** (in `BlockInterpreter.ts`) is the hub-effects surface
+  (`setPixel`, `displayImage`, `clearDisplay`). It is **injected into the
+  interpreter constructor** (`new BlockInterpreter(robot, hub)`) rather than
+  hung off the robot — the robot interface stays about locomotion, and tests can
+  pass a `mockHub` or omit it (light blocks become no-ops).
+- **`HubLights`** (`src/engine/HubLights.ts`) implements `IHub`, holds a 9-value
+  brightness array (row-major, 0–100, clamped), and pushes a copy to
+  `simulationStore.setHubMatrix` on each change. No Three.js/WebGL dependency.
+- **`simulationStore.hubMatrix`** (length `HUB_MATRIX_SIZE = 9`) holds the
+  current state; `SimulationEngine.resetRobot()` calls `hub.clearDisplay()` so
+  the matrix turns off on Reset.
+- **`HubMatrixPanel.tsx`** renders the 9 cells as a glowing green grid overlay
+  (top-left of the canvas, in a column with the orbit hint), brightness → opacity.
+
+### Why the matrix was pulled forward from Phase 2
+
+It is fully self-contained (no physics, no scene work), the most recognisable
+SPIKE Essential feature, and headless-testable — so it shipped in Phase 1
+alongside the movement/event blocks. The Color Sensor (the other Essential
+sensor) stays in Phase 2 because it needs colored scene objects + a raycast
+sensor.
+
+### Motors by port (`motorsByPort`)
+
+SPIKE addresses single motors by hub port. **Both** `SimpleRobot` and
+`DynamicRobot` expose `motorsByPort` mapping `A → left`, `B → right` using the
+**raw** (un-inverted) `LegoMotor` instances — the per-port blocks carry their own
+direction dropdown, so the wrapper inversion used by the movement blocks
+(`motors.left`) is bypassed. The robot interface field is optional; a robot
+without it makes the `motor_*` blocks no-ops. `motor_position` reuses
+`LegoMotor.getAngle()`. (Verified in-browser with the `spike-taxi` `DynamicRobot`
+import — the Motores category drives the parsed model's motors.)
+
+### Hub sound (`ISound` → `HubSound`)
+
+`ISound` (`playTone`, `stop`) is injected as the **third** interpreter
+constructor arg (`new BlockInterpreter(robot, hub?, sound?)`), same pattern as
+`IHub`. `HubSound` (`src/engine/HubSound.ts`) is a WebAudio oscillator with a
+**lazily-created `AudioContext`** — browsers block audio until a user gesture, and
+the Run button that starts interpretation is that gesture, so a context
+created/resumed there may play. It is only constructed in the engine (browser);
+headless tests pass a `mockSound` or omit it, so `AudioContext`'s absence in Node
+is never hit. `SimulationEngine` disposes it in `dispose()` and stops it in
+`resetRobot()`.
+
+### Visual alignment with the SPIKE app
+
+To make the blocks feel like the LEGO SPIKE app (whose reference simulator we
+analysed — see `docs/spike-essential-blocks.md`):
+
+- **`@blockly/field-bitmap`** (official Apache-2.0 plugin) backs
+  `light_display_matrix` — a drawable 3×3 pixel grid embedded in the block, the
+  way SPIKE's "display image" block works. Imported for its registration
+  side-effect in `robotBlocks.ts`; the field self-registers as `field_bitmap`
+  and ships its own CSS. The reference repo's `field-bitmap.ts` turned out to be
+  a (modified, grayscale) copy of this same Google plugin — we use the upstream
+  binary version instead of copying their code (their repo has **no LICENSE**).
+- **`startHats: true`** on the `brickcode-dark` theme gives `event_when_started`
+  a rounded hat cap, like SPIKE event blocks.
+- *Still pending* (needs our own SVG assets — the reference repo's icons are
+  unlicensed): inline direction/motor icons via `field_image`, and per-category
+  toolbox icons. Tracked in `docs/spike-essential-blocks.md`.

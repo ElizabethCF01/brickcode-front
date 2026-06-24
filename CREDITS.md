@@ -24,6 +24,13 @@ LEGO® es marca registrada de The LEGO Group.
 The LEGO Group **no patrocina, avala ni autoriza** este proyecto. BrickCode
 es un proyecto educativo independiente, sin afiliación con The LEGO Group.
 
+## Blockly field-bitmap
+
+El editor de matriz de luces 3×3 dibujable (`light_display_matrix`) usa el
+plugin oficial [`@blockly/field-bitmap`](https://www.npmjs.com/package/@blockly/field-bitmap)
+(© Google LLC), distribuido bajo licencia
+[Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
 ## Software libraries
 
 Las dependencias de software usadas (React, Three.js, Rapier, Blockly,
