@@ -891,8 +891,32 @@ analysed — see `docs/spike-essential-blocks.md`):
   and ships its own CSS. The reference repo's `field-bitmap.ts` turned out to be
   a (modified, grayscale) copy of this same Google plugin — we use the upstream
   binary version instead of copying their code (their repo has **no LICENSE**).
+  We pass `colours: { filled: '#7CFF6B', empty: '#2b2540' }` so a *filled* pixel
+  looks **lit** (green, like `HubMatrixPanel`) and empty looks off. The plugin's
+  defaults are the opposite (filled = dark `#363d80`, empty = white), which read
+  backwards next to the hub card — the value semantics (`1` = lit) were always
+  correct; only the editor's colours were inverted.
 - **`startHats: true`** on the `brickcode-dark` theme gives `event_when_started`
   a rounded hat cap, like SPIKE event blocks.
-- *Still pending* (needs our own SVG assets — the reference repo's icons are
-  unlicensed): inline direction/motor icons via `field_image`, and per-category
-  toolbox icons. Tracked in `docs/spike-essential-blocks.md`.
+- **Inline direction icons** via `field_image` image-dropdowns: rotation ↻/↺ on
+  the Motores blocks and ←/→ on `robot_turn`. The SVGs are drawn in-house as
+  data-URIs in `src/blocks/definitions/blockIcons.ts` (we do **not** copy the
+  reference repo's unlicensed icons). The dropdown VALUEs are unchanged
+  (`CW`/`CCW`, `LEFT`/`RIGHT`), so the interpreter and existing programs are
+  unaffected. Verified in-browser.
+- **Leading per-block icons** (SPIKE puts an icon *inside* each block, left of
+  its text): `blockIcon(src, alt)` builds a `field_image` used as the first
+  `args0` entry, with `%1` prepended to `message0`. Every **action** block gets
+  one — flag (events), four-way arrows (movement: `robot_*`), gear (motors:
+  `motor_run_for/start/stop_port`), 3×3 dot grid (light: `light_*`), speaker
+  (`sound_*`), clock (`wait_seconds`). **Reporters** (`motor_position`,
+  `sensor_distance`) and operators get **no** icon. Glyphs are white-stroke 24×24
+  SVGs in `blockIcons.ts`; they read on the coloured blocks. Adding a leading
+  icon shifts every `%n` in that block's `message0` — the field names/VALUEs are
+  untouched, so the interpreter is unaffected. Verified in-browser at 2×.
+- **Per-category toolbox icons: deliberately *not* done.** Prototyped (a
+  `ContinuousCategory` subclass turning the rail's `.categoryBubble` into a
+  coloured chip carrying the glyph, since `@blockly/continuous-toolbox` ignores
+  `cssconfig.icon`) and then **reverted** per the user's call that SPIKE icons
+  belong inside the pieces, not the rail. The rail keeps its thin colour stripe
+  (`src/index.css` `.categoryBubble`). See `docs/spike-essential-blocks.md`.

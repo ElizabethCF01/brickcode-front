@@ -340,9 +340,23 @@ Apache-2.0), así que usamos **el plugin oficial directamente** — no el suyo.
 - ✅ **Editor de luces 3×3 dibujable** (`light_display_matrix`) vía
   `@blockly/field-bitmap` oficial.
 - ✅ **`startHats: true`** → el bloque "Al empezar" tiene forma de sombrero.
-- 🔜 **Iconos dentro de los bloques** (flechas de dirección, motor, sonido) con
-  `field_image` — requiere crear **SVGs propios** (los del repo de referencia no
-  tienen licencia). Mismo enfoque para iconos por categoría en el toolbox.
+- ✅ **Iconos de dirección dentro de los bloques** (`field_image`, SVGs **propios**
+  como data-URIs en [`blockIcons.ts`](../src/blocks/definitions/blockIcons.ts)):
+  rotación ↻/↺ en los bloques de Motores, y flechas ←/→ en "Girar". Verificado en
+  navegador.
+- ✅ **Glifo líder dentro de cada bloque de acción** (estilo SPIKE: un icono a la
+  izquierda del texto de la pieza). `blockIcon(src, alt)` añade un `field_image`
+  como primer token de `message0`. Glifos propios: 🚩 evento (`event_when_started`),
+  ✛ movimiento (`robot_move_for/drive_*/turn/stop`), ⚙ motor (`motor_run_for/
+  start/stop_port`), ⠿ luz 3×3 (`light_*`), 🔊 sonido (`sound_*`), 🕐 tiempo
+  (`wait_seconds`). **No** llevan glifo los reporters (`motor_position`,
+  `sensor_distance`) ni operadores. Verificado en navegador a 2×.
+- ❌ **Iconos redondos por categoría** en el riel del toolbox — *descartado por
+  decisión de la usuaria*: en SPIKE los iconos van **dentro de las piezas**, no
+  (solo) en el riel. Se prototipó (subclase de `ContinuousCategory` + chip de
+  color con glifo) y **se revirtió**; el riel mantiene la barra fina de color de
+  `index.css`. (El plugin `@blockly/continuous-toolbox` ignora `cssconfig.icon` y
+  pinta un `.categoryBubble`; si algún día se retoma, ese es el punto de enganche.)
 - 🔜 **Nombres/opcodes estilo `flipper*`** si en el futuro queremos importar/exportar
   `.llsp3`.
 

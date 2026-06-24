@@ -1,4 +1,8 @@
 import * as Blockly from 'blockly'
+import {
+  ICON_ROTATE_CW, ICON_ROTATE_CCW, ICON_ARROW_LEFT, ICON_ARROW_RIGHT, imageOption,
+  ICON_EVENT, ICON_MOVE, ICON_MOTOR, ICON_LIGHT, ICON_SOUND, ICON_TIME, blockIcon,
+} from './blockIcons'
 // Side-effect import: registers the official Apache-2.0 `field_bitmap` custom
 // field (a drawable pixel grid) and its CSS in Blockly's global registry.
 // Used by `light_display_matrix` so kids "draw" the 3×3 hub icon on the block,
@@ -28,7 +32,16 @@ const SPIKE_OP    = '#59C059'   // Operators (green)
 
 // Shared dropdown option lists.
 const PORT_OPTIONS = [['A', 'A'], ['B', 'B']]
-const SPIN_OPTIONS = [['→', 'CW'], ['←', 'CCW']]
+// Motor spin direction shown as rotation-arrow icons (SPIKE-style).
+const SPIN_OPTIONS = [
+  imageOption(ICON_ROTATE_CW,  'horario',     'CW'),
+  imageOption(ICON_ROTATE_CCW, 'antihorario', 'CCW'),
+]
+// Turn direction shown as left/right arrow icons.
+const TURN_OPTIONS = [
+  imageOption(ICON_ARROW_LEFT,  'izquierda', 'LEFT'),
+  imageOption(ICON_ARROW_RIGHT, 'derecha',   'RIGHT'),
+]
 
 // ---------------------------------------------------------------------------
 // Block JSON definitions
@@ -43,15 +56,17 @@ const blockJsonArray: object[] = [
     // below it run when the program starts. The interpreter treats it as a
     // cosmetic no-op and executes the blocks connected beneath.
     type: 'event_when_started',
-    message0: 'Al empezar el programa',
+    message0: '%1 Al empezar el programa',
+    args0: [blockIcon(ICON_EVENT, 'evento')],
     nextStatement: null,
     colour: SPIKE_EVENT,
     tooltip: 'Inicia el programa. Conecta los bloques que quieras ejecutar debajo.',
   },
   {
     type: 'robot_drive_forward',
-    message0: 'Mover adelante %1 por %2 segundos',
+    message0: '%1 Mover adelante %2 por %3 segundos',
     args0: [
+      blockIcon(ICON_MOVE, 'mover'),
       { type: 'field_number', name: 'SPEED',    value: 50, min: 0, max: 100 },
       { type: 'field_number', name: 'DURATION', value: 1,  min: 0 },
     ],
@@ -62,8 +77,9 @@ const blockJsonArray: object[] = [
   },
   {
     type: 'robot_drive_backward',
-    message0: 'Mover atrás %1 por %2 segundos',
+    message0: '%1 Mover atrás %2 por %3 segundos',
     args0: [
+      blockIcon(ICON_MOVE, 'mover'),
       { type: 'field_number', name: 'SPEED',    value: 50, min: 0, max: 100 },
       { type: 'field_number', name: 'DURATION', value: 1,  min: 0 },
     ],
@@ -74,15 +90,13 @@ const blockJsonArray: object[] = [
   },
   {
     type: 'robot_turn',
-    message0: 'Girar %1 %2 grados',
+    message0: '%1 Girar %2 %3 grados',
     args0: [
+      blockIcon(ICON_MOVE, 'girar'),
       {
         type: 'field_dropdown',
         name: 'DIRECTION',
-        options: [
-          ['izquierda ◀', 'LEFT'],
-          ['derecha ▶',  'RIGHT'],
-        ],
+        options: TURN_OPTIONS,
       },
       { type: 'field_number', name: 'DEGREES', value: 90, min: 0, max: 360 },
     ],
@@ -93,7 +107,8 @@ const blockJsonArray: object[] = [
   },
   {
     type: 'robot_stop',
-    message0: 'Parar motores',
+    message0: '%1 Parar motores',
+    args0: [blockIcon(ICON_MOVE, 'parar')],
     previousStatement: null,
     nextStatement: null,
     colour: LEGO_RED,
@@ -109,8 +124,9 @@ const blockJsonArray: object[] = [
   },
   {
     type: 'wait_seconds',
-    message0: 'Esperar %1 segundos',
+    message0: '%1 Esperar %2 segundos',
     args0: [
+      blockIcon(ICON_TIME, 'tiempo'),
       { type: 'field_number', name: 'SECONDS', value: 1, min: 0 },
     ],
     previousStatement: null,
@@ -122,8 +138,9 @@ const blockJsonArray: object[] = [
   // ── Movement: SPIKE-style "move for N rotations / degrees / seconds" ───────
   {
     type: 'robot_move_for',
-    message0: 'Mover %1 por %2 %3',
+    message0: '%1 Mover %2 por %3 %4',
     args0: [
+      blockIcon(ICON_MOVE, 'mover'),
       {
         type: 'field_dropdown',
         name: 'DIRECTION',
@@ -153,8 +170,9 @@ const blockJsonArray: object[] = [
   {
     // Drawable 3×3 editor (SPIKE-style): the kid clicks pixels on the block.
     type: 'light_display_matrix',
-    message0: 'Mostrar %1',
+    message0: '%1 Mostrar %2',
     args0: [
+      blockIcon(ICON_LIGHT, 'luz'),
       {
         type: 'field_bitmap',
         name: 'MATRIX',
@@ -163,6 +181,11 @@ const blockJsonArray: object[] = [
         value: HEART_3X3,
         buttons: { randomize: false, clear: true },
         fieldHeight: 54,
+        // LED model: a filled (1) pixel is one that *lights up* on the hub, so
+        // draw it lit (green, like HubMatrixPanel) and empty (0) dark. The
+        // plugin's defaults are the opposite (filled = dark, empty = white),
+        // which read backwards next to the hub card.
+        colours: { filled: '#7CFF6B', empty: '#2b2540' },
       },
     ],
     previousStatement: null,
@@ -172,8 +195,9 @@ const blockJsonArray: object[] = [
   },
   {
     type: 'light_display_image',
-    message0: 'Mostrar imagen %1',
+    message0: '%1 Mostrar imagen %2',
     args0: [
+      blockIcon(ICON_LIGHT, 'luz'),
       {
         type: 'field_dropdown',
         name: 'IMAGE',
@@ -194,8 +218,9 @@ const blockJsonArray: object[] = [
   },
   {
     type: 'light_set_pixel',
-    message0: 'Encender fila %1 columna %2 brillo %3',
+    message0: '%1 Encender fila %2 columna %3 brillo %4',
     args0: [
+      blockIcon(ICON_LIGHT, 'luz'),
       { type: 'field_number', name: 'ROW',        value: 1, min: 1, max: 3 },
       { type: 'field_number', name: 'COL',        value: 1, min: 1, max: 3 },
       { type: 'field_number', name: 'BRIGHTNESS', value: 100, min: 0, max: 100 },
@@ -207,7 +232,8 @@ const blockJsonArray: object[] = [
   },
   {
     type: 'light_off',
-    message0: 'Apagar pantalla',
+    message0: '%1 Apagar pantalla',
+    args0: [blockIcon(ICON_LIGHT, 'luz')],
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_LIGHT,
@@ -217,8 +243,9 @@ const blockJsonArray: object[] = [
   // ── Motors addressed by port (SPIKE Essential ports A / B) ─────────────────
   {
     type: 'motor_run_for',
-    message0: 'Motor %1 girar %2 por %3 %4',
+    message0: '%1 Motor %2 girar %3 por %4 %5',
     args0: [
+      blockIcon(ICON_MOTOR, 'motor'),
       { type: 'field_dropdown', name: 'PORT',      options: PORT_OPTIONS },
       { type: 'field_dropdown', name: 'DIRECTION', options: SPIN_OPTIONS },
       { type: 'field_number',   name: 'AMOUNT',    value: 1, min: 0 },
@@ -239,8 +266,9 @@ const blockJsonArray: object[] = [
   },
   {
     type: 'motor_start',
-    message0: 'Encender motor %1 girando %2',
+    message0: '%1 Encender motor %2 girando %3',
     args0: [
+      blockIcon(ICON_MOTOR, 'motor'),
       { type: 'field_dropdown', name: 'PORT',      options: PORT_OPTIONS },
       { type: 'field_dropdown', name: 'DIRECTION', options: SPIN_OPTIONS },
     ],
@@ -251,8 +279,9 @@ const blockJsonArray: object[] = [
   },
   {
     type: 'motor_stop_port',
-    message0: 'Parar motor %1',
+    message0: '%1 Parar motor %2',
     args0: [
+      blockIcon(ICON_MOTOR, 'motor'),
       { type: 'field_dropdown', name: 'PORT', options: PORT_OPTIONS },
     ],
     previousStatement: null,
@@ -275,8 +304,9 @@ const blockJsonArray: object[] = [
   // ── Sound (hub speaker) ────────────────────────────────────────────────────
   {
     type: 'sound_beep',
-    message0: 'Pitar por %1 segundos',
+    message0: '%1 Pitar por %2 segundos',
     args0: [
+      blockIcon(ICON_SOUND, 'sonido'),
       { type: 'field_number', name: 'DURATION', value: 0.5, min: 0 },
     ],
     previousStatement: null,
@@ -286,8 +316,9 @@ const blockJsonArray: object[] = [
   },
   {
     type: 'sound_play_note',
-    message0: 'Tocar nota %1 por %2 segundos',
+    message0: '%1 Tocar nota %2 por %3 segundos',
     args0: [
+      blockIcon(ICON_SOUND, 'sonido'),
       {
         type: 'field_dropdown',
         name: 'NOTE',
@@ -305,7 +336,8 @@ const blockJsonArray: object[] = [
   },
   {
     type: 'sound_stop',
-    message0: 'Parar sonido',
+    message0: '%1 Parar sonido',
+    args0: [blockIcon(ICON_SOUND, 'sonido')],
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_SOUND,
