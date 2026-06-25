@@ -920,3 +920,71 @@ analysed — see `docs/spike-essential-blocks.md`):
   `cssconfig.icon`) and then **reverted** per the user's call that SPIKE icons
   belong inside the pieces, not the rail. The rail keeps its thin colour stripe
   (`src/index.css` `.categoryBubble`). See `docs/spike-essential-blocks.md`.
+
+## Backend (Supabase) — Task B1
+
+A shared backend makes the (future) teacher dashboard real: pseudonymous student
+simulators submit learning sessions; a teacher reads them back on another machine.
+Stack: **Supabase** (managed Postgres + Auth + RPC). Defined entirely as checked-in
+SQL migrations under `supabase/migrations/` so the backend is reproducible and
+reviewable. **B1 is backend-only** — the client sync layer/outbox and dashboard
+reads (B2), plus the session/event *recording* layer that feeds them, are deferred
+(see "Deferred" below).
+
+### Data model
+
+```
+teachers  (id = auth.users.id, display_name, created_at)
+classes   (id, teacher_id→teachers, name, class_code UNIQUE, created_at)
+students  (id, class_id→classes, pseudonym, created_at)        -- NO PII, ever
+sessions  (id [client-generated], student_id→students, class_id→classes,
+           started_at, ended_at, challenge_ids text[], event_count, schema_version)
+events    (id, session_id→sessions, type, t_monotonic, t_wall,
+           challenge_id, payload jsonb, schema_version)
+```
+
+Indexes: `events(session_id)`, `sessions(student_id)`, `sessions(class_id)`,
+`students(class_id)`. `payload jsonb` keeps the event schema flexible and enables
+later server-side SQL aggregation. `schema_version` on sessions/events lets the
+schema evolve without orphaning old data.
+
+### Privacy & security model
+
+Two very different users, and **students never log in** (they are young children):
+
+- **Teacher (authenticated, email+password):** RLS scopes every row to the owning
+  `class.teacher_id = auth.uid()`. A `security-definer` helper `owns_class(class_id)`
+  expresses the ownership chain for `students`/`sessions`/`events` without recursive
+  policy evaluation. A teacher sees only their own data.
+- **Simulator (anon):** has **zero** table privileges (`revoke all ... from anon`)
+  and **no** RLS policies. Its only reach is `execute` on the `submit_session` RPC.
+  A direct `select` as anon is denied — belt-and-suspenders (grants + RLS).
+
+A teacher row is created automatically on signup via the `handle_new_user()` trigger
+on `auth.users`. `classes.class_code` defaults to `gen_class_code()` (6 chars, no
+ambiguous glyphs) and `classes.teacher_id` defaults to `auth.uid()`, so creating a
+class is a one-field insert that yields a unique code.
+
+### Write path — `submit_session` RPC
+
+`submit_session(p_class_code, p_student_pseudonym, p_session jsonb, p_events jsonb)`
+is `SECURITY DEFINER` (`search_path = public`). It (1) validates the class code,
+(2) upserts the pseudonymous student by `(class_id, pseudonym)`, (3) inserts the
+session, (4) inserts events. **Idempotency:** the session `id` is *client-generated*;
+the insert is `on conflict (id) do nothing`, and events are inserted only when that
+insert actually created a row (`row_count > 0`). So re-sending a session that already
+synced is a clean no-op — no duplicate sessions or events. This is what the B2 outbox
+will rely on when retrying after a dropped connection.
+
+### Keys & env
+
+Client uses only `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` (see `.env.example`).
+The `service_role` key never appears in client code, env files that ship, or docs.
+
+### Deferred (B2 + its prerequisite)
+
+Not built in B1: the session/event **recording layer** (wiring run start/end in
+[ControlPanel.tsx](../src/components/ControlPanel.tsx) / the interpreter to emit
+events), the IndexedDB **outbox**, `src/backend/` (`supabaseClient`, `BackendSync`,
+`dashboardApi`), and the `getClassEventStats` SQL aggregation. The simulator only
+ever *writes* (via the RPC); reads are exclusively the teacher's path.
