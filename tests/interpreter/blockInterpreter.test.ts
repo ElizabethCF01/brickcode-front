@@ -534,4 +534,34 @@ describe('BlockInterpreter', () => {
     expect(robot.motors.left.stop).toHaveBeenCalledOnce()      // DO0 ran
     expect(robot.motors.left.setSpeed).not.toHaveBeenCalled()  // ELSE skipped
   })
+
+  // ── onBlock telemetry sink (recording layer wiring) ────────────────────────
+
+  it('calls the onBlock sink once per executed statement, in order', async () => {
+    const onBlock = vi.fn()
+    const interpreter = new BlockInterpreter(makeRobot(), undefined, undefined, onBlock)
+    // two top-level statements: a motor_stop followed by another motor_stop
+    const second = makeBlock('motor_stop')
+    const first = makeBlock('motor_stop', {}, second)
+
+    await interpreter.run(makeWorkspace([first]) as Workspace)
+
+    expect(onBlock).toHaveBeenCalledTimes(2)
+    expect(onBlock).toHaveBeenNthCalledWith(1, 'motor_stop')
+    expect(onBlock).toHaveBeenNthCalledWith(2, 'motor_stop')
+  })
+
+  it('fires onBlock for each loop iteration body (block-frequency telemetry)', async () => {
+    const onBlock = vi.fn()
+    const interpreter = new BlockInterpreter(makeRobot(), undefined, undefined, onBlock)
+    const body = makeBlock('motor_stop')
+    const times = makeBlock('math_number', { NUM: '3' })
+    const repeat = makeBlock('controls_repeat_ext', {}, null, { TIMES: times, DO: body })
+
+    await interpreter.run(makeWorkspace([repeat]) as Workspace)
+
+    // 1 for the repeat block itself + 3 for the body executions
+    expect(onBlock).toHaveBeenCalledWith('controls_repeat_ext')
+    expect(onBlock.mock.calls.filter(([t]) => t === 'motor_stop')).toHaveLength(3)
+  })
 })

@@ -3,6 +3,24 @@ import { useChallengeStore } from '../store/challengeStore'
 import { getEngine } from '../engine/engineSingleton'
 import { getWorkspace } from '../blocks/workspaceSingleton'
 import { challenge01 } from '../challenges/challenge-01'
+import { getRecorder } from '../recording/recordingSingleton'
+import { getBackendSync } from '../backend/BackendSync'
+
+/**
+ * Seal the active recording session (program ended naturally or via Stop) and
+ * flush it to the backend. Guarded by isRecording() so run-then-stop seals once.
+ */
+async function finishSession(success: boolean): Promise<void> {
+  const recorder = getRecorder()
+  if (!recorder.isRecording()) return
+  recorder.recordEvent('program_run_ended', { challengeId: challenge01.id })
+  recorder.recordEvent('challenge_evaluated', {
+    challengeId: challenge01.id,
+    payload: { success },
+  })
+  await recorder.endSession()
+  await getBackendSync()?.flush()
+}
 
 export default function ControlPanel() {
   const { status, setStatus, showEditor, toggleEditor } = useSimulationStore()
@@ -16,11 +34,17 @@ export default function ControlPanel() {
     useChallengeStore.getState().setResult(null)
     setStatus('running')
 
+    // Begin recording this run (events stream in via the interpreter sink).
+    const recorder = getRecorder()
+    recorder.startSession([challenge01.id])
+    recorder.recordEvent('program_run_started', { challengeId: challenge01.id })
+
     engine.interpreter.run(workspace).then(() => {
       // Program finished naturally (all blocks executed without Stop).
       setStatus('stopped')
       const result = challenge01.evaluate(engine.robot)
       useChallengeStore.getState().setResult(result)
+      void finishSession(result.success)
     })
   }
 
@@ -31,6 +55,7 @@ export default function ControlPanel() {
     setStatus('stopped')
     const result = challenge01.evaluate(engine.robot)
     useChallengeStore.getState().setResult(result)
+    void finishSession(result.success)
   }
 
   const handleReset = () => {
@@ -39,6 +64,9 @@ export default function ControlPanel() {
       engine.interpreter.stop()
       engine.resetRobot()
     }
+    // Discard any in-progress recording — a reset is an intentional abort, not a
+    // completed run, so it should not be sealed or flushed.
+    getRecorder().dispose()
     setStatus('stopped')
     useChallengeStore.getState().setResult(null)
   }

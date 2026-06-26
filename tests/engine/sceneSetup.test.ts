@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 
 // Three.js and OrbitControls depend on WebGL; mock them for headless tests
 vi.mock('three', async () => {

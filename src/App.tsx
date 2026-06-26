@@ -8,9 +8,18 @@ import BlocklyWorkspace from './components/BlocklyWorkspace'
 import SimulatorCanvas from './engine/renderer/SimulatorCanvas'
 import { useSimulationStore } from './store/simulationStore'
 import { resizeWorkspace } from './blocks/workspaceSingleton'
+import { getBackendSync } from './backend/BackendSync'
 
 export default function App() {
   const { showEditor, toggleEditor } = useSimulationStore()
+
+  // Retry flushing buffered sessions on reconnect / periodically. No-op when the
+  // backend isn't configured (getBackendSync returns null).
+  useEffect(() => {
+    const sync = getBackendSync()
+    sync?.startAutoFlush()
+    return () => sync?.stopAutoFlush()
+  }, [])
 
   // The drawer slides in via a 200ms CSS transform transition. Resizing
   // Blockly before the transition completes leaves it with stale flyout/toolbox

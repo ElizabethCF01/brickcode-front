@@ -981,10 +981,54 @@ will rely on when retrying after a dropped connection.
 Client uses only `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` (see `.env.example`).
 The `service_role` key never appears in client code, env files that ship, or docs.
 
-### Deferred (B2 + its prerequisite)
+## Recording, Outbox & Sync (Client) — Task B2
 
-Not built in B1: the session/event **recording layer** (wiring run start/end in
-[ControlPanel.tsx](../src/components/ControlPanel.tsx) / the interpreter to emit
-events), the IndexedDB **outbox**, `src/backend/` (`supabaseClient`, `BackendSync`,
-`dashboardApi`), and the `getClassEventStats` SQL aggregation. The simulator only
-ever *writes* (via the RPC); reads are exclusively the teacher's path.
+B2 wires the app to the B1 backend: a child's program run is recorded locally,
+buffered offline, and flushed to Supabase via the `submit_session` RPC, where the
+teacher's read functions can retrieve it.
+
+### Recording layer (`src/recording/`)
+
+- **`SessionRecorder`** — records **one program run = one session**. The
+  [ControlPanel.tsx](../src/components/ControlPanel.tsx) handlers drive its
+  lifecycle: `startSession()` on Run → `recordEvent()` as the program executes →
+  `endSession()` on Stop / natural finish (which *seals* it). Events:
+  `program_run_started`, `block_executed` (`payload.blockType`),
+  `program_run_ended`, `challenge_evaluated` (`payload.success`). A per-session
+  event cap (5000) bounds runaway `while`/`repeat` loops.
+- **Interpreter telemetry** — [BlockInterpreter.ts](../src/interpreter/BlockInterpreter.ts)
+  takes an optional `onBlock(blockType)` sink, called once per executed statement
+  (the single choke point). [SimulationEngine.ts](../src/engine/SimulationEngine.ts)
+  passes a sink that forwards to the recorder. The interpreter knows nothing about
+  sessions/storage — keeps it framework-agnostic.
+- **`outbox.ts`** — `idb`-backed store keyed by session `id`, write-through so
+  nothing is lost if the network drops mid-class.
+
+### Session-seal invariant (matches the B1 RPC)
+
+A session `id` is **sealed at first flush** and never gains events afterward.
+`submit_session` inserts events only when the session id is new (`row_count > 0`),
+so re-flushing an already-synced session is a clean no-op. `program_run_ended`
+seals + flushes; the `online`/periodic triggers only *retry* unsynced sealed
+sessions, re-sending the identical (idempotent) bundle. A run that is **Reset**
+mid-program is discarded (unsealed partials never flush — `endedAt` stays null).
+
+### Sync & reads (`src/backend/`)
+
+- **`BackendSync`** — `flush()` pushes unsynced sealed sessions through the RPC and
+  `markSynced` on success; failures stay queued. `startAutoFlush()` retries on the
+  `window 'online'` event and a periodic timer. **Privacy invariant:** this path
+  *only* calls the RPC — it never reads a table.
+- **`dashboardApi`** — authenticated teacher reads (`listClasses`, `listStudents`,
+  `listSessions`, `loadSession`, `getClassEventStats`). RLS scopes every result; no
+  client-side access filtering.
+- **`get_class_event_stats(class_id)`** — `SECURITY INVOKER` SQL aggregation
+  (run/failure counts + block-type frequency per student). Being a read, it runs as
+  the teacher so the `owns_class` RLS chain scopes it automatically — another
+  teacher's `class_id` returns zero rows.
+
+### Identity (dev)
+
+The simulator submits under `VITE_CLASS_CODE` (teacher shares the code) with a
+pseudonym persisted in `localStorage` (`brickcode:pseudonym`, no PII). A real
+"join a class" UI and the teacher dashboard **UI** are later tasks.

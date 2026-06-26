@@ -161,11 +161,24 @@ export class BlockInterpreter {
   private readonly robot: SimpleRobot
   private readonly hub: IHub | null
   private readonly sound: ISound | null
+  /**
+   * Optional telemetry sink, called once per executed statement with the block
+   * type. Lets the recording layer build a block-type distribution without the
+   * interpreter knowing anything about sessions/storage. No-op when omitted
+   * (headless tests, no recorder).
+   */
+  private readonly onBlock: ((blockType: string) => void) | null
 
-  constructor(robot: SimpleRobot, hub?: IHub, sound?: ISound) {
+  constructor(
+    robot: SimpleRobot,
+    hub?: IHub,
+    sound?: ISound,
+    onBlock?: (blockType: string) => void,
+  ) {
     this.robot = robot
     this.hub = hub ?? null
     this.sound = sound ?? null
+    this.onBlock = onBlock ?? null
   }
 
   /**
@@ -216,6 +229,7 @@ export class BlockInterpreter {
   }
 
   private async executeStatement(block: Block): Promise<void> {
+    this.onBlock?.(block.type)
     switch (block.type) {
 
       // ── Legacy blocks (kept for backwards compat with existing tests/workspaces) ──

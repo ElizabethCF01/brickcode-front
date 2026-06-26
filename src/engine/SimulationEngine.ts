@@ -22,6 +22,7 @@ import { BlockInterpreter } from '../interpreter/BlockInterpreter'
 import { HubLights } from './HubLights'
 import { HubSound } from './HubSound'
 import { useSimulationStore } from '../store/simulationStore'
+import { getRecorder } from '../recording/recordingSingleton'
 import type { ChallengeEngine } from '../challenges/challenge-01'
 
 // Single RAPIER WASM init — calling RAPIER.init() twice under React StrictMode
@@ -65,7 +66,14 @@ export class SimulationEngine implements ChallengeEngine {
     this.robot       = robot
     this.hub         = new HubLights()
     this.sound       = new HubSound()
-    this.interpreter = new BlockInterpreter(this.robot, this.hub, this.sound)
+    // Forward every executed block to the recording layer for telemetry
+    // (block-type distribution). The recorder no-ops when no session is active.
+    this.interpreter = new BlockInterpreter(
+      this.robot,
+      this.hub,
+      this.sound,
+      (blockType) => getRecorder().recordEvent('block_executed', { payload: { blockType } }),
+    )
   }
 
   // ── Factory ────────────────────────────────────────────────────────────────
