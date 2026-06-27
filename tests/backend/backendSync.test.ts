@@ -70,6 +70,19 @@ describe('BackendSync', () => {
     expect(await getUnsynced()).toHaveLength(1)
   })
 
+  it('warns (not silently) when the class code is invalid', async () => {
+    await putSession(sealedSession('a'))
+    const rpc = vi.fn().mockResolvedValue({ data: null, error: new Error('invalid class code') })
+    const sync = new BackendSync('NOPE99', 'pupil-1', { rpc } as never)
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    await sync.flush()
+
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('NOPE99'))
+    expect(await getUnsynced()).toHaveLength(1) // still queued
+    warn.mockRestore()
+  })
+
   it('skips unsealed (endedAt null) sessions', async () => {
     await putSession(sealedSession('a', { endedAt: null }))
     const { client, rpc } = mockClient()

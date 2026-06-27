@@ -49,8 +49,19 @@ export class BackendSync {
         try {
           await this.submit(session)
           await markSynced(session.id)
-        } catch {
+        } catch (err) {
           // Leave it queued; a later flush (online/periodic) will retry.
+          // Distinguish a misconfiguration (bad class code → actionable) from a
+          // transient network failure (expected offline → stays quiet at debug).
+          const message = err instanceof Error ? err.message : String(err)
+          if (message.includes('invalid class code')) {
+            console.warn(
+              `[BackendSync] class code "${this.classCode}" is not valid — session ${session.id} ` +
+                `stays queued and will not sync. Create a class and update VITE_CLASS_CODE.`,
+            )
+          } else {
+            console.debug(`[BackendSync] flush failed for session ${session.id}, will retry: ${message}`)
+          }
         }
       }
     } finally {
