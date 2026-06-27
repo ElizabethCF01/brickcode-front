@@ -1027,8 +1027,43 @@ mid-program is discarded (unsealed partials never flush — `endedAt` stays null
   the teacher so the `owns_class` RLS chain scopes it automatically — another
   teacher's `class_id` returns zero rows.
 
-### Identity (dev)
+### Identity
 
-The simulator submits under `VITE_CLASS_CODE` (teacher shares the code) with a
-pseudonym persisted in `localStorage` (`brickcode:pseudonym`, no PII). A real
-"join a class" UI and the teacher dashboard **UI** are later tasks.
+The simulator submits under a **class code** resolved by
+[identity.ts](../src/backend/identity.ts): `localStorage` (`brickcode:classCode`,
+set via the in-app join screen) takes precedence over the `VITE_CLASS_CODE` env
+fallback. The pseudonym (`brickcode:pseudonym`) is a nickname the student may set,
+else an auto `pupil-xxxx` — never PII.
+
+## Teacher Dashboard & App Routing
+
+The app serves **two audiences** from one Vite build, split by route and lazily
+loaded so neither pulls the other's bundle ([main.tsx](../src/main.tsx)):
+
+- `/` → `Home` (lightweight landing: title + teacher login button; eager, tiny).
+- `/play` → `SimulatorApp` (Three/Rapier/LDraw/Blockly; behind the LDraw preload gate).
+- `/dashboard/*` → `Dashboard` (teacher tool; ~26 kB chunk, none of the 3D stack).
+
+The build confirms the split: `Dashboard-*.js` and `SimulatorApp-*.js` are separate
+chunks. SPA history fallback (Vite dev/preview + any static host) resolves `/dashboard`.
+
+### Auth-client separation (important)
+
+Both audiences share one origin/localStorage, so two Supabase clients are used:
+- **Teacher** (dashboard): the persisted, authenticatable `getSupabase()` singleton.
+- **Simulator** (submit): `createAnonClient()` with `persistSession:false`, so the
+  student's write path stays anonymous even if a teacher is signed in on the same
+  browser. `BackendSync` uses this; it still only calls the RPC, never reads tables.
+
+### Dashboard structure (`src/dashboard/`)
+
+`AuthGate` (Supabase Auth session; `LoginForm` has a login/signup toggle —
+`handle_new_user` makes the teacher row) wraps a react-router drill-down:
+`ClassesPage` → `ClassPage` (students + `getClassEventStats`) → `StudentPage`
+(sessions) → `SessionPage` (event timeline). All reads go through
+[dashboardApi.ts](../src/backend/dashboardApi.ts); RLS scopes every result.
+
+### Hosted Supabase
+
+Local-only for now; `docs/hosting.md` covers `supabase link` + `db push` + env switch
+to run against a cloud project (a guided, user-driven follow-up).
