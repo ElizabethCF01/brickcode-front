@@ -1,53 +1,34 @@
-import { StrictMode, useEffect, useState } from 'react'
+import { StrictMode, Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
-import App from './App.tsx'
-import LoadingScreen from './components/LoadingScreen'
-import { registerRobotBlocks } from './blocks/definitions/robotBlocks'
-import { LDrawLibraryManager, BRICKCODE_PARTS } from './engine/ldraw/LDrawLibraryManager'
-import { setLDrawManager } from './engine/ldraw/ldrawSingleton'
+import Home from './Home'
 
-registerRobotBlocks()
+// `/` is a lightweight landing page (eager). The two heavy areas are lazy chunks:
+// the student simulator (Three/Rapier/LDraw/Blockly) at /play and the teacher
+// dashboard (none of that) at /dashboard. Lazy-loading keeps each off the other's
+// critical path, and the dashboard is not blocked by the simulator's LDraw preload.
+const SimulatorApp = lazy(() => import('./simulator/SimulatorApp'))
+const Dashboard = lazy(() => import('./dashboard/Dashboard'))
 
-const TOTAL_PARTS = Object.keys(BRICKCODE_PARTS).length
-
-function Bootstrap() {
-  const [loaded, setLoaded] = useState(0)
-  const [ready, setReady] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    const manager = new LDrawLibraryManager()
-
-    manager
-      .preloadAll((n) => {
-        if (!cancelled) setLoaded(n)
-      })
-      .then(() => {
-        if (cancelled) {
-          manager.dispose()
-          return
-        }
-        setLDrawManager(manager)
-        setReady(true)
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return
-        setError(err instanceof Error ? err.message : String(err))
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  if (!ready) return <LoadingScreen loaded={loaded} total={TOTAL_PARTS} error={error} />
-  return <App />
+function Splash() {
+  return (
+    <div className="w-screen h-screen flex items-center justify-center bg-gray-900 text-white">
+      <div className="text-2xl font-semibold">BrickCode</div>
+    </div>
+  )
 }
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Bootstrap />
+    <BrowserRouter>
+      <Suspense fallback={<Splash />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/play" element={<SimulatorApp />} />
+          <Route path="/dashboard/*" element={<Dashboard />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
   </StrictMode>,
 )
