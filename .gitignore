@@ -27,3 +27,4 @@ dist-ssr
 public/ldraw/parts/
 public/ldraw/p/
 public/ldraw/LDConfig.ldr
+.tool-versions
