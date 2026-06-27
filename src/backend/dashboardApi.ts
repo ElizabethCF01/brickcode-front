@@ -35,6 +35,21 @@ export async function listClasses(): Promise<ClassSummary[]> {
   }))
 }
 
+/**
+ * Create a class for the signed-in teacher. teacher_id defaults to auth.uid()
+ * and class_code is auto-generated server-side (gen_class_code) — we only send
+ * the name. RLS's insert check enforces ownership.
+ */
+export async function createClass(name: string): Promise<ClassSummary> {
+  const { data, error } = await client()
+    .from('classes')
+    .insert({ name })
+    .select('id, name, class_code, created_at')
+    .single()
+  if (error) throw error
+  return { id: data.id, name: data.name, classCode: data.class_code, createdAt: data.created_at }
+}
+
 export async function listStudents(classId: string): Promise<StudentSummary[]> {
   const { data, error } = await client()
     .from('students')
