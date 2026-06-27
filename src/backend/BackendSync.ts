@@ -12,7 +12,8 @@
 // Framework-agnostic: no React imports.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { getSupabase } from './supabaseClient'
+import { createAnonClient } from './supabaseClient'
+import { getClassCode, getPseudonym } from './identity'
 import { getUnsynced, markSynced } from '../recording/outbox'
 import type { LearningSession } from './types'
 
@@ -30,7 +31,7 @@ export class BackendSync {
   constructor(classCode: string, pseudonym: string, client?: SupabaseClient | null) {
     this.classCode = classCode
     this.pseudonym = pseudonym
-    this.client = client ?? getSupabase()
+    this.client = client ?? createAnonClient()
   }
 
   /**
@@ -111,33 +112,24 @@ export class BackendSync {
   }
 }
 
-// ── Shared instance, configured from env (dev) ──────────────────────────────
-
-const PSEUDONYM_KEY = 'brickcode:pseudonym'
-
-/** Stable per-browser pseudonym (no PII). Generated once, then persisted. */
-function resolvePseudonym(): string {
-  if (typeof localStorage === 'undefined') return 'pupil-anon'
-  let p = localStorage.getItem(PSEUDONYM_KEY)
-  if (!p) {
-    p = `pupil-${Math.random().toString(36).slice(2, 8)}`
-    localStorage.setItem(PSEUDONYM_KEY, p)
-  }
-  return p
-}
+// ── Shared instance, configured from identity (join-a-class UI / env) ────────
 
 let _sync: BackendSync | null = null
+let _syncClassCode: string | null = null
 
 /**
- * Shared BackendSync built from VITE_CLASS_CODE + a localStorage pseudonym.
- * Returns null when the class code or backend isn't configured (offline dev) —
- * recording still works; nothing flushes until configured.
+ * Shared BackendSync built from the joined class code (localStorage → VITE_CLASS_CODE
+ * fallback) + the student's pseudonym. Returns null when no class code is set or the
+ * backend isn't configured — recording still works; nothing flushes until joined.
+ * Rebuilds if the class code changed (e.g. the student joined a different class).
  */
 export function getBackendSync(): BackendSync | null {
-  if (_sync) return _sync
-  const classCode = import.meta.env.VITE_CLASS_CODE
-  const client = getSupabase()
+  const classCode = getClassCode()
+  const client = createAnonClient()
   if (!classCode || !client) return null
-  _sync = new BackendSync(classCode, resolvePseudonym(), client)
+  if (_sync && _syncClassCode === classCode) return _sync
+  _sync?.stopAutoFlush()
+  _syncClassCode = classCode
+  _sync = new BackendSync(classCode, getPseudonym(), client)
   return _sync
 }
