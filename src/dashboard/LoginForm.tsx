@@ -34,7 +34,10 @@ export default function LoginForm() {
 
   return (
     <CenteredCard>
-      <h1 className="text-xl font-semibold text-slate-900 mb-1">BrickCode · Profesor</h1>
+      <h1 className="flex items-center gap-2 text-xl font-semibold text-slate-900 mb-1">
+        <img src="/logo.png" alt="" className="h-7 w-7" />
+        <span>BrickCode · Profesor</span>
+      </h1>
       <p className="text-sm text-slate-500 mb-6">
         {mode === 'login' ? 'Inicia sesión para ver el progreso de tu clase.' : 'Crea tu cuenta de profesor.'}
       </p>

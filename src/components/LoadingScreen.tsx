@@ -10,7 +10,10 @@ export default function LoadingScreen({ loaded, total, error }: LoadingScreenPro
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-gray-900 text-white">
       <div className="w-80 flex flex-col items-center gap-4">
-        <div className="text-2xl font-semibold">BrickCode</div>
+        <div className="flex items-center gap-3 text-2xl font-semibold">
+          <img src="/logo.png" alt="" className="h-9 w-9" />
+          <span>BrickCode</span>
+        </div>
 
         {error ? (
           <>

@@ -88,8 +88,9 @@ export default function ControlPanel() {
 
   return (
     <header className="flex items-center gap-4 px-4 py-2 bg-gray-800 border-b border-gray-700 shrink-0">
-      <span className="text-yellow-400 font-bold text-xl tracking-wide">
-        🟡 BrickCode
+      <span className="flex items-center gap-2 text-yellow-400 font-bold text-xl tracking-wide">
+        <img src="/logo.png" alt="" className="h-7 w-7" />
+        <span>BrickCode</span>
       </span>
 
       <button
