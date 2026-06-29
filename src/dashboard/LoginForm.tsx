@@ -7,7 +7,7 @@ import { CenteredCard } from './AuthGate'
  * teachers row (display_name from metadata). onAuthStateChange in AuthGate
  * reacts to the resulting session — no manual redirect needed.
  */
-export default function LoginForm() {
+export default function LoginForm({ note }: { note?: string }) {
   const supabase = getSupabase()!
   const [mode, setMode] = useState<'login' | 'signup'>('login')
   const [displayName, setName] = useState('')
@@ -38,6 +38,7 @@ export default function LoginForm() {
         <img src="/logo.png" alt="" className="h-7 w-7" />
         <span>BrickCode · Profesor</span>
       </h1>
+      {note && <p className="text-sm text-amber-600 mb-2">{note}</p>}
       <p className="text-sm text-slate-500 mb-6">
         {mode === 'login' ? 'Inicia sesión para ver el progreso de tu clase.' : 'Crea tu cuenta de profesor.'}
       </p>

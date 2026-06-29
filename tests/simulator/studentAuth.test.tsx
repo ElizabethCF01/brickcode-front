@@ -3,15 +3,20 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import StudentAuthGate from '../../src/simulator/StudentAuthGate'
 import JoinClassModal from '../../src/simulator/JoinClassModal'
 
-const auth = {
-  getSession: vi.fn(),
-  onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
-}
-const rpc = vi.fn()
-vi.mock('../../src/backend/supabaseClient', () => ({ getSupabase: () => ({ auth, rpc }) }))
+const { auth, rpc, from, setTeacher } = vi.hoisted(() => {
+  let isT = false
+  const auth = {
+    getSession: vi.fn(),
+    onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+  }
+  const rpc = vi.fn()
+  const from = vi.fn(() => ({ select: () => ({ limit: () => Promise.resolve({ data: isT ? [{ id: 't' }] : [] }) }) }))
+  return { auth, rpc, from, setTeacher: (v: boolean) => { isT = v } }
+})
+vi.mock('../../src/backend/supabaseClient', () => ({ getSupabase: () => ({ auth, rpc, from }) }))
 
 describe('StudentAuthGate', () => {
-  beforeEach(() => vi.clearAllMocks())
+  beforeEach(() => { vi.clearAllMocks(); setTeacher(false) })
 
   it('shows the student login when there is no session', async () => {
     auth.getSession.mockResolvedValue({ data: { session: null } })
@@ -20,15 +25,17 @@ describe('StudentAuthGate', () => {
     expect(screen.queryByText('SIMULATOR')).toBeNull()
   })
 
-  it('shows the login (not the simulator) when signed in as a teacher', async () => {
-    auth.getSession.mockResolvedValue({ data: { session: { user: { user_metadata: { role: 'teacher' } } } } })
+  it('rejects a teacher session (asks to log in as student)', async () => {
+    setTeacher(true)
+    auth.getSession.mockResolvedValue({ data: { session: { user: { id: 't' } } } })
     render(<StudentAuthGate><div>SIMULATOR</div></StudentAuthGate>)
     expect(await screen.findByText(/Inicia sesión como alumno/)).toBeTruthy()
     expect(screen.queryByText('SIMULATOR')).toBeNull()
   })
 
   it('renders the simulator for a student session', async () => {
-    auth.getSession.mockResolvedValue({ data: { session: { user: { user_metadata: { role: 'student' } } } } })
+    setTeacher(false)
+    auth.getSession.mockResolvedValue({ data: { session: { user: { id: 's' } } } })
     render(<StudentAuthGate><div>SIMULATOR</div></StudentAuthGate>)
     await waitFor(() => expect(screen.getByText('SIMULATOR')).toBeTruthy())
   })

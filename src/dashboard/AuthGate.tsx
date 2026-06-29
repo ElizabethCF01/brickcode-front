@@ -1,27 +1,34 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { getSupabase } from '../backend/supabaseClient'
+import { currentUserIsTeacher } from '../backend/roles'
 import LoginForm from './LoginForm'
 
 /**
- * Gates the dashboard behind a Supabase Auth session (the teacher). Shows the
- * login screen until authenticated; renders children (with a logout affordance
- * via context) once signed in. Uses the persisted getSupabase() client.
+ * Gates the dashboard behind a TEACHER Supabase session. Shows the login screen
+ * until authenticated as a teacher; a student session (no teachers row) is
+ * rejected so a student can't land on an empty dashboard.
  */
 export default function AuthGate({ children }: { children: ReactNode }) {
   const supabase = getSupabase()
   const [session, setSession] = useState<Session | null>(null)
+  const [isTeacher, setIsTeacher] = useState<boolean | null>(null)
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
     if (!supabase) { setReady(true); return }
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session)
-      setReady(true)
-    })
+    supabase.auth.getSession().then(({ data }) => { setSession(data.session); setReady(true) })
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => setSession(s))
     return () => sub.subscription.unsubscribe()
   }, [supabase])
+
+  // Resolve the role whenever the session changes.
+  useEffect(() => {
+    if (!session) { setIsTeacher(null); return }
+    let cancelled = false
+    currentUserIsTeacher().then((t) => { if (!cancelled) setIsTeacher(t) })
+    return () => { cancelled = true }
+  }, [session])
 
   if (!supabase) {
     return (
@@ -36,6 +43,10 @@ export default function AuthGate({ children }: { children: ReactNode }) {
 
   if (!ready) return <CenteredCard><p className="text-slate-500">Cargando…</p></CenteredCard>
   if (!session) return <LoginForm />
+  if (isTeacher === null) return <CenteredCard><p className="text-slate-500">Cargando…</p></CenteredCard>
+  if (!isTeacher) {
+    return <LoginForm note="Esta cuenta no es de profesor. Inicia sesión con una cuenta de profesor." />
+  }
   return <>{children}</>
 }
 
