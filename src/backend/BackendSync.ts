@@ -1,9 +1,9 @@
 // Outbox sync: flushes buffered learning sessions to the backend via the
-// submit_session RPC. Offline-resilient and idempotent.
+// submit_session_auth RPC. Offline-resilient and idempotent.
 //
-// Privacy invariant: this is the SIMULATOR's write path — it ONLY ever calls the
-// submit_session RPC. It never reads any table. Reading is exclusively the
-// teacher's path (dashboardApi). See docs/architecture.md §Backend.
+// Students are authenticated (mandatory login). This runs as the signed-in
+// student: the RPC resolves their student row by auth.uid(), so no class code or
+// pseudonym is sent. The student only ever WRITES — reading is the teacher's path.
 //
 // Idempotency: every session carries a client-generated id. The RPC inserts
 // events only when that id is new, so re-flushing an already-synced session is a
@@ -12,8 +12,7 @@
 // Framework-agnostic: no React imports.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { createAnonClient } from './supabaseClient'
-import { getClassCode, getPseudonym } from './identity'
+import { getSupabase } from './supabaseClient'
 import { getUnsynced, markSynced } from '../recording/outbox'
 import type { LearningSession } from './types'
 
@@ -21,23 +20,19 @@ import type { LearningSession } from './types'
 const RETRY_INTERVAL_MS = 30_000
 
 export class BackendSync {
-  private readonly classCode: string
-  private readonly pseudonym: string
   private readonly client: SupabaseClient | null
   private timer: ReturnType<typeof setInterval> | null = null
   private flushing = false
   private readonly onlineHandler = () => { void this.flush() }
 
-  constructor(classCode: string, pseudonym: string, client?: SupabaseClient | null) {
-    this.classCode = classCode
-    this.pseudonym = pseudonym
-    this.client = client ?? createAnonClient()
+  constructor(client?: SupabaseClient | null) {
+    this.client = client ?? getSupabase()
   }
 
   /**
-   * Push every unsynced session to the backend. Sessions that fail (e.g. offline)
-   * stay queued for the next flush. Safe to call repeatedly — concurrent calls
-   * are coalesced, and already-synced sessions are skipped.
+   * Push every unsynced sealed session to the backend. Sessions that fail (e.g.
+   * offline, or not enrolled yet) stay queued for the next flush. Safe to call
+   * repeatedly — concurrent calls are coalesced, synced sessions are skipped.
    */
   async flush(): Promise<void> {
     if (!this.client || this.flushing) return
@@ -52,13 +47,11 @@ export class BackendSync {
           await markSynced(session.id)
         } catch (err) {
           // Leave it queued; a later flush (online/periodic) will retry.
-          // Distinguish a misconfiguration (bad class code → actionable) from a
-          // transient network failure (expected offline → stays quiet at debug).
           const message = err instanceof Error ? err.message : String(err)
-          if (message.includes('invalid class code')) {
+          if (message.includes('not enrolled')) {
             console.warn(
-              `[BackendSync] class code "${this.classCode}" is not valid — session ${session.id} ` +
-                `stays queued and will not sync. Create a class and update VITE_CLASS_CODE.`,
+              `[BackendSync] not enrolled in a class — session ${session.id} stays queued. ` +
+                `Join a class to sync.`,
             )
           } else {
             console.debug(`[BackendSync] flush failed for session ${session.id}, will retry: ${message}`)
@@ -70,12 +63,10 @@ export class BackendSync {
     }
   }
 
-  /** Submit one session via the RPC. Throws on RPC error so flush keeps it queued. */
+  /** Submit one session via the authenticated RPC. Throws on error so flush keeps it queued. */
   private async submit(session: LearningSession): Promise<void> {
     if (!this.client) throw new Error('backend not configured')
-    const { error } = await this.client.rpc('submit_session', {
-      p_class_code: this.classCode,
-      p_student_pseudonym: this.pseudonym,
+    const { error } = await this.client.rpc('submit_session_auth', {
       p_session: {
         id: session.id,
         started_at: session.startedAt,
@@ -112,24 +103,18 @@ export class BackendSync {
   }
 }
 
-// ── Shared instance, configured from identity (join-a-class UI / env) ────────
+// ── Shared instance ─────────────────────────────────────────────────────────
 
 let _sync: BackendSync | null = null
-let _syncClassCode: string | null = null
 
 /**
- * Shared BackendSync built from the joined class code (localStorage → VITE_CLASS_CODE
- * fallback) + the student's pseudonym. Returns null when no class code is set or the
- * backend isn't configured — recording still works; nothing flushes until joined.
- * Rebuilds if the class code changed (e.g. the student joined a different class).
+ * Shared BackendSync bound to the authenticated Supabase client. Returns null
+ * when the backend isn't configured — recording still works locally; nothing
+ * flushes. Submits run as the signed-in student (RPC resolves them by auth.uid()).
  */
 export function getBackendSync(): BackendSync | null {
-  const classCode = getClassCode()
-  const client = createAnonClient()
-  if (!classCode || !client) return null
-  if (_sync && _syncClassCode === classCode) return _sync
-  _sync?.stopAutoFlush()
-  _syncClassCode = classCode
-  _sync = new BackendSync(classCode, getPseudonym(), client)
+  const client = getSupabase()
+  if (!client) return null
+  if (!_sync) _sync = new BackendSync(client)
   return _sync
 }

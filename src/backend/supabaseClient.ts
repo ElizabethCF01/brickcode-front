@@ -36,17 +36,3 @@ export function isBackendConfigured(): boolean {
   const { url, anonKey } = readEnv()
   return Boolean(url && anonKey)
 }
-
-/**
- * A fresh, NON-persisting anon client for the simulator's submit path. It must
- * stay anonymous even if a teacher has signed in on the dashboard in the same
- * browser — so it never reads/writes the shared persisted auth session. Returns
- * null when env vars are absent.
- */
-export function createAnonClient(): SupabaseClient | null {
-  const { url, anonKey } = readEnv()
-  if (!url || !anonKey) return null
-  return createClient(url, anonKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
-}
