@@ -15,12 +15,20 @@ export default function Home() {
         <p className="max-w-md text-gray-400">
           Programa un robot LEGO en 3D con bloques — sin hardware, directamente en el navegador.
         </p>
-        <Link
-          to="/dashboard"
-          className="mt-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-6 py-3 font-medium transition-colors"
-        >
-          Entrar como profesor
-        </Link>
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            to="/play"
+            className="rounded-lg bg-green-600 hover:bg-green-500 px-6 py-3 font-medium transition-colors"
+          >
+            Soy alumno
+          </Link>
+          <Link
+            to="/dashboard"
+            className="rounded-lg bg-indigo-600 hover:bg-indigo-500 px-6 py-3 font-medium transition-colors"
+          >
+            Entrar como profesor
+          </Link>
+        </div>
       </div>
     </div>
   )

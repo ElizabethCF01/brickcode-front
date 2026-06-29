@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { useSimulationStore } from '../store/simulationStore'
 import { useChallengeStore } from '../store/challengeStore'
 import { getEngine } from '../engine/engineSingleton'
@@ -6,8 +5,6 @@ import { getWorkspace } from '../blocks/workspaceSingleton'
 import { challenge01 } from '../challenges/challenge-01'
 import { getRecorder } from '../recording/recordingSingleton'
 import { getBackendSync } from '../backend/BackendSync'
-import { getClassCode, hasJoinedClass } from '../backend/identity'
-import JoinClassModal from '../simulator/JoinClassModal'
 
 /**
  * Seal the active recording session (program ended naturally or via Stop) and
@@ -27,18 +24,6 @@ async function finishSession(success: boolean): Promise<void> {
 
 export default function ControlPanel() {
   const { status, setStatus, showEditor, toggleEditor } = useSimulationStore()
-  const [showJoin, setShowJoin] = useState(false)
-  const [classCode, setClassCodeState] = useState<string | null>(getClassCode())
-
-  // Prompt to join a class once on first run if none is configured.
-  useEffect(() => {
-    if (!hasJoinedClass()) setShowJoin(true)
-  }, [])
-
-  const closeJoin = () => {
-    setShowJoin(false)
-    setClassCodeState(getClassCode())
-  }
 
   const handleRun = () => {
     const engine    = getEngine()
@@ -92,16 +77,6 @@ export default function ControlPanel() {
         <img src="/logo.png" alt="" className="h-7 w-7" />
         <span>BrickCode</span>
       </span>
-
-      <button
-        onClick={() => setShowJoin(true)}
-        className="text-xs px-2.5 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-200"
-        title="Unirse a una clase"
-      >
-        {classCode ? `🎓 Clase: ${classCode}` : '🎓 Unirse a una clase'}
-      </button>
-
-      {showJoin && <JoinClassModal onClose={closeJoin} />}
 
       <div className="flex gap-2 ml-auto">
         <button

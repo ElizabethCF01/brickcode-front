@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import App from '../App'
 import LoadingScreen from '../components/LoadingScreen'
+import StudentAuthGate from './StudentAuthGate'
+import EnrollmentGate from './EnrollmentGate'
 import { registerRobotBlocks } from '../blocks/definitions/robotBlocks'
 import { LDrawLibraryManager, BRICKCODE_PARTS } from '../engine/ldraw/LDrawLibraryManager'
 import { setLDrawManager } from '../engine/ldraw/ldrawSingleton'
@@ -12,11 +14,21 @@ registerRobotBlocks()
 const TOTAL_PARTS = Object.keys(BRICKCODE_PARTS).length
 
 /**
- * Simulator route. Preloads the LDraw part library (gated behind LoadingScreen),
- * then mounts the 3D simulator App. Lazy-loaded from main.tsx so Three/Rapier/
- * LDraw/Blockly load only when a student visits `/`.
+ * Simulator route (`/play`). Login is mandatory: gate behind a student session
+ * and class enrollment, THEN preload LDraw + mount the 3D simulator. Lazy-loaded
+ * from main.tsx so Three/Rapier/LDraw/Blockly load only here.
  */
 export default function SimulatorApp() {
+  return (
+    <StudentAuthGate>
+      <EnrollmentGate>
+        <SimulatorReady />
+      </EnrollmentGate>
+    </StudentAuthGate>
+  )
+}
+
+function SimulatorReady() {
   const [loaded, setLoaded] = useState(0)
   const [ready, setReady] = useState(false)
   const [error, setError] = useState<string | null>(null)

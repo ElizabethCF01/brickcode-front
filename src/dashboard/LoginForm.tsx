@@ -22,7 +22,7 @@ export default function LoginForm() {
     try {
       const res = mode === 'login'
         ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password, options: { data: { display_name: displayName } } })
+        : await supabase.auth.signUp({ email, password, options: { data: { display_name: displayName, role: 'teacher' } } })
       if (res.error) setError(res.error.message)
       else if (mode === 'signup' && !res.data.session) {
         setError('Revisa tu correo para confirmar la cuenta, luego inicia sesión.')
