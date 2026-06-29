@@ -24,8 +24,10 @@ const engine = {
   resetRobot: vi.fn(),
 }
 
+const signOut = vi.fn()
 vi.mock('../../src/recording/recordingSingleton', () => ({ getRecorder: () => recorder }))
 vi.mock('../../src/backend/BackendSync', () => ({ getBackendSync: () => sync }))
+vi.mock('../../src/backend/supabaseClient', () => ({ getSupabase: () => ({ auth: { signOut } }) }))
 vi.mock('../../src/engine/engineSingleton', () => ({ getEngine: () => engine }))
 vi.mock('../../src/blocks/workspaceSingleton', () => ({ getWorkspace: () => ({ getTopBlocks: () => [] }) }))
 
@@ -51,6 +53,12 @@ describe('ControlPanel recording wiring', () => {
       payload: expect.objectContaining({ success: expect.any(Boolean) }),
     }))
     expect(recorder.endSession).toHaveBeenCalled()
+  })
+
+  it('Cerrar sesión signs the student out', () => {
+    const { getByText } = render(<ControlPanel />)
+    fireEvent.click(getByText('🚪 Cerrar sesión'))
+    expect(signOut).toHaveBeenCalled()
   })
 
   it('Stop seals + flushes the active session', async () => {

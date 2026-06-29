@@ -5,6 +5,7 @@ import { getWorkspace } from '../blocks/workspaceSingleton'
 import { challenge01 } from '../challenges/challenge-01'
 import { getRecorder } from '../recording/recordingSingleton'
 import { getBackendSync } from '../backend/BackendSync'
+import { getSupabase } from '../backend/supabaseClient'
 
 /**
  * Seal the active recording session (program ended naturally or via Stop) and
@@ -77,6 +78,14 @@ export default function ControlPanel() {
         <img src="/logo.png" alt="" className="h-7 w-7" />
         <span>BrickCode</span>
       </span>
+
+      <button
+        onClick={() => getSupabase()?.auth.signOut()}
+        className="text-xs px-2.5 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-200"
+        title="Cerrar sesión"
+      >
+        🚪 Cerrar sesión
+      </button>
 
       <div className="flex gap-2 ml-auto">
         <button
