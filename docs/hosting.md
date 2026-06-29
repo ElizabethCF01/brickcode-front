@@ -30,10 +30,14 @@ The student leaves `VITE_CLASS_CODE` unset and joins via the in-app "Unirse a un
 clase" screen instead.
 
 > **Email confirmation differs from local.** Local Supabase has email confirmation
-> **off** (signup → immediate session → straight into the dashboard). Hosted projects
-> default it **on**, so a self-registering teacher gets "revisa tu correo" and must
-> confirm before logging in. Either confirm via the emailed link, or disable
+> **off** (signup → immediate session → straight in). Hosted projects default it
+> **on**, so a self-registering **teacher or student** gets "revisa tu correo" and
+> must confirm before logging in. Either confirm via the emailed link, or disable
 > confirmations in the project's Auth settings for a frictionless demo.
+>
+> **Note (privacy):** both teachers and students now have email/password accounts.
+> Student emails are PII stored in Supabase Auth (`auth.users`); the teacher dashboard
+> never exposes them. Hosting real student emails is a COPPA/GDPR-K consideration.
 
 ## 4. Verify
 - Teacher: open the deployed app at `/dashboard`, sign up / log in, create a class.

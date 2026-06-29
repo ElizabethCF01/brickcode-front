@@ -921,7 +921,41 @@ analysed — see `docs/spike-essential-blocks.md`):
   belong inside the pieces, not the rail. The rail keeps its thin colour stripe
   (`src/index.css` `.categoryBubble`). See `docs/spike-essential-blocks.md`.
 
+## Accounts model (CURRENT — supersedes the anon-student design below)
+
+> ⚠️ **Privacy-model change.** The original design (Tasks B1/B2, documented in the
+> following sections) had **anonymous, pseudonymous students** with "no PII, ever."
+> The project later moved to **mandatory student accounts (email + password)**, like
+> the teacher. The sections below describe the historical anon path; this section is
+> the authoritative current state.
+
+**Two authenticated roles**, distinguished by `user_metadata.role` set at signup:
+- **Teacher** — email/password; `handle_new_user` creates a `teachers` row only when
+  `role = 'teacher'` (absent = teacher, back-compat).
+- **Student** — email/password (`role:'student'`, no teacher row). Linked to a
+  `students` row via `auth_user_id`. Enrolls in a class with the teacher's code via
+  the `join_class(code, pseudonym)` DEFINER RPC, then submits runs via
+  `submit_session_auth(session, events)` DEFINER RPC (resolves the student by
+  `auth.uid()` — no class code/pseudonym sent). The **anonymous `submit_session` RPC
+  is removed**; there is no anonymous write path.
+
+**RLS:** a student may read only their own `students` row (`auth_user_id = auth.uid()`,
+to check enrollment); they never read sessions/events (writes go through the DEFINER
+RPC). Teachers read their own classes/students/sessions/events via `owns_class`.
+
+**Privacy posture (updated):** student **emails are PII held only in `auth.users`** —
+teachers cannot read that table, and the dashboard shows **pseudonyms only, never
+emails**. Storing minors' emails is a COPPA/GDPR-K consideration; the earlier "no PII"
+claim no longer holds and is intentionally relaxed. Client: `StudentAuthGate` +
+`StudentLoginForm` gate `/play`; `EnrollmentGate` + the enrollment screen call
+`join_class`; `BackendSync` submits via the authenticated client + `submit_session_auth`.
+
+---
+
 ## Backend (Supabase) — Task B1
+
+> 🕑 *Historical (anon-student design). Superseded by the Accounts model above —
+> `submit_session`/anon paths described here no longer exist.*
 
 A shared backend makes the (future) teacher dashboard real: pseudonymous student
 simulators submit learning sessions; a teacher reads them back on another machine.
