@@ -10,7 +10,12 @@ import { useSimulationStore } from './store/simulationStore'
 import { resizeWorkspace } from './blocks/workspaceSingleton'
 import { getBackendSync } from './backend/BackendSync'
 
-export default function App() {
+interface AppProps {
+  /** Return to the level-select screen. */
+  onBackToLevels?: () => void
+}
+
+export default function App({ onBackToLevels }: Readonly<AppProps>) {
   const { showEditor, toggleEditor } = useSimulationStore()
 
   // Retry flushing buffered sessions on reconnect / periodically. No-op when the
@@ -33,7 +38,7 @@ export default function App() {
 
   return (
     <div className="w-screen h-screen flex flex-col overflow-hidden bg-gray-900">
-      <ControlPanel />
+      <ControlPanel onBackToLevels={onBackToLevels} />
 
       {/* Main area: 3D viewport fills the whole space */}
       <div className="flex-1 relative overflow-hidden">

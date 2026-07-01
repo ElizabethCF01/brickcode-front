@@ -272,6 +272,50 @@ interface leaking Rapier types.
 
 ---
 
+## Level Catalog & Selection
+
+**Files**: `src/challenges/types.ts`, `src/challenges/index.ts`,
+`src/challenges/completion.ts`, `src/components/LevelSelect.tsx`,
+`src/simulator/SimulatorApp.tsx`, `src/store/challengeStore.ts`,
+`src/engine/renderer/SimulatorCanvas.tsx`, `src/components/ControlPanel.tsx`,
+`src/components/ChallengePanel.tsx`.
+
+The app grew from a single hardcoded `challenge01` to a **catalog** the student
+picks from before playing.
+
+**Metadata lives in code, not the DB (decision).** Each level's `setup`/`evaluate`
+are TypeScript functions that call the engine, so they cannot live in a table.
+Rather than split metadata (DB) from logic (code), the whole level — metadata +
+logic — is a code registry. The DB continues to store only telemetry. A `levels`
+table stays available as future work if teachers ever need to curate the catalog
+without a redeploy.
+
+- `types.ts` — `LevelMeta` (id, title, description, `difficulty` 1–3, `tags`,
+  `hints`, optional `comingSoon`) and `LevelDefinition extends LevelMeta` (adds
+  `setup`/`evaluate`). `ChallengeEngine` moved here (was in `challenge-01.ts`,
+  still re-exported there for the `SimulationEngine` import). `tags: LevelCategory[]`
+  (`motors | sensors | lights | sound`) drive the grid's category filter and reuse
+  the SPIKE toolbox palette colours.
+- `index.ts` — `LEVELS: Level[]` catalog + `isPlayable()` type guard + `getLevel(id)`.
+  `challenge01` is entry 1; boat/cocodrilo and cave-car are `comingSoon` metadata
+  placeholders (visible, not launchable) until their level files land.
+- `challengeStore` — replaced the unused narrow `Challenge`/`setChallenge` with
+  `activeLevel: LevelDefinition | null` + `setActiveLevel`. **Single source of
+  truth**: `SimulatorCanvas`, `ControlPanel`, and `ChallengePanel` all read the
+  active level from the store (no more direct `challenge01` imports).
+- `SimulatorApp.SimulatorReady` gates on `activeLevel`: after LDraw preload it
+  shows `LevelSelect`; selecting a level sets the store and mounts `App`; the
+  "← Niveles" button (`App` → `ControlPanel` `onBackToLevels`) clears it. Because
+  `App` unmounts on the way back, the next pick rebuilds the engine + scene fresh
+  in `SimulatorCanvas` (which binds `activeLevel.setup`).
+- **Completion** (`completion.ts`) — the ✅ badge is backed by a `localStorage`
+  set (`brickcode.completedLevels`), written in `ControlPanel` when `evaluate()`
+  succeeds. This mirrors the authoritative `challenge_evaluated {success:true}`
+  telemetry event; a backend RPC deriving completion from events can replace the
+  cache later. Offline-first and needs no migration.
+
+---
+
 ## Model-driven sensor UI
 
 **Files**: `src/store/simulationStore.ts`, `src/engine/renderer/SimulatorCanvas.tsx`,

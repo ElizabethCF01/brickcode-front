@@ -23,7 +23,7 @@ import { HubLights } from './HubLights'
 import { HubSound } from './HubSound'
 import { useSimulationStore } from '../store/simulationStore'
 import { getRecorder } from '../recording/recordingSingleton'
-import type { ChallengeEngine } from '../challenges/challenge-01'
+import type { ChallengeEngine } from '../challenges/types'
 
 // Single RAPIER WASM init — calling RAPIER.init() twice under React StrictMode
 // creates two World instances that alias the same WASM heap, triggering the
@@ -164,7 +164,7 @@ export class SimulationEngine implements ChallengeEngine {
 
   // ── Challenge management ───────────────────────────────────────────────────
 
-  /** Call challenge01.setup(engine) via this method to track the teardown. */
+  /** Call a level's setup(engine) via this method to track the teardown. */
   loadChallenge(setup: (engine: ChallengeEngine) => () => void): void {
     this._challengeDispose?.()
     this._challengeDispose = setup(this)

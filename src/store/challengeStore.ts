@@ -1,26 +1,22 @@
 import { create } from 'zustand'
+import type { LevelDefinition } from '../challenges/types'
 
 export interface ChallengeResult {
   success: boolean
   message: string
 }
 
-interface Challenge {
-  id: string
-  title: string
-  description: string
-}
-
 interface ChallengeState {
-  activeChallenge: Challenge | null
+  /** The level currently loaded into the simulator, or null on the level-select screen. */
+  activeLevel: LevelDefinition | null
   result: ChallengeResult | null
-  setChallenge: (challenge: Challenge | null) => void
+  setActiveLevel: (level: LevelDefinition | null) => void
   setResult: (result: ChallengeResult | null) => void
 }
 
 export const useChallengeStore = create<ChallengeState>((set) => ({
-  activeChallenge: null,
+  activeLevel: null,
   result: null,
-  setChallenge: (challenge) => set({ activeChallenge: challenge, result: null }),
+  setActiveLevel: (level) => set({ activeLevel: level, result: null }),
   setResult: (result) => set({ result }),
 }))

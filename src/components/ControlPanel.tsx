@@ -2,34 +2,39 @@ import { useSimulationStore } from '../store/simulationStore'
 import { useChallengeStore } from '../store/challengeStore'
 import { getEngine } from '../engine/engineSingleton'
 import { getWorkspace } from '../blocks/workspaceSingleton'
-import { challenge01 } from '../challenges/challenge-01'
+import { markLevelCompleted } from '../challenges/completion'
 import { getRecorder } from '../recording/recordingSingleton'
 import { getBackendSync } from '../backend/BackendSync'
 import { getSupabase } from '../backend/supabaseClient'
+
+interface ControlPanelProps {
+  onBackToLevels?: () => void
+}
 
 /**
  * Seal the active recording session (program ended naturally or via Stop) and
  * flush it to the backend. Guarded by isRecording() so run-then-stop seals once.
  */
-async function finishSession(success: boolean): Promise<void> {
+async function finishSession(challengeId: string, success: boolean): Promise<void> {
   const recorder = getRecorder()
   if (!recorder.isRecording()) return
-  recorder.recordEvent('program_run_ended', { challengeId: challenge01.id })
+  recorder.recordEvent('program_run_ended', { challengeId })
   recorder.recordEvent('challenge_evaluated', {
-    challengeId: challenge01.id,
+    challengeId,
     payload: { success },
   })
   await recorder.endSession()
   await getBackendSync()?.flush()
 }
 
-export default function ControlPanel() {
+export default function ControlPanel({ onBackToLevels }: Readonly<ControlPanelProps>) {
   const { status, setStatus, showEditor, toggleEditor } = useSimulationStore()
 
   const handleRun = () => {
     const engine    = getEngine()
     const workspace = getWorkspace()
-    if (!engine || !workspace || status === 'running') return
+    const level     = useChallengeStore.getState().activeLevel
+    if (!engine || !workspace || !level || status === 'running') return
 
     // Clear any previous result and mark running.
     useChallengeStore.getState().setResult(null)
@@ -37,26 +42,29 @@ export default function ControlPanel() {
 
     // Begin recording this run (events stream in via the interpreter sink).
     const recorder = getRecorder()
-    recorder.startSession([challenge01.id])
-    recorder.recordEvent('program_run_started', { challengeId: challenge01.id })
+    recorder.startSession([level.id])
+    recorder.recordEvent('program_run_started', { challengeId: level.id })
 
     engine.interpreter.run(workspace).then(() => {
       // Program finished naturally (all blocks executed without Stop).
       setStatus('stopped')
-      const result = challenge01.evaluate(engine.robot)
+      const result = level.evaluate(engine.robot)
       useChallengeStore.getState().setResult(result)
-      void finishSession(result.success)
+      if (result.success) markLevelCompleted(level.id)
+      void finishSession(level.id, result.success)
     })
   }
 
   const handleStop = () => {
     const engine = getEngine()
-    if (!engine) return
+    const level  = useChallengeStore.getState().activeLevel
+    if (!engine || !level) return
     engine.interpreter.stop()
     setStatus('stopped')
-    const result = challenge01.evaluate(engine.robot)
+    const result = level.evaluate(engine.robot)
     useChallengeStore.getState().setResult(result)
-    void finishSession(result.success)
+    if (result.success) markLevelCompleted(level.id)
+    void finishSession(level.id, result.success)
   }
 
   const handleReset = () => {
@@ -78,6 +86,16 @@ export default function ControlPanel() {
         <img src="/logo.png" alt="" className="h-7 w-7" />
         <span>BrickCode</span>
       </span>
+
+      {onBackToLevels && (
+        <button
+          onClick={onBackToLevels}
+          className="text-xs px-2.5 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-200"
+          title="Volver a la lista de niveles"
+        >
+          ← Niveles
+        </button>
+      )}
 
       <button
         onClick={() => getSupabase()?.auth.signOut()}

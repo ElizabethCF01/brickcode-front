@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { SimulationEngine } from '../SimulationEngine'
 import { setEngine } from '../engineSingleton'
-import { challenge01 } from '../../challenges/challenge-01'
+import { useChallengeStore } from '../../store/challengeStore'
 import { useSimulationStore } from '../../store/simulationStore'
 
 export default function SimulatorCanvas() {
@@ -19,7 +19,9 @@ export default function SimulatorCanvas() {
       if (disposed) { e.dispose(); return }
 
       engine = e
-      engine.loadChallenge(challenge01.setup.bind(challenge01))
+      // App only mounts once a level is active, so activeLevel is set here.
+      const level = useChallengeStore.getState().activeLevel
+      if (level) engine.loadChallenge(level.setup.bind(level))
       engine.startRAF()
       setEngine(engine)
       // Tell the UI whether this robot has a sensor so sensor-only panels and

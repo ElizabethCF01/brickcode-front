@@ -1,17 +1,19 @@
 import { useState } from 'react'
 import { useChallengeStore } from '../store/challengeStore'
-import { challenge01 } from '../challenges/challenge-01'
 
 export default function ChallengePanel() {
-  const { result } = useChallengeStore()
+  const result = useChallengeStore((s) => s.result)
+  const level = useChallengeStore((s) => s.activeLevel)
   const [showHints, setShowHints] = useState(false)
+
+  if (!level) return null
 
   return (
     <div className="px-4 py-3 bg-gray-850 border-t border-gray-700 text-sm shrink-0"
          style={{ backgroundColor: '#1a2332' }}>
       {/* Header row */}
       <div className="flex items-center justify-between mb-1">
-        <span className="text-yellow-300 font-bold">{challenge01.title}</span>
+        <span className="text-yellow-300 font-bold">{level.title}</span>
         <button
           onClick={() => setShowHints(h => !h)}
           className="text-gray-400 hover:text-gray-200 text-xs underline"
@@ -20,11 +22,11 @@ export default function ChallengePanel() {
         </button>
       </div>
 
-      <p className="text-gray-300 mb-2 leading-snug">{challenge01.description}</p>
+      <p className="text-gray-300 mb-2 leading-snug">{level.description}</p>
 
-      {showHints && (
+      {showHints && level.hints.length > 0 && (
         <ul className="mb-2 space-y-1">
-          {challenge01.hints.map((hint, i) => (
+          {level.hints.map((hint, i) => (
             <li key={i} className="text-gray-400 text-xs flex gap-2">
               <span className="text-yellow-400 shrink-0">💡</span>
               {hint}

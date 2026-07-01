@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import App from '../App'
+import LevelSelect from '../components/LevelSelect'
 import LoadingScreen from '../components/LoadingScreen'
 import StudentAuthGate from './StudentAuthGate'
 import EnrollmentGate from './EnrollmentGate'
 import { registerRobotBlocks } from '../blocks/definitions/robotBlocks'
 import { LDrawLibraryManager, BRICKCODE_PARTS } from '../engine/ldraw/LDrawLibraryManager'
 import { setLDrawManager } from '../engine/ldraw/ldrawSingleton'
+import { useChallengeStore } from '../store/challengeStore'
 
 // Blockly block definitions are only needed by the simulator route — registering
 // them here (not at app entry) keeps blockly out of the dashboard bundle.
@@ -32,6 +34,7 @@ function SimulatorReady() {
   const [loaded, setLoaded] = useState(0)
   const [ready, setReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const activeLevel = useChallengeStore((s) => s.activeLevel)
 
   useEffect(() => {
     let cancelled = false
@@ -60,5 +63,12 @@ function SimulatorReady() {
   }, [])
 
   if (!ready) return <LoadingScreen loaded={loaded} total={TOTAL_PARTS} error={error} />
-  return <App />
+
+  // After preload, the student picks a level; selecting one stores it and mounts
+  // the simulator. "Back to levels" clears it, remounting App fresh for the next
+  // pick (engine + scene are rebuilt per App mount in SimulatorCanvas).
+  if (!activeLevel) {
+    return <LevelSelect onSelect={(level) => useChallengeStore.getState().setActiveLevel(level)} />
+  }
+  return <App onBackToLevels={() => useChallengeStore.getState().setActiveLevel(null)} />
 }

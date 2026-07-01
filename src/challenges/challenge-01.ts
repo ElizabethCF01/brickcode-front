@@ -1,21 +1,13 @@
 import * as THREE from 'three'
-import RAPIER from '@dimforge/rapier3d-compat'
 import type { SimpleRobot } from '../interpreter/BlockInterpreter'
-import type { ChallengeResult } from '../store/challengeStore'
+import type { ChallengeEngine, ChallengeResult, LevelDefinition } from './types'
 
 // Scale: 1 world unit = 10 cm — see docs/architecture.md §Scale Convention.
 const WU_PER_CM = 0.1
 
-/**
- * Minimal engine surface that setup() needs.
- * Satisfied by SimulationEngine once it exists.
- */
-export interface ChallengeEngine {
-  world: RAPIER.World
-  scene: THREE.Scene
-}
-
-export type { ChallengeResult }
+// `ChallengeEngine` moved to ./types (shared across levels). Re-exported so the
+// existing `SimulationEngine` import keeps working.
+export type { ChallengeEngine, ChallengeResult }
 
 // ── Goal geometry ───────────────────────────────────────────────────────────
 // The robot faces −Z and drives forward toward −Z (see docs/architecture.md
@@ -40,6 +32,8 @@ export const challenge01 = {
   id:          'challenge-01',
   title:       '🏁 ¡Llega a la meta!',
   description: 'Programa el robot para que avance y se detenga dentro de la zona verde, a unos 30 cm hacia adelante.',
+  difficulty:  1,
+  tags:        ['motors'],
   hints: [
     'Usa el bloque "Mover adelante" e indica cuántos segundos avanza',
     'Ajusta la velocidad o el tiempo: si te quedas corto, aumenta; si te pasas, reduce',
@@ -128,4 +122,4 @@ export const challenge01 = {
       message: `Te pasaste: avanzaste ${forwardCm} cm. Reduce el tiempo o la velocidad.`,
     }
   },
-} as const
+} satisfies LevelDefinition
