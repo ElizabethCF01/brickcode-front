@@ -1,0 +1,2377 @@
+0 LDraw.org Configuration File
+0 Name: LDConfig.ldr
+0 Author: LDraw.org
+0 !LDRAW_ORG Configuration UPDATE 2026-04-14
+
+0 // Last update: Changed Alpha of Colour 32 Trans_Black_IR from 210 to 245
+0 // Last update: Changed Alpha of Colours 21 and 329 from 240 to 245
+0 // Last update: Changed Alpha of Colour 294 from 240 to 200
+
+0 // * LDraw and BrickLink mostly share naming conventions for their colours.
+0 // * Where possible LEGO colour numbers were used.
+0 // * The LEGO numbers, names and LDD colours are taken directly from LEGO Digital Designer.
+0 // * Colours were compared with Ryan Howerter's colour list.
+0 // * Most transparent colours were altered so that they can be displayed with their LDraw alpha level.
+0 // * Edge colours for solid, pearl, metallic, solid internal common material were calculated
+0 //   the following way:
+0 //   If the lightness value L in the HSL colours system was above 20%, a Gray with 20% relative
+0 //   luminance in the terms of RGB-Gray was used.
+0 //   If the lightness value L in the HSL colours system was below 20%, a Gray with 50% relative
+0 //   luminance in the terms of RGB-Gray was used.
+0 // * Edge colours for transparent, chrome, milky, glitter, transparent internal common material
+0 //   were calculated the following way:
+0 //   The lightness value L in the HSL colours system was lowered by 20 percentage points. If the
+0 //   lightness value L in the HSL colours system was below 20% it was raised by 20 percentage points.
+0 // * Edge colours for speckle colours are defined by the value of the MATERIAL colour.
+0 // * Rubber colours got their value from the corresponding solid or transparent colour. This applies
+0 //   also to the edge colours.
+0 // * Material Glitter colours were calculated the following way:
+0 //   The lightness value L and the hue value H in the HSL colours system was lowered by 20 percentage
+0 //   points and 20 degree. 
+
+0 // Colour definitions
+0 // LDraw Solid Colours
+0                              // LEGOID  26 - Black
+0 !COLOUR Black                                                 CODE     0   VALUE #1B2A34   EDGE #808080
+0                              // LEGOID  23 - Bright Blue
+0 !COLOUR Blue                                                  CODE     1   VALUE #1E5AA8   EDGE #333333
+0                              // LEGOID  28 - Dark Green
+0 !COLOUR Green                                                 CODE     2   VALUE #00852B   EDGE #333333
+0                              // LEGOID 107 - Bright Bluish Green
+0 !COLOUR Dark_Turquoise                                        CODE     3   VALUE #069D9F   EDGE #333333
+0                              // LEGOID  21 - Bright Red
+0 !COLOUR Red                                                   CODE     4   VALUE #B40000   EDGE #333333
+0                              // LEGOID 221 - Bright Purple
+0 !COLOUR Dark_Pink                                             CODE     5   VALUE #D3359D   EDGE #333333
+0                              // LEGOID  25 - Earth Orange
+0 !COLOUR Brown                                                 CODE     6   VALUE #543324   EDGE #1E1E1E
+0                              // LEGOID   2 - Grey
+0 !COLOUR Light_Grey                                            CODE     7   VALUE #8A928D   EDGE #333333
+0                              // LEGOID  27 - Dark Grey
+0 !COLOUR Dark_Grey                                             CODE     8   VALUE #545955   EDGE #333333
+0                              // LEGOID  45 - Light Blue
+0 !COLOUR Light_Blue                                            CODE     9   VALUE #97CBD9   EDGE #333333
+0                              // LEGOID  37 - Bright Green
+0 !COLOUR Bright_Green                                          CODE    10   VALUE #58AB41   EDGE #333333
+0                              // LEGOID 116 - Medium Bluish Green
+0 !COLOUR Light_Turquoise                                       CODE    11   VALUE #00AAA4   EDGE #333333
+0                              // LEGOID 101 - Medium Red
+0 !COLOUR Salmon                                                CODE    12   VALUE #F06D61   EDGE #333333
+0                              // LEGOID   9 - Light Reddish Violet
+0 !COLOUR Pink                                                  CODE    13   VALUE #F6A9BB   EDGE #333333
+0                              // LEGOID  24 - Bright Yellow
+0 !COLOUR Yellow                                                CODE    14   VALUE #FAC80A   EDGE #333333
+0                              // LEGOID   1 / 426 - White
+0 !COLOUR White                                                 CODE    15   VALUE #F4F4F4   EDGE #333333
+0                              // LEGOID   6 - Light Green
+0 !COLOUR Light_Green                                           CODE    17   VALUE #ADD9A8   EDGE #333333
+0                              // LEGOID   3 - Light Yellow
+0 !COLOUR Light_Yellow                                          CODE    18   VALUE #FFD67F   EDGE #333333
+0                              // LEGOID   5 - Brick Yellow
+0 !COLOUR Tan                                                   CODE    19   VALUE #D7BA8C   EDGE #333333
+0                              // LEGOID  39 - Light Bluish Violet
+0 !COLOUR Light_Violet                                          CODE    20   VALUE #AFBED6   EDGE #333333
+0                              // LEGOID 104 - Bright Violet
+0 !COLOUR Purple                                                CODE    22   VALUE #671F81   EDGE #333333
+0                              // LEGOID 196 - Dark Royal Blue
+0 !COLOUR Dark_Blue_Violet                                      CODE    23   VALUE #0E3E9A   EDGE #333333
+0                              // LEGOID 106 - Bright Orange
+0 !COLOUR Orange                                                CODE    25   VALUE #D67923   EDGE #333333
+0                              // LEGOID 124 - Bright Reddish Violet
+0 !COLOUR Magenta                                               CODE    26   VALUE #901F76   EDGE #333333
+0                              // LEGOID 119 - Bright Yellowish Green
+0 !COLOUR Lime                                                  CODE    27   VALUE #A5CA18   EDGE #333333
+0                              // LEGOID 138 - Sand Yellow
+0 !COLOUR Dark_Tan                                              CODE    28   VALUE #897D62   EDGE #333333
+0                              // LEGOID 222 - Light Purple
+0 !COLOUR Bright_Pink                                           CODE    29   VALUE #FF9ECD   EDGE #333333
+0                              // LEGOID 324 - Medium Lavender
+0 !COLOUR Medium_Lavender                                       CODE    30   VALUE #A06EB9   EDGE #333333
+0                              // LEGOID 325 - Lavender
+0 !COLOUR Lavender                                              CODE    31   VALUE #CDA4DE   EDGE #333333
+0                              // LEGOID  36 - Light Yellowish Orange
+0 !COLOUR Very_Light_Orange                                     CODE    68   VALUE #FDC383   EDGE #333333
+0                              // LEGOID 198 - Bright Reddish Lilac
+0 !COLOUR Bright_Reddish_Lilac                                  CODE    69   VALUE #8A12A8   EDGE #333333
+0                              // LEGOID 192 - Reddish Brown
+0 !COLOUR Reddish_Brown                                         CODE    70   VALUE #5F3109   EDGE #808080
+0                              // LEGOID 194 - Medium Stone Grey
+0 !COLOUR Light_Bluish_Grey                                     CODE    71   VALUE #969696   EDGE #333333
+0                              // LEGOID 199 - Dark Stone Grey
+0 !COLOUR Dark_Bluish_Grey                                      CODE    72   VALUE #646464   EDGE #333333
+0                              // LEGOID 102 - Medium Blue
+0 !COLOUR Medium_Blue                                           CODE    73   VALUE #7396C8   EDGE #333333
+0                              // LEGOID  29 - Medium Green
+0 !COLOUR Medium_Green                                          CODE    74   VALUE #7FC475   EDGE #333333
+0                              // LEGOID 223 - Light Pink
+0 !COLOUR Light_Pink                                            CODE    77   VALUE #FECCCF   EDGE #333333
+0                              // LEGOID 283 - Light Nougat
+0 !COLOUR Light_Nougat                                          CODE    78   VALUE #FFC995   EDGE #333333
+0                              // LEGOID 312 - Medium Nougat
+0 !COLOUR Medium_Nougat                                         CODE    84   VALUE #AA7D55   EDGE #333333
+0                              // LEGOID 268 - Medium Lilac
+0 !COLOUR Medium_Lilac                                          CODE    85   VALUE #441A91   EDGE #333333
+0                              // LEGOID 217 - Brown
+0 !COLOUR Light_Brown                                           CODE    86   VALUE #7B5D41   EDGE #333333
+0                              // LEGOID 195 - Medium Royal Blue
+0 !COLOUR Blue_Violet                                           CODE    89   VALUE #1C58A7   EDGE #333333
+0                              // LEGOID  18 - Nougat
+0 !COLOUR Nougat                                                CODE    92   VALUE #BB805A   EDGE #333333
+0                              // LEGOID 100 - Light Red
+0 !COLOUR Light_Salmon                                          CODE   100   VALUE #F9B7A5   EDGE #333333
+0                              // LEGOID 110 - Bright Bluish Violet
+0 !COLOUR Violet                                                CODE   110   VALUE #26469A   EDGE #333333
+0                              // LEGOID 112 - Medium Bluish Violet
+0 !COLOUR Medium_Violet                                         CODE   112   VALUE #4861AC   EDGE #333333
+0                              // LEGOID 115 - Medium Yellowish Green
+0 !COLOUR Medium_Lime                                           CODE   115   VALUE #B7D425   EDGE #333333
+0                              // LEGOID 118 - Light Bluish Green
+0 !COLOUR Aqua                                                  CODE   118   VALUE #9CD6CC   EDGE #333333
+0                              // LEGOID 120 - Light Yellowish Green
+0 !COLOUR Light_Lime                                            CODE   120   VALUE #DEEA92   EDGE #333333
+0                              // LEGOID 121 - Medium Yellowish Orange
+0 !COLOUR Light_Orange                                          CODE   121   VALUE #F89A39   EDGE #333333
+0                              // LEGOID 123 - Bright Reddish Orange
+0 !COLOUR Dark_Salmon                                           CODE   123   VALUE #EE5434   EDGE #333333
+0                              // LEGOID 125 - Light Orange
+0 !COLOUR Spud_Orange                                           CODE   125   VALUE #F9A777   EDGE #333333
+0                              // LEGOID 128 - Dark Nougat
+0 !COLOUR Dark_Nougat                                           CODE   128   VALUE #AD6140   EDGE #333333
+0                              // LEGOID 208 - Light Stone Grey
+0 !COLOUR Very_Light_Bluish_Grey                                CODE   151   VALUE #C8C8C8   EDGE #333333
+0                              // LEGOID 180 - Curry
+0 !COLOUR Dark_Yellow                                           CODE   180   VALUE #DD982E   EDGE #333333
+0                              // LEGOID 191 - Flame Yellowish Orange
+0 !COLOUR Bright_Light_Orange                                   CODE   191   VALUE #FCAC00   EDGE #333333
+0                              // LEGOID 212 - Light Royal Blue
+0 !COLOUR Bright_Light_Blue                                     CODE   212   VALUE #9DC3F7   EDGE #333333
+0                              // LEGOID 213 - Medium Royal Blue
+0 !COLOUR Medium_Blue_Violet                                    CODE   213   VALUE #476FB6   EDGE #333333
+0                              // LEGOID 216 - Rust
+0 !COLOUR Rust                                                  CODE   216   VALUE #872B17   EDGE #333333
+0                              // LEGOID 218 - Reddish Lilac
+0 !COLOUR Reddish_Lilac                                         CODE   218   VALUE #8E5597   EDGE #333333
+0                              // LEGOID 219 - Lilac
+0 !COLOUR Lilac                                                 CODE   219   VALUE #564E9D   EDGE #333333
+0                              // LEGOID 220 - Light Lilac
+0 !COLOUR Light_Lilac                                           CODE   220   VALUE #9195CA   EDGE #333333
+0                              // LEGOID 225 - Warm Yellowish Orange
+0 !COLOUR Warm_Yellowish_Orange                                 CODE   225   VALUE #FAA964   EDGE #333333
+0                              // LEGOID 226 / 427 - Cool Yellow
+0 !COLOUR Bright_Light_Yellow                                   CODE   226   VALUE #FFEC6C   EDGE #333333
+0                              // LEGOID 232 - Dove Blue
+0 !COLOUR Sky_Blue                                              CODE   232   VALUE #77C9D8   EDGE #333333
+0                              // LEGOID 140 / 428 - Earth Blue
+0 !COLOUR Dark_Blue                                             CODE   272   VALUE #19325A   EDGE #333333
+0                              // LEGOID 141 - Earth Green
+0 !COLOUR Dark_Green                                            CODE   288   VALUE #00451A   EDGE #808080
+0                              // LEGOID 295 - Flamingo Pink
+0 !COLOUR Flamingo_Pink                                         CODE   295   VALUE #FF94C2   EDGE #333333
+0                              // LEGOID 308 - Dark Brown
+0 !COLOUR Dark_Brown                                            CODE   308   VALUE #352100   EDGE #808080
+0                              // LEGOID  11 - Pastel Blue
+0 !COLOUR Maersk_Blue                                           CODE   313   VALUE #ABD9FF   EDGE #333333
+0                              // LEGOID 154 - New Dark Red
+0 !COLOUR Dark_Red                                              CODE   320   VALUE #720012   EDGE #333333
+0                              // LEGOID 321 - Dark Azur
+0 !COLOUR Dark_Azure                                            CODE   321   VALUE #469BC3   EDGE #333333
+0                              // LEGOID 322 - Medium Azur
+0 !COLOUR Medium_Azure                                          CODE   322   VALUE #68C3E2   EDGE #333333
+0                              // LEGOID 323 - Aqua
+0 !COLOUR Light_Aqua                                            CODE   323   VALUE #D3F2EA   EDGE #333333
+0                              // LEGOID 326 - Spring Yellowish Green
+0 !COLOUR Yellowish_Green                                       CODE   326   VALUE #E2F99A   EDGE #333333
+0                              // LEGOID 330 - Olive Green
+0 !COLOUR Olive_Green                                           CODE   330   VALUE #77774E   EDGE #333333
+0                              // LEGOID 153 - Sand Red
+0 !COLOUR Sand_Red                                              CODE   335   VALUE #88605E   EDGE #333333
+0                              // LEGOID  16 - Pink
+0 !COLOUR Medium_Dark_Pink                                      CODE   351   VALUE #F785B1   EDGE #333333
+0                              // LEGOID 353 - Vibrant Coral
+0 !COLOUR Coral                                                 CODE   353   VALUE #FF6D77   EDGE #333333
+0                              // LEGOID  12 - Light Orange Brown
+0 !COLOUR Earth_Orange                                          CODE   366   VALUE #D86D2C   EDGE #333333
+0                              // LEGOID 368 - Vibrant Yellow 
+0 !COLOUR Neon_Yellow                                           CODE   368   VALUE #EDFF21   EDGE #333333
+0                              // LEGOID 370 - Medium Brown
+0 !COLOUR Medium_Brown                                          CODE   370   VALUE #755945   EDGE #333333
+0                              // LEGOID 371 - Warm Tan
+0 !COLOUR Medium_Tan                                            CODE   371   VALUE #CCA373   EDGE #333333
+0                              // LEGOID 136 - Sand Violet
+0 !COLOUR Sand_Purple                                           CODE   373   VALUE #75657D   EDGE #333333
+0                              // LEGOID 151 - Sand Green
+0 !COLOUR Sand_Green                                            CODE   378   VALUE #708E7C   EDGE #333333
+0                              // LEGOID 135 - Sand Blue
+0 !COLOUR Sand_Blue                                             CODE   379   VALUE #70819A   EDGE #333333
+0                              // LEGOID 402 - Reddish Orange
+0 !COLOUR Reddish_Orange                                        CODE   402   VALUE #CA4C0B   EDGE #333333
+0                              // LEGOID 422 - Sienna Brown
+0 !COLOUR Sienna_Brown                                          CODE   422   VALUE #915C3C   EDGE #333333
+0                              // LEGOID 423 - Umber Brown 
+0 !COLOUR Umber_Brown                                           CODE   423   VALUE #543F33   EDGE #333333
+0                              // LEGOID 424 - Ochre Yellow 
+0 !COLOUR Ochre_Yellow                                          CODE   424   VALUE #DD9E47   EDGE #333333
+0                              // LEGOID  430 - Warm Pink
+0 !COLOUR Warm_Pink                                             CODE   430   VALUE #F79B9B   EDGE #333333
+0                              // LEGOID  431 - Blue Violet
+0 !COLOUR Bright_Blue_Violet                                    CODE   431   VALUE #665EA7   EDGE #333333
+0                              // LEGOID   4 - Brick Red
+0 !COLOUR Fabuland_Brown                                        CODE   450   VALUE #D27744   EDGE #333333
+0                              // LEGOID 105 - Bright Yellowish Orange
+0 !COLOUR Medium_Orange                                         CODE   462   VALUE #F58624   EDGE #333333
+0                              // LEGOID  38 - Dark Orange
+0 !COLOUR Dark_Orange                                           CODE   484   VALUE #91501C   EDGE #333333
+0                              // LEGOID 103 - Light Grey
+0 !COLOUR Very_Light_Grey                                       CODE   503   VALUE #BCB4A5   EDGE #333333
+0                              // LEGOID  13 - Red Orange
+0 !COLOUR Fabuland_Red                                          CODE   508   VALUE #C65127   EDGE #333333
+0                              // LEGOID  19 - Light Brown
+0 !COLOUR Fabuland_Orange                                       CODE   509   VALUE #CF8A47   EDGE #333333
+0                              // LEGOID  14 - Pastel Green
+0 !COLOUR Fabuland_Lime                                         CODE   510   VALUE #ACE35A   EDGE #333333
+0                              // LEGOID  15 - Lemon
+0 !COLOUR Lemon                                                 CODE 10015   VALUE #FFF230   EDGE #333333
+0                              // LEGOID  17 - Rose
+0 !COLOUR Rose_Pink                                             CODE 10017   VALUE #FF9494   EDGE #333333
+0                              // LEGOID  22 - Medium Reddish Violet
+0 !COLOUR Yellowish_Dark_Pink                                   CODE 10022   VALUE #D05098   EDGE #333333
+
+
+0 // LDraw Transparent Colours
+0                              // LEGOID 109 / 355 - Trans Black IR
+0 !COLOUR Trans_Black_IR_Lens                                   CODE    32   VALUE #000000   EDGE #333333   ALPHA 245
+0                              // LEGOID  43 - Transparent Blue
+0 !COLOUR Trans_Dark_Blue                                       CODE    33   VALUE #0020A0   EDGE #000B38   ALPHA 128
+0                              // LEGOID  48 - Transparent Green
+0 !COLOUR Trans_Green                                           CODE    34   VALUE #237841   EDGE #174F2B   ALPHA 128
+0                              // LEGOID 311 - Transparent Bright Green 
+0 !COLOUR Trans_Bright_Green                                    CODE    35   VALUE #56E646   EDGE #27AF18   ALPHA 128
+0                              // LEGOID  41 - Transparent Red
+0 !COLOUR Trans_Red                                             CODE    36   VALUE #C91A09   EDGE #660D05   ALPHA 128
+0                              // LEGOID 113 - Transparent Medium Reddish Violet
+0 !COLOUR Trans_Dark_Pink                                       CODE    37   VALUE #DF6695   EDGE #B9275F   ALPHA 128
+0                              // LEGOID  47 - Transparent Fluorescent Reddish Orange
+0 !COLOUR Trans_Neon_Orange                                     CODE    38   VALUE #FF800D   EDGE #A85100   ALPHA 128
+0                              // LEGOID 229 - Transparent Light Bluish Green
+0 !COLOUR Trans_Very_Light_Blue                                 CODE    39   VALUE #C1DFF0   EDGE #6FB4DC   ALPHA 128
+0                              // LEGOID 111 - Transparent Brown 
+0 !COLOUR Trans_Brown                                           CODE    40   VALUE #635F52   EDGE #2A2823   ALPHA 128
+0                              // LEGOID 143 - Transparent Fluorescent Blue
+0 !COLOUR Trans_Medium_Blue                                     CODE    41   VALUE #559AB7   EDGE #326276   ALPHA 128
+0                              // LEGOID  49 - Transparent Fluorescent Green
+0 !COLOUR Trans_Neon_Green                                      CODE    42   VALUE #C0FF00   EDGE #739900   ALPHA 128
+0                              // LEGOID  42 - Transparent Light Blue
+0 !COLOUR Trans_Light_Blue                                      CODE    43   VALUE #AEE9EF   EDGE #59D1DE   ALPHA 128
+0                              // LEGOID 236 - Transparent Bright Reddish Lilac
+0 !COLOUR Trans_Bright_Reddish_Lilac                            CODE    44   VALUE #96709F   EDGE #5F4365   ALPHA 128
+0                              // LEGOID 230 - Transparent Bright Pink
+0 !COLOUR Trans_Pink                                            CODE    45   VALUE #FC97AC   EDGE #F9345B   ALPHA 128
+0                              // LEGOID  44 - Transparent Yellow
+0 !COLOUR Trans_Yellow                                          CODE    46   VALUE #F5CD2F   EDGE #B49208   ALPHA 128
+0                              // LEGOID  40 - Transparent
+0 !COLOUR Trans_Clear                                           CODE    47   VALUE #FCFCFC   EDGE #C9C9C9   ALPHA 128
+0                              // LEGOID 126 - Transparent Bright Bluish Violet
+0 !COLOUR Trans_Purple                                          CODE    52   VALUE #A5A5CB   EDGE #6464A6   ALPHA 128
+0                              // LEGOID 157 - Transparent Fluorescent Yellow
+0 !COLOUR Trans_Neon_Yellow                                     CODE    54   VALUE #DAB000   EDGE #755E00   ALPHA 128
+0                              // LEGOID 182 - Trans Bright Orange
+0 !COLOUR Trans_Orange                                          CODE    57   VALUE #F08F1C   EDGE #9E5C0A   ALPHA 128
+0                              // LEGOID 158 - Transparent Fluorescent Red
+0 !COLOUR Trans_Neon_Red                                        CODE   158   VALUE #F18EBB   EDGE #E63384   ALPHA 128
+0                              // LEGOID 227 - Transparent Bright Yellowish Green
+0 !COLOUR Trans_Bright_Light_Green                              CODE   227  VALUE #B5D96C    EDGE #86B22E   ALPHA 128
+0                              // LEGOID 231 - Transparent Flame Yellowish Orange
+0 !COLOUR Trans_Bright_Light_Orange                             CODE   231  VALUE #FCB76D    EDGE #FA860A   ALPHA 128
+0                              // LEGOID 234 - Transparent Fire Yellow
+0 !COLOUR Trans_Fire_Yellow                                     CODE   234  VALUE #FBE890    EDGE #F7D22B   ALPHA 128
+0                              // LEGOID 284 - Transparent Reddish Lilac
+0 !COLOUR Trans_Reddish_Lilac                                   CODE   284  VALUE #C281A5    EDGE #944771   ALPHA 128
+0                              // LEGOID 285 - Transparent Light Green 
+0 !COLOUR Trans_Light_Green                                     CODE   285  VALUE #7DC291    EDGE #46955D   ALPHA 128
+0                              // LEGOID 293 - Transparent Light Royal Blue
+0 !COLOUR Trans_Light_Blue_Violet                               CODE   293  VALUE #6BABE4    EDGE #247BC6   ALPHA 128
+0                              // LEGOID 375 - Transparent Black
+0 !COLOUR Trans_Black                                           CODE 10375  VALUE #212121    EDGE #545454   ALPHA 128
+0 !COLOUR Trans_White                                           CODE 11015  VALUE #F4F4F4    EDGE #C1C1C1   ALPHA 174
+0 !COLOUR Trans_Tan                                             CODE 11019  VALUE #D7BA8C    EDGE #BC8D41   ALPHA 128
+
+
+0 // LDraw Chrome Plated Colours
+0                              // LEGO - Anti.Gold
+0 !COLOUR Chrome_Antique_Brass                                  CODE  60   VALUE #645A4C   EDGE #665B4D                               CHROME
+0                              // LEGO - Bluemetal
+0 !COLOUR Chrome_Blue                                           CODE  61   VALUE #6C96BF   EDGE #3D638A                               CHROME
+0 !COLOUR Chrome_Green                                          CODE  62   VALUE #3CB371   EDGE #226741                               CHROME
+0                              // LEGO - Metalred
+0 !COLOUR Chrome_Pink                                           CODE  63   VALUE #AA4D8E   EDGE #632C52                               CHROME
+0 !COLOUR Chrome_Black                                          CODE  64   VALUE #1B2A34   EDGE #3D5F76                               CHROME
+0                              // LEGOID 310 - Metalized Gold
+0 !COLOUR Chrome_Gold                                           CODE 334   VALUE #DFC176   EDGE #C2982E                               CHROME
+0                              // LEGOID 309 - Metalized Silver
+0 !COLOUR Chrome_Silver                                         CODE 383   VALUE #CECECE   EDGE #9C9C9C                               CHROME
+
+
+0 // LDraw Pearlescent Plastic Colours
+0                              // LEGOID 149 - Metallic Black
+0 !COLOUR Pearl_Black                                           CODE  83   VALUE #0A1327   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 139 - Copper
+0 !COLOUR Copper                                                CODE 134   VALUE #764D3B   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 131 - Silver
+0 !COLOUR Pearl_Light_Grey                                      CODE 135   VALUE #A0A0A0   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 145 - Sand Blue Metallic
+0 !COLOUR Metallic_Blue                                         CODE 137   VALUE #5B7590   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 127 - Gold
+0 !COLOUR Pearl_Light_Gold                                      CODE 142   VALUE #DEAC66   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 147 - Metallic Sand Yellow
+0 !COLOUR Pearl_Dark_Gold                                       CODE 147   VALUE #83724F   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 148 - Metallic Dark Grey
+0 !COLOUR Pearl_Dark_Grey                                       CODE 148   VALUE #484D48   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 150 - Metallic Light Grey
+0 !COLOUR Pearl_Very_Light_Grey                                 CODE 150   VALUE #989B99   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 176 - Red Flip-flop
+0 !COLOUR Pearl_Red                                             CODE 176   VALUE #945148   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 178 - Yellow Flip-flop
+0 !COLOUR Pearl_Yellow                                          CODE 178   VALUE #AB673A   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 179 - Silver Flip-flop
+0 !COLOUR Pearl_Silver                                          CODE 179   VALUE #898788   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 183 - Metallic White
+0 !COLOUR Pearl_White                                           CODE 183   VALUE #F6F2DF   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 184 - Metallic Bright Red
+0 !COLOUR Metallic_Bright_Red                                   CODE 184   VALUE #D60026   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 185 - Metallic Bright Blue
+0 !COLOUR Metallic_Bright_Blue                                  CODE 185   VALUE #0059A3   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 186 - Metallic Dark Green
+0 !COLOUR Metallic_Dark_Green                                   CODE 186   VALUE #008E3C   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 187 - Metallic Earth Orange 
+0 !COLOUR Pearl_Brown                                           CODE 187   VALUE #57392C   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 189 - Reddish Gold
+0 !COLOUR Reddish_Gold                                          CODE 189   VALUE #AC8247   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 200 - Lemon Metallic
+0 !COLOUR Lemon_Metallic                                        CODE 200   VALUE #708224   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 296 - Cool Silver
+0 !COLOUR Cool_Silver                                           CODE 296   VALUE #ADADAD   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 297 - Warm Gold
+0 !COLOUR Pearl_Gold                                            CODE 297   VALUE #AA7F2E   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 315 - Silver Metallic
+0 !COLOUR Flat_Silver                                           CODE 315   VALUE #8C8C8C   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 316 - Titanium Metallic
+0 !COLOUR Titanium_Metallic                                     CODE 316   VALUE #3E3C39   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 342 - Conductive Black
+0 !COLOUR Conductive_Black                                      CODE 342   VALUE #3E3C39   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 346 - Copper Metallic
+0 !COLOUR Reddish_Copper                                        CODE 346   VALUE #803D07   EDGE #333333                               PEARLESCENT
+
+
+0 // LDraw Metallic Paint Colours
+0                              // LEGOID 298 / 336 - Cool Silver Drum Lacq / Silver Ink
+0 !COLOUR Metallic_Silver                                       CODE    80   VALUE #767676   EDGE #333333                               METAL
+0                              // LEGO Gr.Metal / BricksetID 910 - Metallic Green
+0 !COLOUR Metallic_Green                                        CODE    81   VALUE #C2C06F   EDGE #333333                               METAL
+0                              // LEGOID 299 / 335 - Warm Gold Drum Lacq / Gold Ink
+0 !COLOUR Metallic_Gold                                         CODE    82   VALUE #DBAC34   EDGE #333333                               METAL
+0                              // LEGOID 337 - Titanium
+0 !COLOUR Metallic_Dark_Grey                                    CODE    87   VALUE #3E3C39   EDGE #333333                               METAL
+0                              // LEGOID 300 / 334 - Copper Drum Lacq / Copper Ink
+0 !COLOUR Metallic_Copper                                       CODE   300   VALUE #C27F53   EDGE #333333                               METAL
+0                              // LEGOID 344 - Cyan Metallic Ink
+0 !COLOUR Metallic_Light_Blue                                   CODE 10045   VALUE #97CBD9   EDGE #333333                               METAL
+0                              // BricksetID 911 - Metallic Pink (Clikits)
+0 !COLOUR Metallic_Pink                                         CODE 10046   VALUE #AD659A   EDGE #333333                               METAL
+0                              // LEGOID 345 - Magenta Metallic Ink
+0 !COLOUR Metallic_Light_Pink                                   CODE 10049   VALUE #FECCCF   EDGE #333333                               METAL
+
+
+0 // LDraw Fluorescent Paint Colours
+0                              // LEGOID 332 - Fluorescent Red Ink
+0 !COLOUR Fluorescent_Red_Ink                                   CODE   332   VALUE #D06D4F   EDGE #333333
+0                              // LEGOID 333 - Fluorescent Green Ink
+0 !COLOUR Fluorescent_Green_Ink                                 CODE   333   VALUE #DBEA7A   EDGE #333333
+
+
+0 // LDraw Milky Colours
+0                              // LEGOID 50 - Phosphorescent White
+0 !COLOUR Glow_In_Dark_Opaque                                   CODE    21   VALUE #E0FFB0   EDGE #B8FF4D   ALPHA 245   LUMINANCE 15
+0                              // LEGOID  20 - Nature
+0 !COLOUR Milky_White                                           CODE    79   VALUE #EEEEEE   EDGE #BABABA   ALPHA 240
+0                              // LEGOID 294 - Phosphorescent Green 
+0 !COLOUR Glow_In_Dark_Trans                                    CODE   294   VALUE #BDC6AD   EDGE #8D9D72   ALPHA 200   LUMINANCE 15
+0                              // LEGOID 329 - White Glow
+0 !COLOUR Glow_In_Dark_White                                    CODE   329   VALUE #F5F3D7   EDGE #E0DA85   ALPHA 245   LUMINANCE 15
+
+
+0 // LDraw Glitter Colours
+0                              // LEGOID 114 - Transparent Medium Reddish-Violet w. Glitter 2%
+0 !COLOUR Glitter_Trans_Dark_Pink                               CODE   114   VALUE #DF6695   EDGE #B9275F   ALPHA 128                   MATERIAL GLITTER VALUE #B92790 FRACTION 0.17 VFRACTION 0.2 SIZE 1
+0                              // LEGOID 117 - Transparent Glitter
+0 !COLOUR Glitter_Trans_Clear                                   CODE   117   VALUE #EEEEEE   EDGE #BABABA   ALPHA 128                   MATERIAL GLITTER VALUE #FFFFFF FRACTION 0.08 VFRACTION 0.1 SIZE 1
+0                              // LEGOID 129 - Transparent Bright Bluish Violet w. Glitter 2%
+0 !COLOUR Glitter_Trans_Purple                                  CODE   129   VALUE #640061   EDGE #000000   ALPHA 128                   MATERIAL GLITTER VALUE #8F00CC FRACTION 0.03 VFRACTION 0.4 SIZE 1
+0                              // LEGOID 302 - Transparent Light Blue with Glitter 2%
+0 !COLOUR Glitter_Trans_Light_Blue                              CODE   302   VALUE #AEE9EF   EDGE #59D1DE   ALPHA 128                   MATERIAL GLITTER VALUE #59DEBF FRACTION 0.17 VFRACTION 0.2 SIZE 1
+0                              // LEGOID 339 - Transparent Fluorescent Green with Glitter 2%
+0 !COLOUR Glitter_Trans_Neon_Green                              CODE   339   VALUE #C0FF00   EDGE #739900   ALPHA 128                   MATERIAL GLITTER VALUE #998C00 FRACTION 0.17 VFRACTION 0.2 SIZE 1 
+0                              // LEGOID 341 - Transparent Bright Orange with Glitter 2%
+0 !COLOUR Glitter_Trans_Orange                                  CODE   341   VALUE #F08F1C   EDGE #9E5C0A   ALPHA 128                   MATERIAL GLITTER VALUE #9E2A0A FRACTION 0.17 VFRACTION 0.2 SIZE 1
+0                              // LEGOID 351 - Transparent Bright Green with Glitter 2%
+0 !COLOUR Glitter_Trans_Bright_Green                            CODE 10351   VALUE #56E646   EDGE #27AF18   ALPHA 128                   MATERIAL GLITTER VALUE #59AF18 FRACTION 0.17 VFRACTION 0.2 SIZE 1
+
+
+0 // LDraw Opalescent Colours
+0                              // LEGOID 360 - Transparent Clear Opal
+0 !COLOUR Opal_Trans_Clear                                      CODE   360   VALUE #FCFCFC   EDGE #C9C9C9   ALPHA 240   LUMINANCE 5     MATERIAL GLITTER VALUE #FFFFFF FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 362 - Transparent Blue Opal
+0 !COLOUR Opal_Trans_Light_Blue                                 CODE   362   VALUE #AEE9EF   EDGE #59D1DE   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #59DEBF FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 363 - Transparent Brown Opal
+0 !COLOUR Opal_Trans_Black                                      CODE   363   VALUE #635F52   EDGE #2A2823   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #7781C9 FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 364 - Transparent Medium Reddish Violet Opal
+0 !COLOUR Opal_Trans_Dark_Pink                                  CODE   364   VALUE #DF6695   EDGE #B9275F   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #B92790 FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 365 - Transparent Violet Opal
+0 !COLOUR Opal_Trans_Purple                                     CODE   365   VALUE #671F81   EDGE #441456   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #2F1456 FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 367 - Transparent Green Opal
+0 !COLOUR Opal_Trans_Green                                      CODE   367   VALUE #237841   EDGE #174F2B   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #0B270B FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 376 - Transparent Yellow Opalescence
+0 !COLOUR Opal_Trans_Yellow                                     CODE   376   VALUE #F5CD2F   EDGE #B49208   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #B45908 FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 366 - Transparent Blue Opal 
+0 !COLOUR Opal_Trans_Dark_Blue                                  CODE 10366   VALUE #0020A0   EDGE #000B38   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #001D38 FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+
+
+0 // LDraw Speckle Colours
+0                               // LEGOID 306 - Copper, Diffuse
+0 !COLOUR Speckle_Black_Copper                                  CODE  75     VALUE #000000   EDGE #AB6038                               MATERIAL SPECKLE VALUE #AB6038 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
+0 !COLOUR Speckle_Dark_Bluish_Grey_Silver                       CODE  76     VALUE #635F61   EDGE #898788                               MATERIAL SPECKLE VALUE #898788 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
+0                               // LEGOID 304 - Cool Silver, Diffuse
+0 !COLOUR Speckle_Black_Silver                                  CODE 132     VALUE #000000   EDGE #898788                               MATERIAL SPECKLE VALUE #898788 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
+0                               // LEGOID 305 - Warm Gold Diffuse
+0 !COLOUR Speckle_Black_Gold                                    CODE 133     VALUE #000000   EDGE #DBAC34                               MATERIAL SPECKLE VALUE #DBAC34 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
+
+
+0 // LDraw Modulex Colours
+0                              // MODULEXID  0 / 10 - Clear
+0 !COLOUR Modulex_Clear                                         CODE 30000   VALUE #FCFCFC   EDGE #C9C9C9      ALPHA 128
+0                              // MODULEXID  1 / 31 - White
+0 !COLOUR Modulex_White                                         CODE 30001   VALUE #F4F4F4   EDGE #333333
+0                              // MODULEXID  2 - Grey
+0 !COLOUR Modulex_Light_Grey                                    CODE 30002   VALUE #8A928D   EDGE #333333
+0                              // MODULEXID  3 / 57 - Black
+0 !COLOUR Modulex_Black                                         CODE 30003   VALUE #34434D   EDGE #333333
+0                              // MODULEXID  4 - Terracotta
+0 !COLOUR Modulex_Terracotta                                    CODE 30004   VALUE #D27744   EDGE #333333
+0                              // MODULEXID  5 - Buff
+0 !COLOUR Modulex_Buff                                          CODE 30005   VALUE #D7BA8C   EDGE #333333
+0                              // MODULEXID  6 - Ocher Yellow
+0 !COLOUR Modulex_Ochre_Yellow                                  CODE 30006   VALUE #FED557   EDGE #333333
+0                              // MODULEXID  7 - Olive Green
+0 !COLOUR Modulex_Olive_Green                                   CODE 30007   VALUE #7C9051   EDGE #333333
+0                              // MODULEXID  8 - Teal Blue
+0 !COLOUR Modulex_Teal_Blue                                     CODE 30008   VALUE #467083   EDGE #333333
+0                              // MODULEXID  9 - Brown
+0 !COLOUR Modulex_Brown                                         CODE 30009   VALUE #907450   EDGE #333333
+0                              // MODULEXID  10 - Strong Red
+0 !COLOUR Modulex_Strong_Red                                    CODE 30010   VALUE #B40000   EDGE #333333
+0                              // MODULEXID  11 - Pastel Blue
+0 !COLOUR Modulex_Pastel_Blue                                   CODE 30011   VALUE #ABD9FF   EDGE #333333
+0                              // MODULEXID  12 - Orange
+0 !COLOUR Modulex_Orange                                        CODE 30012   VALUE #D86D2C   EDGE #333333
+0                              // MODULEXID  13 - Red
+0 !COLOUR Modulex_Red                                           CODE 30013   VALUE #C65127   EDGE #333333
+0                              // MODULEXID  14 - Pastel Green
+0 !COLOUR Modulex_Pastel_Green                                  CODE 30014   VALUE #78FC78   EDGE #333333
+0                              // MODULEXID  15 - Lemon
+0 !COLOUR Modulex_Lemon                                         CODE 30015   VALUE #FFF230   EDGE #333333
+0                              // MODULEXID  16 - Pink
+0 !COLOUR Modulex_Pink                                          CODE 30016   VALUE #F785B1   EDGE #333333
+0                              // MODULEXID  32 - Grey
+0 !COLOUR Modulex_Light_Bluish_Grey                             CODE 30032   VALUE #AFB5C7   EDGE #333333
+0                              // MODULEXID  33 - Pink Red
+0 !COLOUR Modulex_Pink_Red                                      CODE 30033   VALUE #F45C40   EDGE #333333
+0                              // MODULEXID  34 - Aqua Green
+0 !COLOUR Modulex_Aqua_Green                                    CODE 30034   VALUE #27867E   EDGE #333333
+0                              // MODULEXID  35 - Light Yellow
+0 !COLOUR Modulex_Light_Yellow                                  CODE 30035   VALUE #FFE371   EDGE #333333
+0                              // MODULEXID  37 - Violet
+0 !COLOUR Modulex_Violet                                        CODE 30037   VALUE #BD7D85   EDGE #333333
+0                              // MODULEXID  38 - Medium Blue
+0 !COLOUR Modulex_Medium_Blue                                   CODE 30038   VALUE #61AFFF   EDGE #333333
+0                              // MODULEXID  39 - Light Orange
+0 !COLOUR Modulex_Light_Orange                                  CODE 30039   VALUE #F7AD63   EDGE #333333
+0                              // MODULEXID  40 - Charcoal Grey
+0 !COLOUR Modulex_Charcoal_Grey                                 CODE 30040   VALUE #595D60   EDGE #333333
+0                              // MODULEXID  54 - Brown (Bricklink 131 Mx Tile Brown)
+0 !COLOUR Modulex_Dark_Brown                                    CODE 30054   VALUE #330000   EDGE #808080
+0                              // MODULEXID  80 - White
+0 !COLOUR Modulex_Foil_White                                    CODE 30080   VALUE #F4F4F4   EDGE #333333 
+0                              // MODULEXID  81 - Black
+0 !COLOUR Modulex_Foil_Black                                    CODE 30081   VALUE #34434D   EDGE #333333 
+0                              // MODULEXID  82 - Dark Grey
+0 !COLOUR Modulex_Foil_Dark_Grey                                CODE 30082   VALUE #595D60   EDGE #333333 
+0                              // MODULEXID  83 - Light Grey
+0 !COLOUR Modulex_Foil_Light_Grey                               CODE 30083   VALUE #9C9C9C   EDGE #333333 
+0                              // MODULEXID  84 - Dark Green
+0 !COLOUR Modulex_Foil_Dark_Green                               CODE 30084   VALUE #006400   EDGE #808080 
+0                              // MODULEXID  85 - Light Green
+0 !COLOUR Modulex_Foil_Light_Green                              CODE 30085   VALUE #7DB538   EDGE #333333 
+0                              // MODULEXID  86 - Dark Blue
+0 !COLOUR Modulex_Foil_Dark_Blue                                CODE 30086   VALUE #0057A6   EDGE #333333 
+0                              // MODULEXID  87 - Light Blue
+0 !COLOUR Modulex_Foil_Light_Blue                               CODE 30087   VALUE #68AECE   EDGE #333333 
+0                              // MODULEXID  88 - Violet
+0 !COLOUR Modulex_Foil_Violet                                   CODE 30088   VALUE #4B0082   EDGE #333333 
+0                              // MODULEXID  89 - Dark Red
+0 !COLOUR Modulex_Foil_Dark_Red                                 CODE 30089   VALUE #8B0000   EDGE #333333 
+0                              // MODULEXID  90 - Yellow
+0 !COLOUR Modulex_Foil_Yellow                                   CODE 30090   VALUE #FED557   EDGE #333333 
+0                              // MODULEXID  91 - Orange
+0 !COLOUR Modulex_Foil_Orange                                   CODE 30091   VALUE #F7AD63   EDGE #333333
+0                              // MODULEXID  7 - Grey
+0 !COLOUR Modulex_Dark_Grey                                     CODE 31000    VALUE #6B5A5A   EDGE #333333
+0                              // MODULEXID  8 - Blue
+0 !COLOUR Modulex_Blue                                          CODE 31001    VALUE #0057A6   EDGE #333333
+0                              // (Mx Very Light Bluish Gray for Printed Plancopy Tiles)
+0 !COLOUR Modulex_Very_Light_Grey                               CODE 31002    VALUE #D9D5CC   EDGE #333333
+
+
+0 // LDraw Rubber Colours
+0 !COLOUR Rubber_Yellow                                         CODE    65 VALUE #FAC80A   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Black                                          CODE   256 VALUE #1B2A34   EDGE #808080                               RUBBER
+0 !COLOUR Rubber_Blue                                           CODE   273 VALUE #1E5AA8   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Red                                            CODE   324 VALUE #B40000   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Orange                                         CODE   350 VALUE #D67923   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Light_Grey                                     CODE   375 VALUE #8A928D   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Dark_Blue                                      CODE   406 VALUE #19325A   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Purple                                         CODE   449 VALUE #671F81   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Lime                                           CODE   490 VALUE #A5CA18   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Light_Bluish_Grey                              CODE   496 VALUE #969696   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Flat_Silver                                    CODE   504 VALUE #898788   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_White                                          CODE   511 VALUE #F4F4F4   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Green                                          CODE 10002 VALUE #00852B   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Dark_Turquoise                                 CODE 10003 VALUE #069D9F   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Dark_Pink                                      CODE 10005 VALUE #D3359D   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Dark_Grey                                      CODE 10008 VALUE #545955   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Bright_Green                                   CODE 10010 VALUE #58AB41   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Tan                                            CODE 10019 VALUE #D7BA8C   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Magenta                                        CODE 10026 VALUE #901F76   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Dark_Tan                                       CODE 10028 VALUE #897D62   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Bright_Pink                                    CODE 10029 VALUE #FF9ECD   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Medium_Lavender                                CODE 10030 VALUE #A06EB9   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Lavender                                       CODE 10031 VALUE #CDA4DE   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Reddish_Brown                                  CODE 10070 VALUE #5F3109   EDGE #808080                               RUBBER
+0 !COLOUR Rubber_Dark_Bluish_Grey                               CODE 10072 VALUE #646464   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Medium_Blue                                    CODE 10073 VALUE #7396C8   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Light_Nougat                                   CODE 10078 VALUE #FFC995   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Medium_Nougat                                  CODE 10084 VALUE #AA7D55   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Medium_Lilac                                   CODE 10085 VALUE #441A91   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Nougat                                         CODE 10092 VALUE #BB805A   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Pearl_Light_Grey                               CODE 10135 VALUE #A0A0A0   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Metallic_Blue                                  CODE 10137 VALUE #5B7590   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Pearl_Dark_Gold                                CODE 10147 VALUE #83724F   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Pearl_Dark_Grey                                CODE 10148 VALUE #484D48   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Pearl_Very_Light_Grey                          CODE 10150 VALUE #989B99   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Very_Light_Bluish_Grey                         CODE 10151 VALUE #C8C8C8   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Reddish_Gold                                   CODE 10189 VALUE #AC8247   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Bright_Light_Orange                            CODE 10191 VALUE #FCAC00   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Lemon_Metallic                                 CODE 10200 VALUE #708224   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Bright_Light_Blue                              CODE 10212 VALUE #9DC3F7   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Bright_Light_Yellow                            CODE 10226 VALUE #FFEC6C   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Dark_Green                                     CODE 10288 VALUE #00451A   EDGE #808080                               RUBBER
+0 !COLOUR Rubber_Pearl_Gold                                     CODE 10297 VALUE #AA7F2E   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Dark_Brown                                     CODE 10308 VALUE #352100   EDGE #808080                               RUBBER
+0 !COLOUR Rubber_Dark_Red                                       CODE 10320 VALUE #720012   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Dark_Azure                                     CODE 10321 VALUE #469BC3   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Medium_Azure                                   CODE 10322 VALUE #68C3E2   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Light_Aqua                                     CODE 10323 VALUE #D3F2EA   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Yellowish_Green                                CODE 10326 VALUE #E2F99A   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Olive_Green                                    CODE 10330 VALUE #77774E   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Sand_Green                                     CODE 10378 VALUE #708E7C   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Dark_Orange                                    CODE 10484 VALUE #91501C   EDGE #333333                               RUBBER
+
+
+0 // LDraw Transparent Rubber Colours
+0 !COLOUR Rubber_Trans_Yellow                                   CODE 66    VALUE #F5CD2F   EDGE #B49208   ALPHA 128                   RUBBER
+0 !COLOUR Rubber_Trans_Clear                                    CODE 67    VALUE #FCFCFC   EDGE #C9C9C9   ALPHA 128                   RUBBER
+0 !COLOUR Rubber_Trans_Bright_Green                             CODE 10035 VALUE #56E646   EDGE #27AF18   ALPHA 128                   RUBBER
+0 !COLOUR Rubber_Trans_Red                                      CODE 10036 VALUE #C91A09   EDGE #660D05   ALPHA 128                   RUBBER
+0 !COLOUR Rubber_Trans_Light_Blue                               CODE 10043 VALUE #AEE9EF   EDGE #59D1DE   ALPHA 128                   RUBBER
+0 !COLOUR Rubber_Trans_Orange                                   CODE 10057 VALUE #F08F1C   EDGE #9E5C0A   ALPHA 128                   RUBBER
+0 !COLOUR Rubber_Milky_White                                    CODE 10079 VALUE #EEEEEE   EDGE #BABABA   ALPHA 240                   RUBBER
+
+
+0 // LDraw Fabric Colours
+0 !COLOUR Canvas_Black                                          CODE 20000 VALUE #1B2A34   EDGE #808080                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Blue                                           CODE 20001 VALUE #1E5AA8   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Green                                          CODE 20002 VALUE #00852B   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Red                                            CODE 20004 VALUE #B40000   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Brown                                          CODE 20006 VALUE #543324   EDGE #1E1E1E                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Light_Grey                                     CODE 20007 VALUE #8A928D   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Bright_Green                                   CODE 20010 VALUE #58AB41   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Yellow                                         CODE 20014 VALUE #FAC80A   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_White                                          CODE 20015 VALUE #F4F4F4   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Tan                                            CODE 20019 VALUE #D7BA8C   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Purple                                         CODE 20022 VALUE #671F81   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Dark_Tan                                       CODE 20028 VALUE #897D62   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Reddish_Brown                                  CODE 20070 VALUE #5F3109   EDGE #808080                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Light_Bluish_Grey                              CODE 20071 VALUE #969696   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Dark_Bluish_Grey                               CODE 20072 VALUE #646464   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Light_Brown                                    CODE 20086 VALUE #7B5D41   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Dark_Green                                     CODE 20288 VALUE #00451A   EDGE #808080                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Dark_Red                                       CODE 20320 VALUE #720012   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Sand_Red                                       CODE 20335 VALUE #88605E   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Cream                                          CODE 20500 VALUE #F8F3E4   EDGE #333333                               MATERIAL FABRIC CANVAS
+
+
+0 // LDraw Obsolete Colours
+0 !COLOUR Obsolete_Light_Orange_Brown                           CODE  507  VALUE #FA9C1C   EDGE #333333
+
+
+0 // LDraw Internal Common Material Colours
+0 !COLOUR Main_Colour                                           CODE  16   VALUE #FFFF80   EDGE #333333
+0 !COLOUR Edge_Colour                                           CODE  24   VALUE #7F7F7F   EDGE #333333
+0 !COLOUR Magnet                                                CODE 493   VALUE #656761   EDGE #333333                               METAL
+0 !COLOUR Electric_Contact_Alloy                                CODE 494   VALUE #D0D0D0   EDGE #333333                               METAL
+0 !COLOUR Electric_Contact_Copper                               CODE 495   VALUE #AE7A59   EDGE #333333                               METAL
+0 !COLOUR Trans_Sticker                                         CODE 10047 VALUE #FFFFFF   EDGE #FFFFFF   ALPHA 16
+
+
+
+0 // Avatar definitions
+0 !AVATAR CATEGORY "Animal" DESCRIPTION "Animal" PART 1 0 0  0 1 0  0 0 1 "13786.dat"
+0 !AVATAR CATEGORY "Antenna" DESCRIPTION "Antenna" PART 1 0 0  0 1 0  0 0 1 "3144.dat"
+0 !AVATAR CATEGORY "Arch" DESCRIPTION "Arch" PART 1 0 0  0 1 0  0 0 1 "4490.dat"
+0 !AVATAR CATEGORY "Arm" DESCRIPTION "Arm" PART 1 0 0  0 1 0  0 0 1 "4220a.dat"
+
+0 !AVATAR CATEGORY "Bar" DESCRIPTION "Bar" PART 1 0 0  0 1 0  0 0 1 "87994.dat"
+0 !AVATAR CATEGORY "Baseplate" DESCRIPTION "Baseplate" PART 1 0 0  0 1 0  0 0 1 "3947.dat"
+0 !AVATAR CATEGORY "Belville" DESCRIPTION "Belville" PART 1 0 0  0 1 0  0 0 1 "72514.dat"
+0 !AVATAR CATEGORY "Boat" DESCRIPTION "Boat" PART 1 0 0  0 1 0  0 0 1 "28925.dat"
+0 !AVATAR CATEGORY "Bracket" DESCRIPTION "Bracket" PART 1 0 0  0 1 0  0 0 1 "44728.dat"
+0 !AVATAR CATEGORY "Brick" DESCRIPTION "Brick" PART 1 0 0  0 1 0  0 0 1 "3002.dat"
+
+0 !AVATAR CATEGORY "Car" DESCRIPTION "Car" PART 1 0 0  0 1 0  0 0 1 "3829c01.dat"
+0 !AVATAR CATEGORY "Clikits" DESCRIPTION "Clikits" PART 1 0 0  0 1 0  0 0 1 "46296.dat"
+0 !AVATAR CATEGORY "Cockpit" DESCRIPTION "Cockpit" PART 1 0 0  0 1 0  0 0 1 "30200.dat"
+0 !AVATAR CATEGORY "Cone" DESCRIPTION "Cone" PART 1 0 0  0 1 0  0 0 1 "3942a.dat"
+0 !AVATAR CATEGORY "Constraction" DESCRIPTION "Constraction" PART 1 0 0  0 1 0  0 0 1 "32475.dat"
+0 !AVATAR CATEGORY "Constraction Accessory" DESCRIPTION "Constraction Accessory" PART 1 0 0  0 1 0  0 0 1 "85582.dat"
+0 !AVATAR CATEGORY "Container" DESCRIPTION "Container" PART 1 0 0  0 1 0  0 0 1 "61780.dat"
+0 !AVATAR CATEGORY "Conveyor" DESCRIPTION "Conveyor" PART 1 0 0  0 1 0  0 0 1 "92713c01.dat"
+0 !AVATAR CATEGORY "Crane" DESCRIPTION "Crane" PART 1 0 0  0 1 0  0 0 1 "30395.dat"
+0 !AVATAR CATEGORY "Cylinder" DESCRIPTION "Cylinder" PART 1 0 0  0 1 0  0 0 1 "3062b.dat"
+
+0 !AVATAR CATEGORY "Dish" DESCRIPTION "Dish" PART 1 0 0  0 1 0  0 0 1 "3960.dat"
+0 !AVATAR CATEGORY "Door" DESCRIPTION "Door" PART 1 0 0  0 1 0  0 0 1 "3861a.dat"
+0 !AVATAR CATEGORY "Duplo" DESCRIPTION "Duplo" PART 1 0 0  0 1 0  0 0 1 "40666.dat"
+
+0 !AVATAR CATEGORY "Electric" DESCRIPTION "Electric" PART 1 0 0  0 1 0  0 0 1 "73666.dat"
+0 !AVATAR CATEGORY "Exhaust" DESCRIPTION "Exhaust" PART 1 0 0  0 1 0  0 0 1 "71137.dat"
+
+0 !AVATAR CATEGORY "Fence" DESCRIPTION "Fence" PART 1 0 0  0 1 0  0 0 1 "33303.dat"
+0 !AVATAR CATEGORY "Figure" DESCRIPTION "Figure" PART 1 0 0  0 1 0  0 0 1 "92198c01.dat"
+0 !AVATAR CATEGORY "Figure Accessory" DESCRIPTION "Figure Accessory" PART 1 0 0  0 1 0  0 0 1 "11245.dat"
+0 !AVATAR CATEGORY "Flag" DESCRIPTION "Flag" PART 1 0 0  0 1 0  0 0 1 "3596.dat"
+0 !AVATAR CATEGORY "Flexible" DESCRIPTION "Flexible" PART 1 0 0  0 1 0  0 0 1 "92338-f1.dat"
+0 !AVATAR CATEGORY "Forklift" DESCRIPTION "Forklift" PART 1 0 0  0 1 0  0 0 1 "3430c00-f1.dat"
+0 !AVATAR CATEGORY "Freestyle" DESCRIPTION "Freestyle" PART 1 0 0  0 1 0  0 0 1 "6243p01.dat"
+
+0 !AVATAR CATEGORY "Garage" DESCRIPTION "Garage" PART 1 0 0  0 1 0  0 0 1 "822bc02.dat"
+0 !AVATAR CATEGORY "Glass" DESCRIPTION "Glass" PART 1 0 0  0 1 0  0 0 1 "4036.dat"
+0 !AVATAR CATEGORY "Grab" DESCRIPTION "Grab" PART 1 0 0  0 1 0  0 0 1 "3492c02.dat"
+
+0 !AVATAR CATEGORY "Helper" DESCRIPTION "Helper" PART 1 0 0  0 1 0  0 0 1 "helper2druler100ldu.dat"
+0 !AVATAR CATEGORY "Hinge" DESCRIPTION "Hinge" PART 1 0 0  0 1 0  0 0 1 "3937c01.dat"
+0 !AVATAR CATEGORY "Homemaker" DESCRIPTION "Homemaker" PART 1 0 0  0 1 0  0 0 1 "837.dat"
+0 !AVATAR CATEGORY "Hose" DESCRIPTION "Hose" PART 1 0 0  0 1 0  0 0 1 "73590a.dat"
+
+0 !AVATAR CATEGORY "Ladder" DESCRIPTION "Ladder" PART 1 0 0  0 1 0  0 0 1 "11299.dat"
+0 !AVATAR CATEGORY "Lever" DESCRIPTION "Lever" PART 1 0 0  0 1 0  0 0 1 "73587p01.dat"
+
+0 !AVATAR CATEGORY "Magnet" DESCRIPTION "Magnet" PART 1 0 0  0 1 0  0 0 1 "735.dat"
+0 !AVATAR CATEGORY "Minifig" DESCRIPTION "Minifig" PART 1 0 0  0 1 0  0 0 1 "973.dat"
+0 !AVATAR CATEGORY "Minifig Accessory" DESCRIPTION "Minifig Accessory" PART 1 0 0  0 1 0  0 0 1 "3962a.dat"
+0 !AVATAR CATEGORY "Minifig Footwear" DESCRIPTION "Minifig Footwear" PART 1 0 0  0 1 0  0 0 1 "10190.dat"
+0 !AVATAR CATEGORY "Minifig Headwear" DESCRIPTION "Minifig Headwear" PART 1 0 0  0 1 0  0 0 1 "30138.dat"
+0 !AVATAR CATEGORY "Minifig Hipwear" DESCRIPTION "Minifig Hipwear" PART 1 0 0  0 1 0  0 0 1 "24782.dat"
+0 !AVATAR CATEGORY "Minifig Neckwear" DESCRIPTION "Minifig Neckwear" PART 1 0 0  0 1 0  0 0 1 "2587.dat"
+0 !AVATAR CATEGORY "Modulex" DESCRIPTION "Modulex" PART 1 0 0  0 1 0  0 0 1 "u7006.dat"
+0 !AVATAR CATEGORY "Monorail" DESCRIPTION "Monorail" PART 1 0 0  0 1 0  0 0 1 "2684c01.dat"
+0 !AVATAR CATEGORY "Mursten" DESCRIPTION "Mursten" PART 1 0 0  0 1 0  0 0 1 "u8003c.dat"
+
+0 !AVATAR CATEGORY "Panel" DESCRIPTION "Panel" PART 1 0 0  0 1 0  0 0 1 "6231.dat"
+0 !AVATAR CATEGORY "Plane" DESCRIPTION "Plane" PART 1 0 0  0 1 0  0 0 1 "87613.dat"
+0 !AVATAR CATEGORY "Plant" DESCRIPTION "Plant" PART 1 0 0  0 1 0  0 0 1 "6255.dat"
+0 !AVATAR CATEGORY "Plate" DESCRIPTION "Plate" PART 1 0 0  0 1 0  0 0 1 "3021.dat"
+0 !AVATAR CATEGORY "Platform" DESCRIPTION "Platform" PART 1 0 0  0 1 0  0 0 1 "2642.dat"
+0 !AVATAR CATEGORY "Propeller" DESCRIPTION "Propeller" PART 1 0 0  0 1 0  0 0 1 "15211.dat"
+
+0 !AVATAR CATEGORY "Quatro" DESCRIPTION "Quatro" PART 1 0 0  0 1 0  0 0 1 "48287.dat"
+
+0 !AVATAR CATEGORY "Rack" DESCRIPTION "Rack" PART 1 0 0  0 1 0  0 0 1 "2426c02.dat"
+0 !AVATAR CATEGORY "Roadsign" DESCRIPTION "Roadsign" PART 1 0 0  0 1 0  0 0 1 "3350.dat"
+0 !AVATAR CATEGORY "Rock" DESCRIPTION "Rock" PART 1 0 0  0 1 0  0 0 1 "42284.dat"
+
+0 !AVATAR CATEGORY "Scala" DESCRIPTION "Scala" PART 1 0 0  0 1 0  0 0 1 "33086.dat"
+0 !AVATAR CATEGORY "Screw" DESCRIPTION "Screw" PART 1 0 0  0 1 0  0 0 1 "u9013.dat"
+0 !AVATAR CATEGORY "Sheet Cardboard" DESCRIPTION "Sheet Cardboard" PART 1 0 0  0 1 0  0 0 1 "u572p02.dat"
+0 !AVATAR CATEGORY "Sheet Fabric" DESCRIPTION "Sheet Fabric" PART 1 0 0  0 1 0  0 0 1 "u9494p01c01.dat"
+0 !AVATAR CATEGORY "Sheet Plastic" DESCRIPTION "Sheet Plastic" PART 1 0 0  0 1 0  0 0 1 "u66.dat"
+0 !AVATAR CATEGORY "Slope" DESCRIPTION "Slope" PART 1 0 0  0 1 0  0 0 1 "3298.dat"
+0 !AVATAR CATEGORY "Sphere" DESCRIPTION "Sphere" PART 1 0 0  0 1 0  0 0 1 "98107.dat"
+0 !AVATAR CATEGORY "Staircase" DESCRIPTION "Staircase" PART 1 0 0  0 1 0  0 0 1 "4784.dat"
+0 !AVATAR CATEGORY "Sticker" DESCRIPTION "Sticker" PART 1 0 0  0 1 0  0 0 1 "192425a.dat"
+0 !AVATAR CATEGORY "Sticker Shortcut" DESCRIPTION "Sticker Shortcut" PART 1 0 0  0 1 0  0 0 1 "4215ad04.dat"
+0 !AVATAR CATEGORY "String" DESCRIPTION "String" PART 1 0 0  0 1 0  0 0 1 "76384.dat"
+0 !AVATAR CATEGORY "Support" DESCRIPTION "Support" PART 1 0 0  0 1 0  0 0 1 "2580.dat"
+
+0 !AVATAR CATEGORY "Tail" DESCRIPTION "Tail" PART 1 0 0  0 1 0  0 0 1 "4867.dat"
+0 !AVATAR CATEGORY "Tap" DESCRIPTION "Tap" PART 1 0 0  0 1 0  0 0 1 "6936.dat"
+0 !AVATAR CATEGORY "Technic" DESCRIPTION "Technic" PART 1 0 0  0 1 0  0 0 1 "4019.dat"
+0 !AVATAR CATEGORY "Tile" DESCRIPTION "Tile" PART 1 0 0  0 1 0  0 0 1 "3068b.dat"
+0 !AVATAR CATEGORY "Tipper" DESCRIPTION "Tipper" PART 1 0 0  0 1 0  0 0 1 "15455.dat"
+0 !AVATAR CATEGORY "Tractor" DESCRIPTION "Tractor" PART 1 0 0  0 1 0  0 0 1 "828.dat"
+0 !AVATAR CATEGORY "Trailer" DESCRIPTION "Trailer" PART 1 0 0  0 1 0  0 0 1 "30184.dat"
+0 !AVATAR CATEGORY "Train" DESCRIPTION "Train" PART 1 0 0  0 1 0  0 0 1 "53400.dat"
+0 !AVATAR CATEGORY "Turntable" DESCRIPTION "Turntable" PART 1 0 0  0 1 0  0 0 1 "3403c01.dat"
+0 !AVATAR CATEGORY "Tyre" DESCRIPTION "Tyre" PART 1 0 0  0 1 0  0 0 1 "3641.dat"
+
+0 !AVATAR CATEGORY "Vehicle" DESCRIPTION "Vehicle" PART 1 0 0  0 1 0  0 0 1 "50859bc01.dat"
+
+0 !AVATAR CATEGORY "Wedge" DESCRIPTION "Wedge" PART 1 0 0  0 1 0  0 0 1 "48933.dat"
+0 !AVATAR CATEGORY "Wheel" DESCRIPTION "Wheel" PART 1 0 0  0 1 0  0 0 1 "2470.dat"
+0 !AVATAR CATEGORY "Winch" DESCRIPTION "Winch" PART 1 0 0  0 1 0  0 0 1 "73037.dat"
+0 !AVATAR CATEGORY "Window" DESCRIPTION "Window" PART 1 0 0  0 1 0  0 0 1 "3853.dat"
+0 !AVATAR CATEGORY "Windscreen" DESCRIPTION "Windscreen" PART 1 0 0  0 1 0  0 0 1 "3823.dat"
+0 !AVATAR CATEGORY "Wing" DESCRIPTION "Wing" PART 1 0 0  0 1 0  0 0 1 "3936.dat"
+
+0 !AVATAR CATEGORY "Znap" DESCRIPTION "Znap" PART 1 0 0  0 1 0  0 0 1 "32210.dat" 
+0 Big Rock (decor prop)
+0 Name: rock-big
+0 Author: BrickCode
+1 72 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 1.000000 parts/30294c01.dat
+0 NOFILE
+
+0 FILE parts/30294c01.dat
+0 Rock  4 x  4 x  3
+0 Name: 30294c01.dat
+0 Author: Philippe Hurbain [Philo]
+0 !LDRAW_ORG Shortcut UPDATE 2012-01
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 2012-03-30 [PTadmin] Official Update 2012-01
+
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 parts/30293.dat
+1 16 0 64 0 1 0 0 0 1 0 0 0 1 parts/30294.dat
+
+0 FILE parts/30294.dat
+0 =Rock  4 x  4 x  1.667 Bottom
+0 Name: 30294.dat
+0 Author: [PTadmin]
+0 !LDRAW_ORG Part Alias UPDATE 2025-09
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 2013-12-23 [PTadmin] Official Update 2013-02
+0 !HISTORY 2025-09-27 [OrionP] Changed winding to CCW
+0 !HISTORY 2025-09-29 [OrionP] Official Update 2025-09
+
+0 // Alias of 42291
+0 // 30294 is the transparent colour counterpart of 42291
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 parts/42291.dat
+0
+0 FILE parts/42291.dat
+0 Rock  4 x  4 x  1.667 Bottom
+0 Name: 42291.dat
+0 Author: Philippe Hurbain [Philo]
+0 !LDRAW_ORG Part UPDATE 2013-02
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !KEYWORDS BrickLink 30294, Rebrickable 30294
+
+0 !HISTORY 2007-08-25 {LEGO Universe Team} Original part shape
+0 !HISTORY 2012-01-25 [Philo] File preparation for LDraw Parts Tracker
+0 !HISTORY 2012-03-30 [PTadmin] Official Update 2012-01
+0 !HISTORY 2013-06-30 [PTadmin] Renamed from 30294
+0 !HISTORY 2013-12-23 [PTadmin] Official Update 2013-02
+
+
+4 16 -14.31 4.65 -19.29 -17.24 3.42 -17.34 -17.27 8 -17.31 -14.24 8 -19.31
+3 16 17.29 8 -17.29 19.08 5.02 -14.77 17.05 4.33 -17.52
+3 16 19.3 8 -14.29 19.08 5.02 -14.77 17.29 8 -17.29
+4 16 10.75 8 -20 14.29 8 -19.3 14.14 4.1 -19.36 10.75 4.38 -20
+3 16 14.29 8 -19.3 17.05 4.33 -17.52 14.14 4.1 -19.36
+3 16 17.29 8 -17.29 17.05 4.33 -17.52 14.29 8 -19.3
+4 16 -14.15 -1.62 21.39 -17.28 -2.44 20.41 -18.53 -1.1 15.98 -18.33 0 13.5
+3 16 -18.33 0 13.5 -11.4 0 20.06 -14.15 -1.62 21.39
+4 16 -29.54 -17.58 20.54 -18.53 -1.1 15.98 -17.28 -2.44 20.41 -22.87 -12.45 25.28
+4 16 -32.97 -17.72 6.98 -18.33 0 13.5 -18.53 -1.1 15.98 -29.54 -17.58 20.54
+3 16 -18.33 0 13.5 -32.97 -17.72 6.98 -21.13 0 2.07
+3 16 -32.97 -17.72 6.98 -29.54 -17.58 20.54 -34.53 -23.43 17.78
+3 16 -21.38 0 -4.86 -19.07 -2.89 -20.73 -15.88 -1.34 -21.94
+3 16 -21.38 0 -4.86 -15.88 -1.34 -21.94 -14.2 0 -20.43
+3 16 -21.38 0 -4.86 -32.97 -17.72 6.98 -32.97 -17.72 -8.11
+3 16 -21.13 0 2.07 -32.97 -17.72 6.98 -21.38 0 -4.86
+3 16 -32.97 -17.72 -8.11 -34.65 -23.86 -18.63 -30.24 -18.7 -21.75
+3 16 -32.97 -17.72 -8.11 -19.07 -2.89 -20.73 -21.38 0 -4.86
+3 16 -30.24 -18.7 -21.75 -19.07 -2.89 -20.73 -32.97 -17.72 -8.11
+3 16 -19.07 -2.89 -20.73 -30.24 -18.7 -21.75 -23.25 -13.34 -27.4
+3 16 -2.52 -7.09 -32.31 -19.07 -2.89 -20.73 -4.61 -11.63 -34.69
+3 16 -15.88 -1.34 -21.94 -19.07 -2.89 -20.73 -2.52 -7.09 -32.31
+3 16 -23.25 -13.34 -27.4 -4.61 -11.63 -34.69 -19.07 -2.89 -20.73
+3 16 -23.25 -13.34 -27.4 -16.94 -20.35 -35.46 -4.61 -11.63 -34.69
+4 16 -14.2 0 -20.43 -15.88 -1.34 -21.94 -2.52 -7.09 -32.31 3.8 0 -23.85
+3 16 3.8 0 -23.85 -2.52 -7.09 -32.31 9.54 -2.47 -28.3
+4 16 17.11 0 -18.34 3.8 0 -23.85 9.54 -2.47 -28.3 15.15 -3.08 -27.68
+3 16 22.25 0 8.22 22.37 -4.35 18.07 8.89 -4.37 24.69
+3 16 8.89 -4.37 24.69 -4.62 0 20.32 22.25 0 8.22
+3 16 15.15 -3.08 -27.68 19.78 -9.18 -29.5 17.11 0 -18.34
+4 16 22.07 0 -9.24 17.11 0 -18.34 19.78 -9.18 -29.5 31.28 -16.05 -19.86
+3 16 26.07 -3.33 4.11 22.25 0 8.22 22.07 0 -9.24
+4 16 22.25 0 8.22 26.07 -3.33 4.11 28.77 -13.68 19.29 22.37 -4.35 18.07
+4 16 31.28 -16.05 -19.86 33.32 -18.81 -18.55 31.87 -13.4 -3.26 22.07 0 -9.24
+3 16 22.07 0 -9.24 31.87 -13.4 -3.26 26.07 -3.33 4.11
+4 16 31.87 -13.4 -3.26 30.53 -17.95 21.01 28.77 -13.68 19.29 26.07 -3.33 4.11
+3 16 30.53 -17.95 21.01 31.87 -13.4 -3.26 36.25 -31.75 18.45
+4 16 17.3 -17.88 34.19 22.37 -4.35 18.07 28.77 -13.68 19.29 30.53 -17.95 21.01
+4 16 22.37 -4.35 18.07 17.3 -17.88 34.19 11.22 -14.28 33.55 8.89 -4.37 24.69
+4 16 -11.4 0 20.06 -4.62 0 20.32 -10.9 -15.45 33.76 -14.15 -1.62 21.39
+4 16 -10.9 -15.45 33.76 -4.62 0 20.32 8.89 -4.37 24.69 11.22 -14.28 33.55
+4 16 -22.87 -12.45 25.28 -17.28 -2.44 20.41 -14.15 -1.62 21.39 -10.9 -15.45 33.76
+3 16 -22.87 -12.45 25.28 -10.9 -15.45 33.76 -16.5 -20.29 34.61
+3 16 -34.65 -23.86 -18.63 -32.97 -17.72 -8.11 -36.23 -32.17 -18.47
+3 16 -32.97 -17.72 -8.11 -32.97 -17.72 6.98 -36.23 -32.17 -18.47
+3 16 -36.23 -32.17 -18.47 -34.53 -23.43 17.78 -36.25 -32.25 18.45
+3 16 -32.97 -17.72 6.98 -34.53 -23.43 17.78 -36.23 -32.17 -18.47
+3 16 -22.87 -12.45 25.28 -16.5 -20.29 34.61 -18.41 -32.16 36.25
+3 16 -18.41 -32.16 36.25 -29.54 -17.58 20.54 -22.87 -12.45 25.28
+3 16 -34.53 -23.43 17.78 -18.41 -32.16 36.25 -36.25 -32.25 18.45
+3 16 -29.54 -17.58 20.54 -18.41 -32.16 36.25 -34.53 -23.43 17.78
+3 16 17.3 -17.88 34.19 18.44 -32.1 36.25 11.22 -14.28 33.55
+3 16 -10.9 -15.45 33.76 18.44 -32.1 36.25 -16.5 -20.29 34.61
+3 16 11.22 -14.28 33.55 18.44 -32.1 36.25 -10.9 -15.45 33.76
+3 16 -16.5 -20.29 34.61 18.44 -32.1 36.25 -18.41 -32.16 36.25
+4 16 36.25 -31.75 18.45 18.44 -32.1 36.25 17.3 -17.88 34.19 30.53 -17.95 21.01
+3 16 36.23 -32.17 -18.47 31.87 -13.4 -3.26 33.32 -18.81 -18.55
+3 16 31.87 -13.4 -3.26 36.23 -32.17 -18.47 36.25 -31.75 18.45
+3 16 15.15 -3.08 -27.68 9.54 -2.47 -28.3 19.78 -9.18 -29.5
+4 16 19.78 -9.18 -29.5 9.54 -2.47 -28.3 -2.52 -7.09 -32.31 -4.61 -11.63 -34.69
+3 16 -4.61 -11.63 -34.69 16.94 -21.09 -35.52 19.78 -9.18 -29.5
+3 16 -16.94 -20.35 -35.46 -23.25 -13.34 -27.4 -18.43 -32 -36.25
+3 16 -23.25 -13.34 -27.4 -30.24 -18.7 -21.75 -18.43 -32 -36.25
+3 16 -18.43 -32 -36.25 -34.65 -23.86 -18.63 -36.23 -32.17 -18.47
+3 16 -30.24 -18.7 -21.75 -34.65 -23.86 -18.63 -18.43 -32 -36.25
+3 16 -4.61 -11.63 -34.69 -16.94 -20.35 -35.46 16.94 -21.09 -35.52
+4 16 -16.94 -20.35 -35.46 -18.43 -32 -36.25 18.42 -32.01 -36.25 16.94 -21.09 -35.52
+3 16 31.28 -16.05 -19.86 19.78 -9.18 -29.5 16.94 -21.09 -35.52
+3 16 31.28 -16.05 -19.86 18.42 -32.01 -36.25 33.32 -18.81 -18.55
+3 16 16.94 -21.09 -35.52 18.42 -32.01 -36.25 31.28 -16.05 -19.86
+3 16 18.42 -32.01 -36.25 36.23 -32.17 -18.47 33.32 -18.81 -18.55
+3 16 21.29 -8.31 -33.22 20.9 -5.87 -32.18 24.08 -8.31 -30.43
+4 16 10.72 0.42 -30.96 16.61 -0.23 -30.32 20.9 -5.87 -32.18 -2.74 -4.74 -35.44
+4 16 -2.74 -4.74 -35.44 20.9 -5.87 -32.18 21.29 -8.31 -33.22 -5.28 -10.26 -38.34
+3 16 21.29 -8.31 -33.22 18.5 -20.69 -39.25 -5.28 -10.26 -38.34
+4 16 -20.28 0.07 -23.85 -17.55 1.63 -23.95 -2.74 -4.74 -35.44 -5.28 -10.26 -38.34
+4 16 -25.64 -11.55 -29.95 -20.28 0.07 -23.85 -5.28 -10.26 -38.34 -18.43 -19.55 -39.15
+4 16 -22.26 -0.3 -20.65 -20.28 0.07 -23.85 -25.64 -11.55 -29.95 -34.14 -18.07 -23.08
+4 16 -36.43 -16.15 -8.56 -24.23 2.11 -6.07 -22.26 -0.3 -20.65 -34.14 -18.07 -23.08
+3 16 -36.43 -16.15 -8.56 -34.14 -18.07 -23.08 -38.27 -22.91 -20.15
+4 16 -23.28 3.54 -2.5 -24.23 2.11 -6.07 -36.43 -16.15 -8.56 -36.43 -16.15 7.51
+3 16 -36.43 -16.15 7.51 -23.28 3.54 2.06 -23.28 3.54 -2.5
+4 16 -17.55 1.63 -23.95 -20.28 0.07 -23.85 -17.24 3.42 -17.34 -14.31 4.65 -19.29
+4 16 -17.24 3.42 -17.34 -20.28 0.07 -23.85 -22.26 -0.3 -20.65 -19.27 2.97 -14.34
+4 16 -19.27 2.97 -14.34 -22.26 -0.3 -20.65 -24.23 2.11 -6.07 -20 3.43 -10.75
+4 16 -23.28 3.54 -2.5 -20 6.05 0.02 -20 3.43 -10.75 -24.23 2.11 -6.07
+3 16 -14.31 4.65 -19.29 -2.74 -4.74 -35.44 -17.55 1.63 -23.95
+3 16 -10.75 5.48 -20 -2.74 -4.74 -35.44 -14.31 4.65 -19.29
+4 16 -3.42 6.5 -20 10.72 0.42 -30.96 -2.74 -4.74 -35.44 -10.75 5.48 -20
+4 16 10.72 0.42 -30.96 10.75 4.38 -20 14.14 4.1 -19.36 16.61 -0.23 -30.32
+3 16 16.61 -0.23 -30.32 14.14 4.1 -19.36 17.05 4.33 -17.52
+3 16 10.75 4.38 -20 10.72 0.42 -30.96 -3.42 6.5 -20
+3 16 16.61 -0.23 -30.32 17.05 4.33 -17.52 19.08 5.02 -14.77
+3 16 20.9 -5.87 -32.18 19.08 5.02 -14.77 20.41 5.74 -12.23
+3 16 19.08 5.02 -14.77 20.9 -5.87 -32.18 16.61 -0.23 -30.32
+3 16 20.41 5.74 -12.23 19.08 5.02 -14.77 19.98 6.06 -11.12
+4 16 20.41 5.74 -12.23 25.07 2.16 -9.67 24.08 -8.31 -30.43 20.9 -5.87 -32.18
+3 16 24.08 -8.31 -30.43 25.07 2.16 -9.67 35.82 -16.24 -20.76
+4 16 32.17 -12.58 21.11 29.08 -0.91 4.33 24.84 2.34 10.38 24.46 -1.25 19.57
+4 16 19.98 6.06 -11.12 20 6.05 3.42 29.08 -0.91 4.33 25.07 2.16 -9.67
+3 16 25.07 2.16 -9.67 20.41 5.74 -12.23 19.98 6.06 -11.12
+3 16 20 6.05 3.42 24.84 2.34 10.38 29.08 -0.91 4.33
+3 16 20 6.05 3.42 20 3.13 10.75 24.84 2.34 10.38
+4 16 19.31 1.87 14.25 24.46 -1.25 19.57 24.84 2.34 10.38 20 3.13 10.75
+3 16 24.46 -1.25 19.57 19.31 1.87 14.25 17.32 1.06 17.26
+4 16 24.46 -1.25 19.57 17.32 1.06 17.26 14.31 0.84 19.29 9.35 -1.26 26.97
+3 16 14.31 0.84 19.29 10.75 1.24 20 9.35 -1.26 26.97
+4 16 -9.34 5.15 20 -9.31 4.77 20.93 9.35 -1.26 26.97 10.75 1.24 20
+4 16 20 8 -10.75 20 8 10.75 20 6.05 3.42 19.98 6.06 -11.12
+3 16 20 6.05 3.42 20 8 10.75 20 3.13 10.75
+4 16 10.75 8 20 -10.75 8 20 -9.34 5.15 20 10.75 1.24 20
+3 16 -9.34 5.15 20 -10.75 8 20 -10.75 4.59 20
+4 16 -20.81 1.97 16.83 -19.23 0.29 22.42 -17.3 3.16 17.29 -19.31 3.62 14.26
+4 16 -14.27 3.51 19.3 -17.3 3.16 17.29 -19.23 0.29 22.42 -15.08 1.37 23.72
+4 16 -15.08 1.37 23.72 -9.31 4.77 20.93 -10.75 4.59 20 -14.27 3.51 19.3
+3 16 -10.75 4.59 20 -9.31 4.77 20.93 -9.34 5.15 20
+3 16 -20.81 1.97 16.83 -19.31 3.62 14.26 -20 4.79 10.75
+3 16 -36.43 -16.15 7.51 -20.81 1.97 16.83 -20 4.79 10.75
+4 16 -23.28 3.54 2.06 -20.03 6.02 7.74 -20 6.05 0.02 -23.28 3.54 -2.5
+3 16 -20 3.43 -10.75 -20 6.05 0.02 -20 8 -10.75
+3 16 -20 6.05 0.02 -20 8 10.75 -20 8 -10.75
+3 16 -20.03 6.02 7.74 -20 8 10.75 -20 6.05 0.02
+3 16 -20 8 10.75 -20.03 6.02 7.74 -20 4.79 10.75
+3 16 -10.75 5.48 -20 -10.75 8 -20 -3.42 6.5 -20
+4 16 -3.42 6.5 -20 -10.75 8 -20 10.75 8 -20 10.75 4.38 -20
+4 16 -17.3 8 17.29 -17.3 3.16 17.29 -14.27 3.51 19.3 -14.27 8 19.3
+4 16 -20 4.79 10.75 -19.31 3.62 14.26 -19.31 8 14.26 -20 8 10.75
+4 16 -19.31 3.62 14.26 -17.3 3.16 17.29 -17.3 8 17.29 -19.31 8 14.26
+4 16 -14.27 8 19.3 -14.27 3.51 19.3 -10.75 4.59 20 -10.75 8 20
+3 16 19.3 8 -14.29 19.98 6.06 -11.12 19.08 5.02 -14.77
+3 16 20 8 -10.75 19.98 6.06 -11.12 19.3 8 -14.29
+4 16 17.32 8 17.26 17.32 1.06 17.26 19.31 1.87 14.25 19.31 8 14.25
+4 16 10.75 1.24 20 14.31 0.84 19.29 14.31 8 19.29 10.75 8 20
+4 16 14.31 8 19.29 14.31 0.84 19.29 17.32 1.06 17.26 17.32 8 17.26
+4 16 19.31 8 14.25 19.31 1.87 14.25 20 3.13 10.75 20 8 10.75
+4 16 -19.3 8 -14.28 -19.27 2.97 -14.34 -20 3.43 -10.75 -20 8 -10.75
+4 16 -17.24 3.42 -17.34 -19.27 2.97 -14.34 -19.3 8 -14.28 -17.27 8 -17.31
+4 16 -10.75 5.48 -20 -14.31 4.65 -19.29 -14.24 8 -19.31 -10.75 8 -20
+3 16 -23.28 3.54 2.06 -36.43 -16.15 7.51 -20.03 6.02 7.74
+3 16 -20.03 6.02 7.74 -36.43 -16.15 7.51 -20 4.79 10.75
+4 16 -33.24 -16.63 21.98 -20.81 1.97 16.83 -36.43 -16.15 7.51 -38.12 -22.36 19.27
+4 16 -20.81 1.97 16.83 -33.24 -16.63 21.98 -25.23 -10.49 27.66 -19.23 0.29 22.42
+4 16 -19.23 0.29 22.42 -25.23 -10.49 27.66 -11.52 -13.79 37.27 -15.08 1.37 23.72
+4 16 -18 -19.38 38.26 -25.23 -10.49 27.66 -33.24 -16.63 21.98 -20 -29.25 40
+3 16 -25.23 -10.49 27.66 -18 -19.38 38.26 -11.52 -13.79 37.27
+4 16 9.35 -1.26 26.97 -9.31 4.77 20.93 -11.52 -13.79 37.27 12 -12.54 37.05
+3 16 -9.31 4.77 20.93 -15.08 1.37 23.72 -11.52 -13.79 37.27
+4 16 12 -12.54 37.05 18.76 -16.55 37.76 24.46 -1.25 19.57 9.35 -1.26 26.97
+4 16 18.76 -16.55 37.76 33.84 -16.62 22.74 32.17 -12.58 21.11 24.46 -1.25 19.57
+4 16 32.17 -12.58 21.11 33.84 -16.62 22.74 35.33 -11.81 -3.44 29.08 -0.91 4.33
+3 16 39.76 -28.34 20 35.82 -16.24 -20.76 35.33 -11.81 -3.44
+3 16 39.76 -28.34 20 35.33 -11.81 -3.44 33.84 -16.62 22.74
+3 16 39.76 -28.34 20 20 -29.25 40 40 -29.25 20
+4 16 33.84 -16.62 22.74 18.76 -16.55 37.76 20 -29.25 40 39.76 -28.34 20
+4 16 18.5 -20.69 -39.25 21.29 -8.31 -33.22 24.08 -8.31 -30.43 35.82 -16.24 -20.76
+4 16 35.82 -16.24 -20.76 40 -29.25 -20 20 -29.25 -40 18.5 -20.69 -39.25
+4 16 -20 -29.25 -40 -34.14 -18.07 -23.08 -25.64 -11.55 -29.95 -18.43 -19.55 -39.15
+4 16 -20 -29.25 -40 -40 -29.25 -20 -38.27 -22.91 -20.15 -34.14 -18.07 -23.08
+4 16 -20 -29.25 40 -33.24 -16.63 21.98 -38.12 -22.36 19.27 -40 -29.25 20
+4 16 -18.43 -19.55 -39.15 -5.28 -10.26 -38.34 18.5 -20.69 -39.25 20 -29.25 -40
+3 16 20 -29.25 -40 -20 -29.25 -40 -18.43 -19.55 -39.15
+3 16 40 -29.25 -20 39.76 -28.34 20 40 -29.25 20
+3 16 35.82 -16.24 -20.76 39.76 -28.34 20 40 -29.25 -20
+4 16 20 -29.25 40 18.76 -16.55 37.76 12 -12.54 37.05 -11.52 -13.79 37.27
+4 16 20 -29.25 40 -11.52 -13.79 37.27 -18 -19.38 38.26 -20 -29.25 40
+4 16 -40 -29.25 -20 -36.43 -16.15 7.51 -36.43 -16.15 -8.56 -38.27 -22.91 -20.15
+4 16 -40 -29.25 -20 -40 -29.25 20 -38.12 -22.36 19.27 -36.43 -16.15 7.51
+4 16 -40 -32 -20 -20 -32 -40 -19.22 -32 -38.12 -38.12 -32 -19.22
+4 16 19.22 -32 -38.12 -19.22 -32 -38.12 -20 -32 -40 20 -32 -40
+4 16 38.12 -32 -19.22 19.22 -32 -38.12 20 -32 -40 40 -32 -20
+4 16 38.12 -32 19.22 38.12 -32 -19.22 40 -32 -20 40 -32 20
+4 16 19.22 -32 38.12 38.12 -32 19.22 40 -32 20 20 -32 40
+4 16 -19.22 -32 38.12 19.22 -32 38.12 20 -32 40 -20 -32 40
+4 16 -38.12 -32 19.22 -19.22 -32 38.12 -20 -32 40 -40 -32 20
+4 16 -38.12 -32 -19.22 -38.12 -32 19.22 -40 -32 20 -40 -32 -20
+4 16 38.12 -37.25 19.22 19.22 -37.25 38.12 18.45 -37.25 36.25 36.25 -37.25 18.45
+4 16 38.12 -37.25 -19.22 38.12 -37.25 19.22 36.25 -37.25 18.45 36.25 -37.25 -18.45
+4 16 19.22 -37.25 -38.12 38.12 -37.25 -19.22 36.25 -37.25 -18.45 18.45 -37.25 -36.25
+4 16 -19.22 -37.25 -38.12 19.22 -37.25 -38.12 18.45 -37.25 -36.25 -18.45 -37.25 -36.25
+4 16 -38.12 -37.25 -19.22 -19.22 -37.25 -38.12 -18.45 -37.25 -36.25 -36.25 -37.25 -18.45
+4 16 -38.12 -37.25 19.22 -38.12 -37.25 -19.22 -36.25 -37.25 -18.45 -36.25 -37.25 18.45
+4 16 -19.22 -37.25 38.12 -38.12 -37.25 19.22 -36.25 -37.25 18.45 -18.45 -37.25 36.25
+4 16 -18.45 -37.25 36.25 18.45 -37.25 36.25 19.22 -37.25 38.12 -19.22 -37.25 38.12
+4 16 -36.25 -32.25 18.45 -18.41 -32.16 36.25 -18.45 -37.25 36.25 -36.25 -37.25 18.45
+4 16 -36.23 -32.17 -18.47 -36.25 -32.25 18.45 -36.25 -37.25 18.45 -36.25 -37.25 -18.45
+4 16 -36.25 -37.25 -18.45 -18.45 -37.25 -36.25 -18.43 -32 -36.25 -36.23 -32.17 -18.47
+4 16 -18.45 -37.25 -36.25 18.45 -37.25 -36.25 18.42 -32.01 -36.25 -18.43 -32 -36.25
+4 16 36.23 -32.17 -18.47 18.42 -32.01 -36.25 18.45 -37.25 -36.25 36.25 -37.25 -18.45
+4 16 36.25 -37.25 -18.45 36.25 -37.25 18.45 36.25 -31.75 18.45 36.23 -32.17 -18.47
+4 16 18.44 -32.1 36.25 36.25 -31.75 18.45 36.25 -37.25 18.45 18.45 -37.25 36.25
+4 16 18.45 -37.25 36.25 -18.45 -37.25 36.25 -18.41 -32.16 36.25 18.44 -32.1 36.25
+4 16 -20 -32 40 20 -32 40 20 -29.25 40 -20 -29.25 40
+4 16 20 -32 40 40 -32 20 40 -29.25 20 20 -29.25 40
+4 16 -40 -32 20 -20 -32 40 -20 -29.25 40 -40 -29.25 20
+4 16 -40 -32 -20 -40 -32 20 -40 -29.25 20 -40 -29.25 -20
+4 16 -20 -32 -40 -40 -32 -20 -40 -29.25 -20 -20 -29.25 -40
+4 16 20 -32 -40 -20 -32 -40 -20 -29.25 -40 20 -29.25 -40
+4 16 40 -32 -20 20 -32 -40 20 -29.25 -40 40 -29.25 -20
+4 16 40 -32 20 40 -32 -20 40 -29.25 -20 40 -29.25 20
+4 16 38.12 -37.25 19.22 38.12 -37.25 -19.22 38.12 -32 -19.22 38.12 -32 19.22
+4 16 19.22 -37.25 38.12 38.12 -37.25 19.22 38.12 -32 19.22 19.22 -32 38.12
+4 16 -19.22 -37.25 38.12 19.22 -37.25 38.12 19.22 -32 38.12 -19.22 -32 38.12
+4 16 -38.12 -37.25 19.22 -19.22 -37.25 38.12 -19.22 -32 38.12 -38.12 -32 19.22
+4 16 38.12 -37.25 -19.22 19.22 -37.25 -38.12 19.22 -32 -38.12 38.12 -32 -19.22
+4 16 19.22 -37.25 -38.12 -19.22 -37.25 -38.12 -19.22 -32 -38.12 19.22 -32 -38.12
+4 16 -19.22 -37.25 -38.12 -38.12 -37.25 -19.22 -38.12 -32 -19.22 -19.22 -32 -38.12
+4 16 -38.12 -37.25 -19.22 -38.12 -37.25 19.22 -38.12 -32 19.22 -38.12 -32 -19.22
+4 16 35.33 -11.81 -3.44 35.82 -16.24 -20.76 25.07 2.16 -9.67 29.08 -0.91 4.33
+2 24 -14.31 4.65 -19.29 -17.24 3.42 -17.34
+2 24 -17.27 8 -17.31 -14.24 8 -19.31
+2 24 19.08 5.02 -14.77 17.05 4.33 -17.52
+2 24 17.29 8 -17.29 19.3 8 -14.29
+2 24 10.75 8 -20 14.29 8 -19.3
+2 24 14.14 4.1 -19.36 10.75 4.38 -20
+2 24 17.05 4.33 -17.52 14.14 4.1 -19.36
+2 24 14.29 8 -19.3 17.29 8 -17.29
+2 24 -4.62 0 20.32 -11.4 0 20.06
+2 24 -11.4 0 20.06 -18.33 0 13.5
+2 24 -18.33 0 13.5 -21.13 0 2.07
+2 24 -21.13 0 2.07 -21.38 0 -4.86
+2 24 -21.38 0 -4.86 -14.2 0 -20.43
+2 24 -14.2 0 -20.43 3.8 0 -23.85
+2 24 3.8 0 -23.85 17.11 0 -18.34
+2 24 22.25 0 8.22 -4.62 0 20.32
+2 24 22.07 0 -9.24 22.25 0 8.22
+2 24 17.11 0 -18.34 22.07 0 -9.24
+2 24 -14.15 -1.62 21.39 -17.28 -2.44 20.41
+2 24 -17.28 -2.44 20.41 -18.53 -1.1 15.98
+2 24 -11.4 0 20.06 -14.15 -1.62 21.39
+2 24 -18.53 -1.1 15.98 -18.33 0 13.5
+2 24 -29.54 -17.58 20.54 -18.53 -1.1 15.98
+2 24 -17.28 -2.44 20.41 -22.87 -12.45 25.28
+2 24 -22.87 -12.45 25.28 -29.54 -17.58 20.54
+2 24 -32.97 -17.72 6.98 -21.13 0 2.07
+2 24 -34.53 -23.43 17.78 -32.97 -17.72 6.98
+2 24 -29.54 -17.58 20.54 -34.53 -23.43 17.78
+2 24 -21.38 0 -4.86 -19.07 -2.89 -20.73
+2 24 -19.07 -2.89 -20.73 -15.88 -1.34 -21.94
+2 24 -15.88 -1.34 -21.94 -14.2 0 -20.43
+2 24 -32.97 -17.72 -8.11 -21.38 0 -4.86
+2 24 -32.97 -17.72 6.98 -32.97 -17.72 -8.11
+2 24 -32.97 -17.72 -8.11 -34.65 -23.86 -18.63
+2 24 -34.65 -23.86 -18.63 -30.24 -18.7 -21.75
+2 24 -30.24 -18.7 -21.75 -19.07 -2.89 -20.73
+2 24 -23.25 -13.34 -27.4 -19.07 -2.89 -20.73
+2 24 -30.24 -18.7 -21.75 -23.25 -13.34 -27.4
+2 24 -4.61 -11.63 -34.69 -2.52 -7.09 -32.31
+2 24 -19.07 -2.89 -20.73 -4.61 -11.63 -34.69
+2 24 -2.52 -7.09 -32.31 -15.88 -1.34 -21.94
+2 24 -23.25 -13.34 -27.4 -16.94 -20.35 -35.46
+2 24 -16.94 -20.35 -35.46 -4.61 -11.63 -34.69
+2 24 9.54 -2.47 -28.3 3.8 0 -23.85
+2 24 -2.52 -7.09 -32.31 9.54 -2.47 -28.3
+2 24 9.54 -2.47 -28.3 15.15 -3.08 -27.68
+2 24 15.15 -3.08 -27.68 17.11 0 -18.34
+2 24 22.25 0 8.22 22.37 -4.35 18.07
+2 24 22.37 -4.35 18.07 8.89 -4.37 24.69
+2 24 8.89 -4.37 24.69 -4.62 0 20.32
+2 24 15.15 -3.08 -27.68 19.78 -9.18 -29.5
+2 24 19.78 -9.18 -29.5 31.28 -16.05 -19.86
+2 24 31.28 -16.05 -19.86 22.07 0 -9.24
+2 24 22.07 0 -9.24 26.07 -3.33 4.11
+2 24 26.07 -3.33 4.11 22.25 0 8.22
+2 24 26.07 -3.33 4.11 28.77 -13.68 19.29
+2 24 28.77 -13.68 19.29 22.37 -4.35 18.07
+2 24 33.32 -18.81 -18.55 31.87 -13.4 -3.26
+2 24 31.28 -16.05 -19.86 33.32 -18.81 -18.55
+2 24 31.87 -13.4 -3.26 22.07 0 -9.24
+2 24 31.87 -13.4 -3.26 26.07 -3.33 4.11
+2 24 30.53 -17.95 21.01 28.77 -13.68 19.29
+2 24 36.25 -31.75 18.45 30.53 -17.95 21.01
+2 24 31.87 -13.4 -3.26 36.25 -31.75 18.45
+2 24 17.3 -17.88 34.19 22.37 -4.35 18.07
+2 24 30.53 -17.95 21.01 17.3 -17.88 34.19
+2 24 17.3 -17.88 34.19 11.22 -14.28 33.55
+2 24 11.22 -14.28 33.55 8.89 -4.37 24.69
+2 24 -10.9 -15.45 33.76 -14.15 -1.62 21.39
+2 24 11.22 -14.28 33.55 -10.9 -15.45 33.76
+2 24 -16.5 -20.29 34.61 -22.87 -12.45 25.28
+2 24 -10.9 -15.45 33.76 -16.5 -20.29 34.61
+2 24 -36.23 -32.17 -18.47 -34.65 -23.86 -18.63
+2 24 -36.25 -32.25 18.45 -36.23 -32.17 -18.47
+2 24 -34.53 -23.43 17.78 -36.25 -32.25 18.45
+2 24 -16.5 -20.29 34.61 -18.41 -32.16 36.25
+2 24 -18.41 -32.16 36.25 -36.25 -32.25 18.45
+2 24 17.3 -17.88 34.19 18.44 -32.1 36.25
+2 24 18.44 -32.1 36.25 -18.41 -32.16 36.25
+2 24 36.25 -31.75 18.45 18.44 -32.1 36.25
+2 24 33.32 -18.81 -18.55 36.23 -32.17 -18.47
+2 24 36.23 -32.17 -18.47 36.25 -31.75 18.45
+2 24 16.94 -21.09 -35.52 19.78 -9.18 -29.5
+2 24 -4.61 -11.63 -34.69 16.94 -21.09 -35.52
+2 24 -18.43 -32 -36.25 -16.94 -20.35 -35.46
+2 24 -36.23 -32.17 -18.47 -18.43 -32 -36.25
+2 24 -18.43 -32 -36.25 18.42 -32.01 -36.25
+2 24 18.42 -32.01 -36.25 16.94 -21.09 -35.52
+2 24 18.42 -32.01 -36.25 36.23 -32.17 -18.47
+2 24 24.08 -8.31 -30.43 21.29 -8.31 -33.22
+2 24 21.29 -8.31 -33.22 20.9 -5.87 -32.18
+2 24 20.9 -5.87 -32.18 24.08 -8.31 -30.43
+2 24 10.72 0.42 -30.96 16.61 -0.23 -30.32
+2 24 16.61 -0.23 -30.32 20.9 -5.87 -32.18
+2 24 -2.74 -4.74 -35.44 10.72 0.42 -30.96
+2 24 18.5 -20.69 -39.25 -5.28 -10.26 -38.34
+2 24 21.29 -8.31 -33.22 18.5 -20.69 -39.25
+2 24 -5.28 -10.26 -38.34 -2.74 -4.74 -35.44
+2 24 -20.28 0.07 -23.85 -17.55 1.63 -23.95
+2 24 -17.55 1.63 -23.95 -2.74 -4.74 -35.44
+2 24 -25.64 -11.55 -29.95 -20.28 0.07 -23.85
+2 24 -18.43 -19.55 -39.15 -25.64 -11.55 -29.95
+2 24 -5.28 -10.26 -38.34 -18.43 -19.55 -39.15
+2 24 -22.26 -0.3 -20.65 -20.28 0.07 -23.85
+2 24 -25.64 -11.55 -29.95 -34.14 -18.07 -23.08
+2 24 -34.14 -18.07 -23.08 -22.26 -0.3 -20.65
+2 24 -24.23 2.11 -6.07 -22.26 -0.3 -20.65
+2 24 -36.43 -16.15 -8.56 -24.23 2.11 -6.07
+2 24 -38.27 -22.91 -20.15 -36.43 -16.15 -8.56
+2 24 -34.14 -18.07 -23.08 -38.27 -22.91 -20.15
+2 24 -23.28 3.54 -2.5 -24.23 2.11 -6.07
+2 24 -23.28 3.54 2.06 -23.28 3.54 -2.5
+2 24 -36.43 -16.15 7.51 -23.28 3.54 2.06
+2 24 -36.43 -16.15 -8.56 -36.43 -16.15 7.51
+2 24 -14.31 4.65 -19.29 -17.55 1.63 -23.95
+2 24 -19.27 2.97 -14.34 -17.24 3.42 -17.34
+2 24 -20 3.43 -10.75 -19.27 2.97 -14.34
+2 24 -20 6.05 0.02 -20 3.43 -10.75
+2 24 -23.28 3.54 -2.5 -20 6.05 0.02
+2 24 -14.31 4.65 -19.29 -10.75 5.48 -20
+2 24 -3.42 6.5 -20 10.72 0.42 -30.96
+2 24 -10.75 5.48 -20 -3.42 6.5 -20
+2 24 -3.42 6.5 -20 10.75 4.38 -20
+2 24 19.08 5.02 -14.77 16.61 -0.23 -30.32
+2 24 19.08 5.02 -14.77 20.41 5.74 -12.23
+2 24 19.98 6.06 -11.12 20.41 5.74 -12.23
+2 24 19.08 5.02 -14.77 19.98 6.06 -11.12
+2 24 20.41 5.74 -12.23 25.07 2.16 -9.67
+2 24 35.82 -16.24 -20.76 24.08 -8.31 -30.43
+2 24 25.07 2.16 -9.67 35.82 -16.24 -20.76
+2 24 29.08 -0.91 4.33 24.84 2.34 10.38
+2 24 32.17 -12.58 21.11 29.08 -0.91 4.33
+2 24 24.46 -1.25 19.57 32.17 -12.58 21.11
+2 24 24.84 2.34 10.38 24.46 -1.25 19.57
+2 24 19.98 6.06 -11.12 20 6.05 3.42
+2 24 29.08 -0.91 4.33 25.07 2.16 -9.67
+2 24 20 6.05 3.42 24.84 2.34 10.38
+2 24 20 6.05 3.42 20 3.13 10.75
+2 24 20 3.13 10.75 19.31 1.87 14.25
+2 24 19.31 1.87 14.25 17.32 1.06 17.26
+2 24 17.32 1.06 17.26 14.31 0.84 19.29
+2 24 14.31 0.84 19.29 10.75 1.24 20
+2 24 9.35 -1.26 26.97 24.46 -1.25 19.57
+2 24 -9.31 4.77 20.93 9.35 -1.26 26.97
+2 24 -9.34 5.15 20 -9.31 4.77 20.93
+2 24 10.75 1.24 20 -9.34 5.15 20
+2 24 20 8 -10.75 20 8 10.75
+2 24 10.75 8 20 -10.75 8 20
+2 24 -10.75 4.59 20 -9.34 5.15 20
+2 24 -20.81 1.97 16.83 -19.23 0.29 22.42
+2 24 -17.3 3.16 17.29 -19.31 3.62 14.26
+2 24 -14.27 3.51 19.3 -17.3 3.16 17.29
+2 24 -19.23 0.29 22.42 -15.08 1.37 23.72
+2 24 -15.08 1.37 23.72 -9.31 4.77 20.93
+2 24 -10.75 4.59 20 -14.27 3.51 19.3
+2 24 -20 4.79 10.75 -20.81 1.97 16.83
+2 24 -19.31 3.62 14.26 -20 4.79 10.75
+2 24 -20.03 6.02 7.74 -20 6.05 0.02
+2 24 -23.28 3.54 2.06 -20.03 6.02 7.74
+2 24 -20 8 10.75 -20 8 -10.75
+2 24 -20.03 6.02 7.74 -20 4.79 10.75
+2 24 -10.75 8 -20 10.75 8 -20
+2 24 -14.27 8 19.3 -17.3 8 17.29
+2 24 -19.31 8 14.26 -20 8 10.75
+2 24 -17.3 8 17.29 -19.31 8 14.26
+2 24 -10.75 8 20 -14.27 8 19.3
+2 24 19.3 8 -14.29 20 8 -10.75
+2 24 19.31 8 14.25 17.32 8 17.26
+2 24 14.31 8 19.29 10.75 8 20
+2 24 17.32 8 17.26 14.31 8 19.29
+2 24 20 8 10.75 19.31 8 14.25
+2 24 -20 8 -10.75 -19.3 8 -14.28
+2 24 -19.3 8 -14.28 -17.27 8 -17.31
+2 24 -14.24 8 -19.31 -10.75 8 -20
+2 24 -33.24 -16.63 21.98 -20.81 1.97 16.83
+2 24 -38.12 -22.36 19.27 -33.24 -16.63 21.98
+2 24 -36.43 -16.15 7.51 -38.12 -22.36 19.27
+2 24 -33.24 -16.63 21.98 -25.23 -10.49 27.66
+2 24 -25.23 -10.49 27.66 -19.23 0.29 22.42
+2 24 -11.52 -13.79 37.27 -15.08 1.37 23.72
+2 24 -18 -19.38 38.26 -25.23 -10.49 27.66
+2 24 -18 -19.38 38.26 -11.52 -13.79 37.27
+2 24 -11.52 -13.79 37.27 12 -12.54 37.05
+2 24 12 -12.54 37.05 9.35 -1.26 26.97
+2 24 18.76 -16.55 37.76 24.46 -1.25 19.57
+2 24 12 -12.54 37.05 18.76 -16.55 37.76
+2 24 33.84 -16.62 22.74 32.17 -12.58 21.11
+2 24 18.76 -16.55 37.76 33.84 -16.62 22.74
+2 24 35.33 -11.81 -3.44 29.08 -0.91 4.33
+2 24 35.82 -16.24 -20.76 35.33 -11.81 -3.44
+2 24 35.33 -11.81 -3.44 39.76 -28.34 20
+2 24 33.84 -16.62 22.74 39.76 -28.34 20
+2 24 20 -29.25 40 40 -29.25 20
+2 24 40 -29.25 20 39.76 -28.34 20
+2 24 18.76 -16.55 37.76 20 -29.25 40
+2 24 40 -29.25 -20 20 -29.25 -40
+2 24 35.82 -16.24 -20.76 40 -29.25 -20
+2 24 20 -29.25 -40 18.5 -20.69 -39.25
+2 24 -18.43 -19.55 -39.15 -20 -29.25 -40
+2 24 -40 -29.25 -20 -38.27 -22.91 -20.15
+2 24 -20 -29.25 -40 -40 -29.25 -20
+2 24 -20 -29.25 40 -18 -19.38 38.26
+2 24 -40 -29.25 20 -20 -29.25 40
+2 24 -38.12 -22.36 19.27 -40 -29.25 20
+2 24 20 -29.25 -40 -20 -29.25 -40
+2 24 40 -29.25 20 40 -29.25 -20
+2 24 -20 -29.25 40 20 -29.25 40
+2 24 -40 -29.25 -20 -40 -29.25 20
+2 24 -40 -32 -20 -20 -32 -40
+2 24 -19.22 -32 -38.12 -38.12 -32 -19.22
+2 24 19.22 -32 -38.12 -19.22 -32 -38.12
+2 24 -20 -32 -40 20 -32 -40
+2 24 38.12 -32 -19.22 19.22 -32 -38.12
+2 24 20 -32 -40 40 -32 -20
+2 24 38.12 -32 19.22 38.12 -32 -19.22
+2 24 40 -32 -20 40 -32 20
+2 24 19.22 -32 38.12 38.12 -32 19.22
+2 24 40 -32 20 20 -32 40
+2 24 -19.22 -32 38.12 19.22 -32 38.12
+2 24 20 -32 40 -20 -32 40
+2 24 -38.12 -32 19.22 -19.22 -32 38.12
+2 24 -20 -32 40 -40 -32 20
+2 24 -38.12 -32 -19.22 -38.12 -32 19.22
+2 24 -40 -32 20 -40 -32 -20
+2 24 38.12 -37.25 19.22 19.22 -37.25 38.12
+2 24 18.45 -37.25 36.25 36.25 -37.25 18.45
+2 24 38.12 -37.25 -19.22 38.12 -37.25 19.22
+2 24 36.25 -37.25 18.45 36.25 -37.25 -18.45
+2 24 19.22 -37.25 -38.12 38.12 -37.25 -19.22
+2 24 36.25 -37.25 -18.45 18.45 -37.25 -36.25
+2 24 -19.22 -37.25 -38.12 19.22 -37.25 -38.12
+2 24 18.45 -37.25 -36.25 -18.45 -37.25 -36.25
+2 24 -38.12 -37.25 -19.22 -19.22 -37.25 -38.12
+2 24 -18.45 -37.25 -36.25 -36.25 -37.25 -18.45
+2 24 -38.12 -37.25 19.22 -38.12 -37.25 -19.22
+2 24 -36.25 -37.25 -18.45 -36.25 -37.25 18.45
+2 24 -19.22 -37.25 38.12 -38.12 -37.25 19.22
+2 24 -36.25 -37.25 18.45 -18.45 -37.25 36.25
+2 24 -18.45 -37.25 36.25 18.45 -37.25 36.25
+2 24 19.22 -37.25 38.12 -19.22 -37.25 38.12
+2 24 -18.41 -32.16 36.25 -18.45 -37.25 36.25
+2 24 -36.25 -37.25 18.45 -36.25 -32.25 18.45
+2 24 -36.25 -37.25 -18.45 -36.23 -32.17 -18.47
+2 24 -18.45 -37.25 -36.25 -18.43 -32 -36.25
+2 24 18.45 -37.25 -36.25 18.42 -32.01 -36.25
+2 24 36.25 -37.25 -18.45 36.23 -32.17 -18.47
+2 24 36.25 -37.25 18.45 36.25 -31.75 18.45
+2 24 18.45 -37.25 36.25 18.44 -32.1 36.25
+2 24 20 -32 40 20 -29.25 40
+2 24 -20 -29.25 40 -20 -32 40
+2 24 40 -32 20 40 -29.25 20
+2 24 -40 -29.25 20 -40 -32 20
+2 24 -40 -29.25 -20 -40 -32 -20
+2 24 -20 -29.25 -40 -20 -32 -40
+2 24 20 -29.25 -40 20 -32 -40
+2 24 40 -29.25 -20 40 -32 -20
+2 24 38.12 -37.25 -19.22 38.12 -32 -19.22
+2 24 38.12 -32 19.22 38.12 -37.25 19.22
+2 24 19.22 -32 38.12 19.22 -37.25 38.12
+2 24 -19.22 -32 38.12 -19.22 -37.25 38.12
+2 24 -38.12 -32 19.22 -38.12 -37.25 19.22
+2 24 19.22 -37.25 -38.12 19.22 -32 -38.12
+2 24 -19.22 -37.25 -38.12 -19.22 -32 -38.12
+2 24 -38.12 -37.25 -19.22 -38.12 -32 -19.22
+1 16 0 4 0 1 0 0 0 -1 0 0 0 -1 p/stud4.dat
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 p/stud2a.dat
+1 16 0 0 0 6 0 0 0 1 0 0 0 6 p/4-4edge.dat
+1 16 0 4 0 4 0 0 0 1 0 0 0 4 p/4-4edge.dat
+1 16 0 4 0 4 0 0 0 -1 0 0 0 4 p/4-4ndis.dat
+0 BFC INVERTNEXT
+1 16 0 4 0 4 0 0 0 -4 0 0 0 4 p/4-4cyli.dat
+4 16 0 0 6.12 -4.62 0 20.32 -11.4 0 20.06 -18.33 0 13.5
+4 16 -6.12 0 0 0 0 6.12 -18.33 0 13.5 -21.13 0 2.07
+4 16 -6.12 0 0 -21.13 0 2.07 -21.38 0 -4.86 0 0 -6.12
+4 16 0 0 -6.12 -21.38 0 -4.86 -14.2 0 -20.43 3.8 0 -23.85
+4 16 0 0 -6.12 3.8 0 -23.85 17.11 0 -18.34 22.07 0 -9.24
+4 16 22.25 0 8.22 -4.62 0 20.32 0 0 6.12 6.12 0 0
+4 16 6.12 0 0 0 0 -6.12 22.07 0 -9.24 22.25 0 8.22
+4 16 14.29 8 -19.3 10.75 8 -20 10 8 -16 12.296 8 -15.543
+4 16 17.29 8 -17.29 14.29 8 -19.3 12.296 8 -15.543 14.243 8 -14.243
+4 16 15.543 8 -12.296 19.3 8 -14.29 17.29 8 -17.29 14.243 8 -14.243
+4 16 16 8 -10 20 8 -10.75 19.3 8 -14.29 15.543 8 -12.296
+4 16 16 8 10 20 8 10.75 20 8 -10.75 16 8 -10
+4 16 -19.3 8 -14.29 -20 8 -10.75 -16 8 -10 -15.543 8 -12.296
+4 16 -17.29 8 -17.29 -19.3 8 -14.29 -15.543 8 -12.296 -14.243 8 -14.243
+4 16 -12.296 8 -15.543 -14.29 8 -19.3 -17.29 8 -17.29 -14.243 8 -14.243
+4 16 -10 8 -16 -10.75 8 -20 -14.29 8 -19.3 -12.296 8 -15.543
+4 16 10 8 -16 10.75 8 -20 -10.75 8 -20 -10 8 -16
+4 16 19.3 8 14.29 20 8 10.75 16 8 10 15.543 8 12.296
+4 16 17.29 8 17.29 19.3 8 14.29 15.543 8 12.296 14.243 8 14.243
+4 16 12.296 8 15.543 14.29 8 19.3 17.29 8 17.29 14.243 8 14.243
+4 16 10 8 16 10.75 8 20 14.29 8 19.3 12.296 8 15.543
+4 16 -10 8 16 -10.75 8 20 10.75 8 20 10 8 16
+4 16 -14.29 8 19.3 -10.75 8 20 -10 8 16 -12.296 8 15.543
+4 16 -17.29 8 17.29 -14.29 8 19.3 -12.296 8 15.543 -14.243 8 14.243
+4 16 -15.543 8 12.296 -19.3 8 14.29 -17.29 8 17.29 -14.243 8 14.243
+4 16 -16 8 10 -20 8 10.75 -19.3 8 14.29 -15.543 8 12.296
+4 16 -16 8 -10 -20 8 -10.75 -20 8 10.75 -16 8 10
+0 BFC INVERTNEXT
+1 16 10 4 -10 0 0 6 0 4 0 -6 0 0 p/1-4cylc.dat
+1 16 16 6 0 0 1 0 0 0 -2 10 0 0 p/rect2p.dat
+4 16 10 4 10 16 4 10 16 4 -10 10 4 -10
+4 16 10 4 -10 4 4 -4 4 4 4 10 4 10
+0 BFC INVERTNEXT
+1 16 10 4 10 6 0 0 0 4 0 0 0 6 p/1-4cylc.dat
+1 16 0 6 16 -10 0 0 0 0 -2 0 1 0 p/rect2p.dat
+4 16 -10 4 10 -10 4 16 10 4 16 10 4 10
+4 16 10 4 10 4 4 4 -4 4 4 -10 4 10
+0 BFC INVERTNEXT
+1 16 -10 4 10 0 0 -6 0 4 0 6 0 0 p/1-4cylc.dat
+1 16 -16 6 0 0 -1 0 0 0 -2 -10 0 0 p/rect2p.dat
+4 16 -10 4 -10 -16 4 -10 -16 4 10 -10 4 10
+4 16 -10 4 10 -4 4 4 -4 4 -4 -10 4 -10
+0 BFC INVERTNEXT
+1 16 -10 4 -10 -6 0 0 0 4 0 0 0 -6 p/1-4cylc.dat
+1 16 0 6 -16 10 0 0 0 0 -2 0 -1 0 p/rect2p.dat
+4 16 10 4 -10 10 4 -16 -10 4 -16 -10 4 -10
+4 16 -10 4 -10 -4 4 -4 4 4 -4 10 4 -10
+5 24 -17.24 3.42 -17.34 -17.27 8 -17.31 -14.31 4.65 -19.29 -19.3 8 -14.28
+5 24 -14.24 8 -19.31 -14.31 4.65 -19.29 -17.27 8 -17.31 -10.75 5.48 -20
+5 24 17.05 4.33 -17.52 17.29 8 -17.29 19.08 5.02 -14.77 14.29 8 -19.3
+5 24 17.29 8 -17.29 19.08 5.02 -14.77 17.05 4.33 -17.52 19.3 8 -14.29
+5 24 19.3 8 -14.29 19.08 5.02 -14.77 17.29 8 -17.29 19.98 6.06 -11.12
+5 24 14.29 8 -19.3 14.14 4.1 -19.36 10.75 8 -20 17.05 4.33 -17.52
+5 24 10.75 4.38 -20 10.75 8 -20 14.14 4.1 -19.36 -3.42 6.5 -20
+5 24 14.29 8 -19.3 17.05 4.33 -17.52 14.14 4.1 -19.36 17.29 8 -17.29
+5 24 -15.88 -1.34 -21.94 -21.38 0 -4.86 -19.07 -2.89 -20.73 -14.2 0 -20.43
+5 24 -21.38 0 -4.86 -32.97 -17.72 6.98 -32.97 -17.72 -8.11 -21.13 0 2.07
+5 24 -30.24 -18.7 -21.75 -32.97 -17.72 -8.11 -34.65 -23.86 -18.63 -19.07 -2.89 -20.73
+5 24 -32.97 -17.72 -8.11 -19.07 -2.89 -20.73 -21.38 0 -4.86 -30.24 -18.7 -21.75
+5 24 -2.52 -7.09 -32.31 -19.07 -2.89 -20.73 -4.61 -11.63 -34.69 -15.88 -1.34 -21.94
+5 24 -23.25 -13.34 -27.4 -4.61 -11.63 -34.69 -19.07 -2.89 -20.73 -16.94 -20.35 -35.46
+5 24 8.89 -4.37 24.69 22.25 0 8.22 22.37 -4.35 18.07 -4.62 0 20.32
+5 24 19.78 -9.18 -29.5 17.11 0 -18.34 15.15 -3.08 -27.68 22.07 0 -9.24
+5 24 31.87 -13.4 -3.26 30.53 -17.95 21.01 28.77 -13.68 19.29 36.25 -31.75 18.45
+5 24 -32.97 -17.72 -8.11 -36.23 -32.17 -18.47 -34.65 -23.86 -18.63 -32.97 -17.72 6.98
+5 24 -32.97 -17.72 6.98 -36.23 -32.17 -18.47 -32.97 -17.72 -8.11 -34.53 -23.43 17.78
+5 24 -36.23 -32.17 -18.47 -34.53 -23.43 17.78 -36.25 -32.25 18.45 -32.97 -17.72 6.98
+5 24 -18.41 -32.16 36.25 -22.87 -12.45 25.28 -16.5 -20.29 34.61 -29.54 -17.58 20.54
+5 24 -18.41 -32.16 36.25 -29.54 -17.58 20.54 -22.87 -12.45 25.28 -34.53 -23.43 17.78
+5 24 -34.53 -23.43 17.78 -18.41 -32.16 36.25 -36.25 -32.25 18.45 -29.54 -17.58 20.54
+5 24 18.44 -32.1 36.25 11.22 -14.28 33.55 17.3 -17.88 34.19 -10.9 -15.45 33.76
+5 24 -10.9 -15.45 33.76 18.44 -32.1 36.25 -16.5 -20.29 34.61 11.22 -14.28 33.55
+5 24 18.44 -32.1 36.25 -16.5 -20.29 34.61 -10.9 -15.45 33.76 -18.41 -32.16 36.25
+5 24 36.23 -32.17 -18.47 31.87 -13.4 -3.26 33.32 -18.81 -18.55 36.25 -31.75 18.45
+5 24 9.54 -2.47 -28.3 19.78 -9.18 -29.5 15.15 -3.08 -27.68 -2.52 -7.09 -32.31
+5 24 19.78 -9.18 -29.5 -4.61 -11.63 -34.69 16.94 -21.09 -35.52 -2.52 -7.09 -32.31
+5 24 -23.25 -13.34 -27.4 -18.43 -32 -36.25 -16.94 -20.35 -35.46 -30.24 -18.7 -21.75
+5 24 -30.24 -18.7 -21.75 -18.43 -32 -36.25 -23.25 -13.34 -27.4 -34.65 -23.86 -18.63
+5 24 -18.43 -32 -36.25 -34.65 -23.86 -18.63 -36.23 -32.17 -18.47 -30.24 -18.7 -21.75
+5 24 -16.94 -20.35 -35.46 16.94 -21.09 -35.52 -4.61 -11.63 -34.69 18.42 -32.01 -36.25
+5 24 16.94 -21.09 -35.52 31.28 -16.05 -19.86 19.78 -9.18 -29.5 18.42 -32.01 -36.25
+5 24 31.28 -16.05 -19.86 18.42 -32.01 -36.25 33.32 -18.81 -18.55 16.94 -21.09 -35.52
+5 24 18.42 -32.01 -36.25 33.32 -18.81 -18.55 31.28 -16.05 -19.86 36.23 -32.17 -18.47
+5 24 -24.23 2.11 -6.07 -20 3.43 -10.75 -19.27 2.97 -14.34 -23.28 3.54 -2.5
+5 24 -14.31 4.65 -19.29 -2.74 -4.74 -35.44 -17.55 1.63 -23.95 -10.75 5.48 -20
+5 24 -10.75 5.48 -20 -2.74 -4.74 -35.44 -14.31 4.65 -19.29 -3.42 6.5 -20
+5 24 20.41 5.74 -12.23 20.9 -5.87 -32.18 19.08 5.02 -14.77 24.08 -8.31 -30.43
+5 24 20.9 -5.87 -32.18 19.08 5.02 -14.77 20.41 5.74 -12.23 16.61 -0.23 -30.32
+5 24 25.07 2.16 -9.67 24.08 -8.31 -30.43 20.41 5.74 -12.23 35.82 -16.24 -20.76
+5 24 25.07 2.16 -9.67 19.98 6.06 -11.12 29.08 -0.91 4.33 20.41 5.74 -12.23
+5 24 10.75 1.24 20 9.35 -1.26 26.97 14.31 0.84 19.29 -9.34 5.15 20
+5 24 9.35 -1.26 26.97 14.31 0.84 19.29 10.75 1.24 20 24.46 -1.25 19.57
+5 24 19.98 6.06 -11.12 20 8 -10.75 20 6.05 3.42 19.3 8 -14.29
+5 24 20 8 10.75 20 3.13 10.75 20 6.05 3.42 19.31 8 14.25
+5 24 10.75 1.24 20 10.75 8 20 -9.34 5.15 20 14.31 8 19.29
+5 24 -10.75 8 20 -10.75 4.59 20 -9.34 5.15 20 -14.27 8 19.3
+5 24 -19.23 0.29 22.42 -17.3 3.16 17.29 -20.81 1.97 16.83 -14.27 3.51 19.3
+5 24 -19.31 3.62 14.26 -20.81 1.97 16.83 -17.3 3.16 17.29 -20 4.79 10.75
+5 24 -9.31 4.77 20.93 -10.75 4.59 20 -15.08 1.37 23.72 -9.34 5.15 20
+5 24 -20 4.79 10.75 -36.43 -16.15 7.51 -20.81 1.97 16.83 -20.03 6.02 7.74
+5 24 -36.43 -16.15 7.51 -20.81 1.97 16.83 -20 4.79 10.75 -33.24 -16.63 21.98
+5 24 -20 8 -10.75 -20 3.43 -10.75 -20 6.05 0.02 -19.3 8 -14.28
+5 24 -20 6.05 0.02 -20 8 10.75 -20 8 -10.75 -20.03 6.02 7.74
+5 24 -20.03 6.02 7.74 -20 8 10.75 -20 6.05 0.02 -20 4.79 10.75
+5 24 -20 4.79 10.75 -20 8 10.75 -20.03 6.02 7.74 -19.31 8 14.26
+5 24 -10.75 5.48 -20 -10.75 8 -20 -3.42 6.5 -20 -14.24 8 -19.31
+5 24 -17.3 8 17.29 -17.3 3.16 17.29 -14.27 3.51 19.3 -19.31 3.62 14.26
+5 24 -14.27 3.51 19.3 -14.27 8 19.3 -17.3 8 17.29 -10.75 4.59 20
+5 24 -19.31 3.62 14.26 -19.31 8 14.26 -20 4.79 10.75 -17.3 8 17.29
+5 24 19.3 8 -14.29 19.98 6.06 -11.12 19.08 5.02 -14.77 20 8 -10.75
+5 24 17.32 8 17.26 17.32 1.06 17.26 19.31 1.87 14.25 14.31 8 19.29
+5 24 19.31 1.87 14.25 19.31 8 14.25 17.32 8 17.26 20 3.13 10.75
+5 24 14.31 0.84 19.29 14.31 8 19.29 10.75 1.24 20 17.32 1.06 17.26
+5 24 -19.3 8 -14.28 -19.27 2.97 -14.34 -20 3.43 -10.75 -17.24 3.42 -17.34
+5 24 -36.43 -16.15 7.51 -20.03 6.02 7.74 -23.28 3.54 2.06 -20 4.79 10.75
+5 24 39.76 -28.34 20 35.82 -16.24 -20.76 35.33 -11.81 -3.44 40 -29.25 -20
+5 24 39.76 -28.34 20 20 -29.25 40 40 -29.25 20 33.84 -16.62 22.74
+5 24 40 -29.25 -20 39.76 -28.34 20 40 -29.25 20 35.82 -16.24 -20.76
+
+0 FILE p/rect2p.dat
+0 Rectangle with 2 Parallel Edges
+0 Name: rect2p.dat
+0 Author: Donald Sutter [technog]
+0 !LDRAW_ORG Primitive UPDATE 2010-01
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 2003-08-01 [PTadmin] Official Update 2003-02
+0 !HISTORY 2007-06-24 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+0 !HISTORY 2010-01-17 [mikeheide] changed winding to CCW
+0 !HISTORY 2010-04-05 [PTadmin] Official Update 2010-01
+
+
+2 24 1 0 1 -1 0 1
+2 24 -1 0 -1 1 0 -1
+4 16 -1 0 1 -1 0 -1 1 0 -1 1 0 1
+0
+
+0 FILE p/1-4cylc.dat
+0 Cylinder Closed 0.25
+0 Name: 1-4cylc.dat
+0 Author: Mark Kennedy [mkennedy]
+0 !LDRAW_ORG Primitive UPDATE 2010-01
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 2010-04-05 [PTadmin] Official Update 2010-01
+
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 p/1-4edge.dat
+1 16 0 1 0 1 0 0 0 1 0 0 0 1 p/1-4edge.dat
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 p/1-4disc.dat
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 p/1-4cyli.dat
+0
+
+0 FILE p/1-4cyli.dat
+0 Cylinder 0.25
+0 Name: 1-4cyli.dat
+0 Author: James Jessiman
+0 !LDRAW_ORG Primitive UPDATE 2012-01
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 2002-03-23 [sbliss] Added BFC statement.
+0 !HISTORY 2002-04-25 [PTadmin] Official Update 2002-02
+0 !HISTORY 2007-06-22 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+0 !HISTORY 2012-02-16 [Philo] Changed to CCW
+0 !HISTORY 2012-03-30 [PTadmin] Official Update 2012-01
+
+
+4 16 1 1 0 0.9239 1 0.3827 0.9239 0 0.3827 1 0 0
+5 24 1 0 0 1 1 0 0.9239 0 0.3827 1 0 -1
+4 16 0.9239 1 0.3827 0.7071 1 0.7071 0.7071 0 0.7071 0.9239 0 0.3827
+5 24 0.9239 0 0.3827 0.9239 1 0.3827 0.7071 0 0.7071 1 0 0
+4 16 0.7071 1 0.7071 0.3827 1 0.9239 0.3827 0 0.9239 0.7071 0 0.7071
+5 24 0.7071 0 0.7071 0.7071 1 0.7071 0.3827 0 0.9239 0.9239 0 0.3827
+4 16 0.3827 1 0.9239 0 1 1 0 0 1 0.3827 0 0.9239
+5 24 0.3827 0 0.9239 0.3827 1 0.9239 0 0 1 0.7071 0 0.7071
+5 24 0 0 1 0 1 1 0.3827 0 0.9239 -1 0 1
+
+0 FILE p/1-4disc.dat
+0 Disc 0.25
+0 Name: 1-4disc.dat
+0 Author: James Jessiman
+0 !LDRAW_ORG Primitive UPDATE 2002-02
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 2002-03-23 [sbliss] Added BFC statement.
+0 !HISTORY 2002-04-25 [PTadmin] Official Update 2002-02
+0 !HISTORY 2007-06-22 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+
+
+3 16 0 0 0 1 0 0 0.9239 0 0.3827
+3 16 0 0 0 0.9239 0 0.3827 0.7071 0 0.7071
+3 16 0 0 0 0.7071 0 0.7071 0.3827 0 0.9239
+3 16 0 0 0 0.3827 0 0.9239 0 0 1
+0
+
+0 FILE p/1-4edge.dat
+0 Circle 0.25
+0 Name: 1-4edge.dat
+0 Author: James Jessiman
+0 !LDRAW_ORG Primitive UPDATE 2017-01
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 2007-06-22 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+0 !HISTORY 2017-01-15 [Steffen] BFCed
+0 !HISTORY 2017-12-30 [PTadmin] Official Update 2017-01
+
+
+2 24 1 0 0 0.9239 0 0.3827
+2 24 0.9239 0 0.3827 0.7071 0 0.7071
+2 24 0.7071 0 0.7071 0.3827 0 0.9239
+2 24 0.3827 0 0.9239 0 0 1
+
+0 FILE p/4-4ndis.dat
+0 Disc Negative 1.0
+0 Name: 4-4ndis.dat
+0 Author: James Jessiman
+0 !LDRAW_ORG Primitive UPDATE 2012-01
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 2002-03-23 [sbliss] Added BFC statement; compacted code
+0 !HISTORY 2002-04-25 [PTadmin] Official Update 2002-02
+0 !HISTORY 2007-06-24 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+0 !HISTORY 2012-02-16 [Philo] Changed to CCW
+0 !HISTORY 2012-03-30 [PTadmin] Official Update 2012-01
+
+
+3 16 0.9239 0 0.3827 1 0 0 1 0 1
+3 16 0.7071 0 0.7071 0.9239 0 0.3827 1 0 1
+3 16 0.3827 0 0.9239 0.7071 0 0.7071 1 0 1
+3 16 0 0 1 0.3827 0 0.9239 1 0 1
+3 16 -0.3827 0 0.9239 0 0 1 -1 0 1
+3 16 -0.7071 0 0.7071 -0.3827 0 0.9239 -1 0 1
+3 16 -0.9239 0 0.3827 -0.7071 0 0.7071 -1 0 1
+3 16 -1 0 0 -0.9239 0 0.3827 -1 0 1
+3 16 -0.9239 0 -0.3827 -1 0 0 -1 0 -1
+3 16 -0.7071 0 -0.7071 -0.9239 0 -0.3827 -1 0 -1
+3 16 -0.3827 0 -0.9239 -0.7071 0 -0.7071 -1 0 -1
+3 16 0 0 -1 -0.3827 0 -0.9239 -1 0 -1
+3 16 0.3827 0 -0.9239 0 0 -1 1 0 -1
+3 16 0.7071 0 -0.7071 0.3827 0 -0.9239 1 0 -1
+3 16 0.9239 0 -0.3827 0.7071 0 -0.7071 1 0 -1
+3 16 1 0 0 0.9239 0 -0.3827 1 0 -1
+
+0 FILE p/stud2a.dat
+0 Stud Open without Base Edges
+0 Name: stud2a.dat
+0 Author: James Jessiman
+0 !LDRAW_ORG Primitive UPDATE 2009-02
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 1999-07-05 [PTadmin] Official Update 1999-05
+0 !HISTORY 2002-04-04 [sbliss] Modified for BFC compliance
+0 !HISTORY 2002-04-25 [PTadmin] Official Update 2002-02
+0 !HISTORY 2007-06-24 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+0 !HISTORY 2009-06-21 [cwdee] Update ring references to 4-4ring
+0 !HISTORY 2009-09-03 [PTadmin] Official Update 2009-02
+
+
+1 16 0 -4 0 4 0 0 0 1 0 0 0 4 p/4-4edge.dat
+1 16 0 -4 0 6 0 0 0 1 0 0 0 6 p/4-4edge.dat
+0 BFC INVERTNEXT
+1 16 0 -4 0 4 0 0 0 4 0 0 0 4 p/4-4cyli.dat
+1 16 0 -4 0 6 0 0 0 4 0 0 0 6 p/4-4cyli.dat
+1 16 0 -4 0 2 0 0 0 1 0 0 0 2 p/4-4ring2.dat
+0
+
+0 FILE p/4-4ring2.dat
+0 Ring  2 x 1.0
+0 Name: 4-4ring2.dat
+0 Author: James Jessiman
+0 !LDRAW_ORG Primitive UPDATE 2009-01
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 1998-12-15 [PTadmin] Official Update 1998-10
+0 !HISTORY 2002-04-05 [hafhead] Added BFC statement
+0 !HISTORY 2002-04-25 [PTadmin] Official Update 2002-02
+0 !HISTORY 2007-06-24 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+0 !HISTORY 2008-08-26 [cwdee] Switch polygon winding and rename
+0 !HISTORY 2009-05-02 [PTadmin] Official Update 2009-01
+
+
+4 16 -1.1481 0 2.7717 -0.7654 0 1.8478 0 0 2 0 0 3
+4 16 -2.1213 0 2.1213 -1.4142 0 1.4142 -0.7654 0 1.8478 -1.1481 0 2.7717
+4 16 -2.7717 0 1.1481 -1.8478 0 0.7654 -1.4142 0 1.4142 -2.1213 0 2.1213
+4 16 -3 0 0 -2 0 0 -1.8478 0 0.7654 -2.7717 0 1.1481
+4 16 -2.7717 0 -1.1481 -1.8478 0 -0.7654 -2 0 0 -3 0 0
+4 16 -2.1213 0 -2.1213 -1.4142 0 -1.4142 -1.8478 0 -0.7654 -2.7717 0 -1.1481
+4 16 -1.1481 0 -2.7717 -0.7654 0 -1.8478 -1.4142 0 -1.4142 -2.1213 0 -2.1213
+4 16 0 0 -3 0 0 -2 -0.7654 0 -1.8478 -1.1481 0 -2.7717
+4 16 1.1481 0 -2.7717 0.7654 0 -1.8478 0 0 -2 0 0 -3
+4 16 2.1213 0 -2.1213 1.4142 0 -1.4142 0.7654 0 -1.8478 1.1481 0 -2.7717
+4 16 2.7717 0 -1.1481 1.8478 0 -0.7654 1.4142 0 -1.4142 2.1213 0 -2.1213
+4 16 3 0 0 2 0 0 1.8478 0 -0.7654 2.7717 0 -1.1481
+4 16 2.7717 0 1.1481 1.8478 0 0.7654 2 0 0 3 0 0
+4 16 2.1213 0 2.1213 1.4142 0 1.4142 1.8478 0 0.7654 2.7717 0 1.1481
+4 16 1.1481 0 2.7717 0.7654 0 1.8478 1.4142 0 1.4142 2.1213 0 2.1213
+4 16 0 0 3 0 0 2 0.7654 0 1.8478 1.1481 0 2.7717
+0
+
+0 FILE parts/30293.dat
+0 =Rock  4 x  4 x  1.333 Top
+0 Name: 30293.dat
+0 Author: [PTadmin]
+0 !LDRAW_ORG Part Alias UPDATE 2025-09
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 2013-12-23 [PTadmin] Official Update 2013-02
+0 !HISTORY 2025-09-27 [OrionP] Changed winding to CCW
+0 !HISTORY 2025-09-29 [OrionP] Official Update 2025-09
+
+0 // Alias of 42284
+0 // 30293 is the transparent colour counterpart of 42284
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 parts/42284.dat
+0
+0 FILE parts/42284.dat
+0 Rock  4 x  4 x  1.333 Top
+0 Name: 42284.dat
+0 Author: El'dar Ismagilov [Eldar]
+0 !LDRAW_ORG Part UPDATE 2013-02
+0 !LICENSE Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !KEYWORDS BrickLink 30293, Rebrickable 30293
+
+0 !HISTORY 2009-10-13 {LEGO Universe Team} Original part shape
+0 !HISTORY 2009-11-07 [Eldar] File preparation for LDraw Parts Tracker
+0 !HISTORY 2010-12-31 [PTadmin] Official Update 2010-03
+0 !HISTORY 2012-01-26 [Philo] Corrected height in description
+0 !HISTORY 2012-03-30 [PTadmin] Official Update 2012-01
+0 !HISTORY 2013-06-30 [PTadmin] Renamed from 30293
+0 !HISTORY 2013-12-23 [PTadmin] Official Update 2013-02
+
+
+1 16 0 4 0 1 0 0 0 -1 0 0 0 -1 p/stud4.dat
+1 16 0 0 0 0 0 1 0 1 0 -1 0 0 p/stug-2x2.dat
+4 16 6.69 3.75 -15.3 -12.76 3.75 0.533 -4.34 3.75 8.955 19.32 3.75 -2.66
+4 16 6.69 3.75 -15.3 -7 3.75 -17.51 -12.34 3.75 -15.36 -12.76 3.75 0.533
+3 16 -22.45 7.07 -8.75 -12.76 3.75 0.533 -17.33 5.34 -13.48
+4 16 -12.76 3.75 0.533 -22.45 7.07 -8.75 -24.46 7.71 3.012 -21.68 6.75 8.774
+4 16 -13.92 7.14 18.721 -4.34 3.75 8.955 -21.68 6.75 8.774 -20.56 8.02 17.121
+3 16 -12.76 3.75 0.533 -21.68 6.75 8.774 -4.34 3.75 8.955
+4 16 19.32 3.75 -2.66 25.66 7.28 -7.23 9.847 7.32 -23.2 6.69 3.75 -15.3
+4 16 25.66 7.28 -7.23 24.32 11.08 -20.35 18.565 11.08 -26.1 9.847 7.32 -23.2
+3 16 6.69 3.75 -15.3 -4.67 6.38 -23.33 -7 3.75 -17.51
+4 16 -4.67 6.38 -23.33 6.69 3.75 -15.3 9.847 7.32 -23.2 0.756 7.36 -24.76
+4 16 12.369 16.36 -33.27 -17.41 23.194 -35.1 -4.67 6.38 -23.33 0.756 7.36 -24.76
+4 16 -17.41 23.194 -35.1 -20.46 14.23 -27.65 -12.51 8.18 -23.82 -4.67 6.38 -23.33
+4 16 0.756 7.36 -24.76 9.847 7.32 -23.2 18.565 11.08 -26.1 12.369 16.36 -33.27
+4 16 18.565 11.08 -26.1 20.85 14.33 -29.5 17.821 17.38 -33.54 12.369 16.36 -33.27
+4 16 -19.34 24.46 34.2 -6.97 14.68 28.56 -23.47 10.65 19.052 -28.01 15.11 22
+4 16 -23.47 10.65 19.052 -6.97 14.68 28.56 -9.5 8.19 21.24 -13.92 7.14 18.721
+4 16 -22.83 8.25 -13.63 -12.51 8.18 -23.82 -20.46 14.23 -27.65 -26.91 14.23 -21.19
+4 16 -22.83 8.25 -13.63 -17.33 5.34 -13.48 -12.34 3.75 -15.36 -12.51 8.18 -23.82
+4 16 -32.15 15.8 10.228 -24.46 7.71 3.012 -22.45 7.07 -8.75 -34.37 22.61 -17.86
+4 16 -22.45 7.07 -8.75 -22.83 8.25 -13.63 -26.91 14.23 -21.19 -34.37 22.61 -17.86
+4 16 -38.12 26.75 -19.22 -35.71 26.75 -18.55 -18.21 26.75 -36.05 -19.22 26.75 -38.12
+4 16 -19.22 26.75 -38.12 -18.21 26.75 -36.05 18.419 26.75 -36.05 19.223 26.75 -38.12
+4 16 38.13 26.75 -19.22 19.223 26.75 -38.12 18.419 26.75 -36.05 36.05 26.75 -18.42
+4 16 38.13 26.75 19.223 38.13 26.75 -19.22 36.05 26.75 -18.42 36.05 26.75 18.258
+4 16 19.223 26.75 38.13 38.13 26.75 19.223 36.05 26.75 18.258 18.783 26.75 35.53
+4 16 19.223 26.75 38.13 18.783 26.75 35.53 -18.89 26.75 35.53 -19.22 26.75 38.13
+4 16 -19.22 26.75 38.13 -18.89 26.75 35.53 -35.71 26.75 18.704 -38.12 26.75 19.223
+4 16 -38.12 26.75 -19.22 -38.12 26.75 19.223 -35.71 26.75 18.704 -35.71 26.75 -18.55
+3 16 -35.71 26.75 18.704 -34.37 22.61 -17.86 -35.71 26.75 -18.55
+4 16 -34.37 22.61 -17.86 -35.71 26.75 18.704 -32.99 18.38 18.252 -32.15 15.8 10.228
+3 16 -19.34 24.46 34.2 -35.71 26.75 18.704 -18.89 26.75 35.53
+4 16 -35.71 26.75 18.704 -19.34 24.46 34.2 -28.01 15.11 22 -32.99 18.38 18.252
+4 16 18.783 26.75 35.53 19.328 22.126 32.86 12.381 17.05 29.93 -18.89 26.75 35.53
+4 16 -18.89 26.75 35.53 12.381 17.05 29.93 -6.97 14.68 28.56 -19.34 24.46 34.2
+3 16 17.821 17.38 -33.54 36.05 26.75 -18.42 18.419 26.75 -36.05
+4 16 17.821 17.38 -33.54 20.85 14.33 -29.5 25.19 14.33 -25.16 36.05 26.75 -18.42
+3 16 -17.41 23.194 -35.1 18.419 26.75 -36.05 -18.21 26.75 -36.05
+4 16 17.821 17.38 -33.54 18.419 26.75 -36.05 -17.41 23.194 -35.1 12.369 16.36 -33.27
+4 16 -35.71 26.75 -18.55 -34.37 22.61 -17.86 -17.41 23.194 -35.1 -18.21 26.75 -36.05
+4 16 -34.37 22.61 -17.86 -26.91 14.23 -21.19 -20.46 14.23 -27.65 -17.41 23.194 -35.1
+4 16 -20 32 -40 -19.22 32 -38.12 19.223 32 -38.12 20 32 -40
+4 16 20 32 -40 19.223 32 -38.12 38.13 32 -19.22 40 32 -20
+4 16 40 32 -20 38.13 32 -19.22 38.13 32 19.223 40 32 20
+4 16 40 32 20 38.13 32 19.223 19.223 32 38.13 20 32 40
+4 16 20 32 40 19.223 32 38.13 -19.22 32 38.13 -20 32 40
+4 16 -20 32 40 -19.22 32 38.13 -38.12 32 19.223 -40 32 20
+4 16 -40 32 20 -38.12 32 19.223 -38.12 32 -19.22 -40 32 -20
+4 16 -40 32 -20 -38.12 32 -19.22 -19.22 32 -38.12 -20 32 -40
+3 16 20.8 20.21 36.08 30.49 15.41 24.19 39.58 25.426 19.699
+4 16 40 27 20 20 27 40 20.8 20.21 36.08 39.58 25.426 19.699
+4 16 -37.8 21.06 -19.27 -20 27 -40 -18.83 21.76 -38.6 -29.65 11.89 -22.92
+3 16 -22.18 11.89 -30.39 -29.65 11.89 -22.92 -18.83 21.76 -38.6
+4 16 -25.26 5.45 -14.77 -13.67 5.41 -26.29 -15.72 1.15 -15.94 -17.98 1.61 -14.58
+4 16 -13.67 5.41 -26.29 -25.26 5.45 -14.77 -29.65 11.89 -22.92 -22.18 11.89 -30.39
+4 16 -24.75 3.89 -8.33 -17.98 1.61 -14.58 -17.85 1.56 -12.51 -18.1 1.63 -8.45
+4 16 -23.27 3.33 9.69 -26.63 4.49 2.695 -13.35 0 -2.46 -13.38 0 0.56
+4 16 -26.63 4.49 2.695 -24.75 3.89 -8.33 -16.49 1.07 -4.91 -13.35 0 -2.46
+3 16 -24.75 3.89 -8.33 -18.1 1.63 -8.45 -16.49 1.07 -4.91
+3 16 -4.57 3.32 -25.73 -12.34 0.7 -17.91 -13.67 5.41 -26.29
+4 16 -12.34 0.7 -17.91 -4.57 3.32 -25.73 -7.51 0 -18.38 -8.32 0 -18.08
+3 16 10.764 4.11 -25.09 11.901 2.19 -18.03 8.195 1 -18.05
+4 16 27.87 4.23 -8.35 20.27 0 -2.87 17.188 0 -5.95 18.236 1.49 -9.53
+4 16 26.59 7.87 -20.9 27.87 4.23 -8.35 18.236 1.49 -9.53 17.603 2.48 -13.2
+4 16 19.485 7.87 -28 26.59 7.87 -20.9 17.603 2.48 -13.2 15.37 2.74 -16.26
+4 16 15.37 2.74 -16.26 11.901 2.19 -18.03 10.764 4.11 -25.09 19.485 7.87 -28
+4 16 27.87 4.23 -8.35 30.98 5.8 -2.15 24.93 2.31 8.992 20.27 0 -2.87
+4 16 20.27 0 -2.87 24.93 2.31 8.992 21.33 0.36 8.797 20.63 0 7.87
+3 16 -14.93 3.75 20.45 -20.67 4.57 19.357 -14.84 3.08 16.678
+4 16 -16.9 1.48 5.482 -23.27 3.33 9.69 -13.38 0 0.56 -11.95 0 1.984
+4 16 -16.9 1.48 5.482 -18.06 2.73 11.39 -22.57 4.57 17.461 -23.27 3.33 9.69
+4 16 -18.06 2.73 11.39 -14.84 3.08 16.678 -20.67 4.57 19.357 -22.57 4.57 17.461
+4 16 13.249 14.4 -36.62 0.026 4.15 -26.94 -4.57 3.32 -25.73 -18.83 21.76 -38.6
+4 16 -22.18 11.89 -30.39 -18.83 21.76 -38.6 -4.57 3.32 -25.73 -13.67 5.41 -26.29
+4 16 0.026 4.15 -26.94 13.249 14.4 -36.62 19.485 7.87 -28 10.764 4.11 -25.09
+4 16 19.485 7.87 -28 13.249 14.4 -36.62 19.268 15.52 -36.92 22.55 12.23 -32.55
+4 16 36.16 12.67 -1.72 26.59 7.87 -20.9 27.76 12.23 -27.34 39.45 24.94 -19.87
+4 16 30.98 5.8 -2.15 27.87 4.23 -8.35 26.59 7.87 -20.9 36.16 12.67 -1.72
+4 16 36.16 12.67 -1.72 39.58 25.426 19.699 30.49 15.41 24.19 25.31 3.72 11.357
+4 16 25.31 3.72 11.357 24.93 2.31 8.992 30.98 5.8 -2.15 36.16 12.67 -1.72
+4 16 -20.8 22.967 37.67 -30.37 12.63 24.18 -28.31 10.6 22.84 -7.2 12.22 31.47
+4 16 -28.31 10.6 22.84 -20.67 4.57 19.357 -14.93 3.75 20.45 -7.2 12.22 31.47
+3 16 -7.2 12.22 31.47 -14.93 3.75 20.45 -10.05 4.92 23.23
+3 16 -23.27 3.33 9.69 -35.43 13.74 10.94 -26.63 4.49 2.695
+4 16 -23.27 3.33 9.69 -22.57 4.57 17.461 -28.31 10.6 22.84 -35.43 13.74 10.94
+4 16 -28.31 10.6 22.84 -30.37 12.63 24.18 -36.34 16.54 19.7 -35.43 13.74 10.94
+4 16 -35.43 13.74 10.94 -37.8 21.06 -19.27 -24.75 3.89 -8.33 -26.63 4.49 2.695
+4 16 -24.75 3.89 -8.33 -37.8 21.06 -19.27 -29.65 11.89 -22.92 -25.26 5.45 -14.77
+4 16 17.188 0 -5.95 20.27 0 -2.87 20.63 0 7.87 18.017 0 8.055
+3 16 -13.35 0 -2.46 -11.95 0 1.984 -13.38 0 0.56
+3 16 4.779 0 -16.39 -8.32 0 -18.08 -7.51 0 -18.38
+3 16 -11.95 0 1.984 -1.77 0 9.453 -16.93 0 5.517
+3 16 14.964 0 16.589 18.017 0 8.055 17.768 0 12.78
+3 16 -18.13 0 -8.61 -13.35 0 -2.46 -16.46 0 -4.87
+3 16 18.236 0 -9.52 17.188 0 -5.95 17.569 0 -13.28
+4 16 -1.77 0 9.453 -3.62 0 15.236 -8.96 0 18.184 -14.88 0 16.654
+4 16 -16.93 0 5.517 -1.77 0 9.453 -14.88 0 16.654 -18.1 0 11.554
+4 16 5.999 0 17.215 18.017 0 8.055 14.964 0 16.589 10.573 0 18.23
+4 16 1.789 0 9.202 18.017 0 8.055 5.999 0 17.215 2.7 0 13.844
+4 16 4.779 0 -16.39 17.188 0 -5.95 18.017 0 8.055 1.789 0 9.202
+4 16 -15.78 0 -15.89 -13.35 0 -2.46 -18.13 0 -8.61 -17.87 0 -12.53
+4 16 -8.32 0 -18.08 -13.35 0 -2.46 -15.78 0 -15.89 -12.25 0 -17.94
+4 16 1.789 0 9.202 -1.77 0 9.453 -11.95 0 1.984 -13.35 0 -2.46
+4 16 4.779 0 -16.39 1.789 0 9.202 -13.35 0 -2.46 -8.32 0 -18.08
+4 16 4.779 0 -16.39 8.139 0 -18.04 11.952 0 -18.02 17.188 0 -5.95
+4 16 11.952 0 -18.02 15.275 0 -16.36 17.569 0 -13.28 17.188 0 -5.95
+3 16 20 27 -40 -18.83 21.76 -38.6 -20 27 -40
+4 16 19.268 15.52 -36.92 13.249 14.4 -36.62 -18.83 21.76 -38.6 20 27 -40
+4 16 40 27 -20 39.45 24.94 -19.87 27.76 12.23 -27.34 20 27 -40
+4 16 27.76 12.23 -27.34 22.55 12.23 -32.55 19.268 15.52 -36.92 20 27 -40
+3 16 39.58 25.426 19.699 40 27 -20 40 27 20
+4 16 40 27 -20 39.58 25.426 19.699 36.16 12.67 -1.72 39.45 24.94 -19.87
+4 16 20 27 40 -20 27 40 13.304 14.73 32.92 20.8 20.21 36.08
+4 16 -20 27 40 -20.8 22.967 37.67 -7.2 12.22 31.47 13.304 14.73 32.92
+3 16 -40 27.816 -20 -37.8 21.06 -19.27 -40 27.816 20
+4 16 -40 27.816 20 -37.8 21.06 -19.27 -35.43 13.74 10.94 -36.34 16.54 19.7
+4 16 40 32 -20 40 32 20 40 27 20 40 27 -20
+4 16 40 32 -20 40 27 -20 20 27 -40 20 32 -40
+4 16 -20 32 -40 20 32 -40 20 27 -40 -20 27 -40
+4 16 40 32 20 20 32 40 20 27 40 40 27 20
+4 16 20 32 40 -20 32 40 -20 27 40 20 27 40
+4 16 -20 27 40 -20 32 40 -40 32 20 -40 27.816 20
+4 16 -40 32 -20 -40 27.816 -20 -40 27.816 20 -40 32 20
+4 16 -40 32 -20 -20 32 -40 -20 27 -40 -40 27.816 -20
+3 16 -40 27.816 20 -20.8 22.967 37.67 -20 27 40
+3 16 -40 27.816 20 -36.34 16.54 19.7 -20.8 22.967 37.67
+3 16 -30.37 12.63 24.18 -20.8 22.967 37.67 -36.34 16.54 19.7
+4 16 10.573 0 18.23 10.603 3.6 18.14 5.894 3.07 17.08 5.999 0 17.215
+3 16 2.647 1.71 13.741 1.789 0 9.202 2.7 0 13.844
+4 16 5.894 3.07 17.08 2.647 1.71 13.741 2.7 0 13.844 5.999 0 17.215
+4 16 10.573 0 18.23 14.964 0 16.589 15 3.26 16.469 10.603 3.6 18.14
+4 16 14.964 0 16.589 17.768 0 12.78 17.804 1.7 12.671 15 3.26 16.469
+3 16 17.804 1.7 12.671 17.768 0 12.78 18.017 0 8.055
+3 16 -14.84 3.08 16.678 -18.1 0 11.554 -14.88 0 16.654
+3 16 -18.06 2.73 11.39 -18.1 0 11.554 -14.84 3.08 16.678
+3 16 -16.9 1.48 5.482 -11.95 0 1.984 -16.93 0 5.517
+4 16 -18.06 2.73 11.39 -16.9 1.48 5.482 -16.93 0 5.517 -18.1 0 11.554
+4 16 -14.88 0 16.654 -8.96 0 18.184 -8.88 3.06 18.174 -14.84 3.08 16.678
+4 16 -8.96 0 18.184 -3.62 0 15.236 -3.56 2.08 15.19 -8.88 3.06 18.174
+3 16 -3.56 2.08 15.19 -3.62 0 15.236 -1.77 0 9.453
+4 16 -16.49 1.07 -4.91 -18.1 1.63 -8.45 -18.13 0 -8.61 -16.46 0 -4.87
+3 16 -16.49 1.07 -4.91 -16.46 0 -4.87 -13.35 0 -2.46
+4 16 -18.13 0 -8.61 -18.1 1.63 -8.45 -17.85 1.56 -12.51 -17.87 0 -12.53
+4 16 -17.85 1.56 -12.51 -15.72 1.15 -15.94 -15.78 0 -15.89 -17.87 0 -12.53
+4 16 -15.72 1.15 -15.94 -12.34 0.7 -17.91 -12.25 0 -17.94 -15.78 0 -15.89
+3 16 -12.34 0.7 -17.91 -8.32 0 -18.08 -12.25 0 -17.94
+3 16 8.139 0 -18.04 4.779 0 -16.39 8.195 1 -18.05
+4 16 15.275 0 -16.36 15.37 2.74 -16.26 17.603 2.48 -13.2 17.569 0 -13.28
+3 16 18.236 1.49 -9.53 17.188 0 -5.95 18.236 0 -9.52
+4 16 17.569 0 -13.28 17.603 2.48 -13.2 18.236 1.49 -9.53 18.236 0 -9.52
+4 16 15.37 2.74 -16.26 15.275 0 -16.36 11.952 0 -18.02 11.901 2.19 -18.03
+4 16 11.901 2.19 -18.03 11.952 0 -18.02 8.139 0 -18.04 8.195 1 -18.05
+3 16 -20.67 4.57 19.357 -28.31 10.6 22.84 -22.57 4.57 17.461
+4 16 13.304 14.73 32.92 -7.2 12.22 31.47 -10.05 4.92 23.23 9.477 4.92 21.85
+4 16 9.477 4.92 21.85 30.49 15.41 24.19 20.8 20.21 36.08 13.304 14.73 32.92
+3 16 10.603 3.6 18.14 30.49 15.41 24.19 9.477 4.92 21.85
+3 16 10.603 3.6 18.14 15 3.26 16.469 30.49 15.41 24.19
+3 16 21.11 0.65 9.584 30.49 15.41 24.19 17.804 1.7 12.671
+3 16 25.31 3.72 11.357 30.49 15.41 24.19 21.11 0.65 9.584
+3 16 17.804 1.7 12.671 30.49 15.41 24.19 15 3.26 16.469
+4 16 26.59 7.87 -20.9 19.485 7.87 -28 22.55 12.23 -32.55 27.76 12.23 -27.34
+3 16 -25.26 5.45 -14.77 -17.98 1.61 -14.58 -24.75 3.89 -8.33
+4 16 21.33 0.36 8.797 24.93 2.31 8.992 25.31 3.72 11.357 21.11 0.65 9.584
+4 16 -7.51 0 -18.38 -4.57 3.32 -25.73 0.026 4.15 -26.94 4.779 0 -16.39
+3 16 0.026 4.15 -26.94 8.195 1 -18.05 4.779 0 -16.39
+3 16 10.764 4.11 -25.09 8.195 1 -18.05 0.026 4.15 -26.94
+3 16 -17.85 1.56 -12.51 -17.98 1.61 -14.58 -15.72 1.15 -15.94
+3 16 -12.34 0.7 -17.91 -15.72 1.15 -15.94 -13.67 5.41 -26.29
+3 16 -20 27 -40 -37.8 21.06 -19.27 -40 27.816 -20
+3 16 20.63 0 7.87 21.33 0.36 8.797 18.017 0 8.055
+4 16 21.33 0.36 8.797 21.11 0.65 9.584 17.804 1.7 12.671 18.017 0 8.055
+4 16 -10.05 4.92 23.23 -14.93 3.75 20.45 -8.88 3.06 18.174 9.477 4.92 21.85
+3 16 -14.84 3.08 16.678 -8.88 3.06 18.174 -14.93 3.75 20.45
+4 16 2.647 1.71 13.741 5.894 3.07 17.08 -8.88 3.06 18.174 -3.56 2.08 15.19
+4 16 -3.56 2.08 15.19 -1.77 0 9.453 1.789 0 9.202 2.647 1.71 13.741
+4 16 10.603 3.6 18.14 9.477 4.92 21.85 -8.88 3.06 18.174 5.894 3.07 17.08
+4 16 38.13 32 -19.22 38.13 26.75 -19.22 38.13 26.75 19.223 38.13 32 19.223
+4 16 38.13 26.75 19.223 19.223 26.75 38.13 19.223 32 38.13 38.13 32 19.223
+4 16 19.223 26.75 38.13 -19.22 26.75 38.13 -19.22 32 38.13 19.223 32 38.13
+4 16 -19.22 26.75 38.13 -38.12 26.75 19.223 -38.12 32 19.223 -19.22 32 38.13
+4 16 -38.12 26.75 19.223 -38.12 26.75 -19.22 -38.12 32 -19.22 -38.12 32 19.223
+4 16 -19.22 26.75 -38.12 -19.22 32 -38.12 -38.12 32 -19.22 -38.12 26.75 -19.22
+4 16 -19.22 26.75 -38.12 19.223 26.75 -38.12 19.223 32 -38.12 -19.22 32 -38.12
+4 16 38.13 26.75 -19.22 38.13 32 -19.22 19.223 32 -38.12 19.223 26.75 -38.12
+3 16 32.8 14.63 -1.71 36.05 26.75 18.258 36.05 26.75 -18.42
+4 16 19.328 22.126 32.86 18.783 26.75 35.53 36.05 26.75 18.258 28.08 17.79 22.11
+3 16 19.328 22.126 32.86 28.08 17.79 22.11 12.381 17.05 29.93
+3 16 -22.45 7.07 -8.75 -17.33 5.34 -13.48 -22.83 8.25 -13.63
+3 16 -32.15 15.8 10.228 -21.68 6.75 8.774 -24.46 7.71 3.012
+3 16 -32.15 15.8 10.228 -20.56 8.02 17.121 -21.68 6.75 8.774
+3 16 -32.15 15.8 10.228 -23.47 10.65 19.052 -20.56 8.02 17.121
+4 16 -32.15 15.8 10.228 -32.99 18.38 18.252 -28.01 15.11 22 -23.47 10.65 19.052
+3 16 -20.56 8.02 17.121 -23.47 10.65 19.052 -13.92 7.14 18.721
+4 16 8.926 8.19 19.942 -9.5 8.19 21.24 -6.97 14.68 28.56 12.381 17.05 29.93
+4 16 22.73 5.62 8.602 8.926 8.19 19.942 12.381 17.05 29.93 28.08 17.79 22.11
+3 16 8.926 8.19 19.942 22.73 5.62 8.602 20.01 3.94 7.649
+4 16 28.08 17.79 22.11 36.05 26.75 18.258 28.24 8.58 -2.09 22.73 5.62 8.602
+3 16 32.8 14.63 -1.71 28.24 8.58 -2.09 36.05 26.75 18.258
+3 16 24.32 11.08 -20.35 36.05 26.75 -18.42 25.19 14.33 -25.16
+3 16 36.05 26.75 -18.42 24.32 11.08 -20.35 32.8 14.63 -1.71
+4 16 28.24 8.58 -2.09 32.8 14.63 -1.71 24.32 11.08 -20.35 25.66 7.28 -7.23
+4 16 18.565 11.08 -26.1 24.32 11.08 -20.35 25.19 14.33 -25.16 20.85 14.33 -29.5
+3 16 -12.34 3.75 -15.36 -4.67 6.38 -23.33 -12.51 8.18 -23.82
+3 16 -7 3.75 -17.51 -4.67 6.38 -23.33 -12.34 3.75 -15.36
+4 16 28.24 8.58 -2.09 25.66 7.28 -7.23 19.32 3.75 -2.66 20.01 3.94 7.649
+3 16 22.73 5.62 8.602 28.24 8.58 -2.09 20.01 3.94 7.649
+3 16 -9.5 8.19 21.24 -4.34 3.75 8.955 -13.92 7.14 18.721
+4 16 -4.34 3.75 8.955 -9.5 8.19 21.24 8.926 8.19 19.942 20.01 3.94 7.649
+3 16 -17.33 5.34 -13.48 -12.76 3.75 0.533 -12.34 3.75 -15.36
+3 16 19.32 3.75 -2.66 -4.34 3.75 8.955 20.01 3.94 7.649
+5 24 -4.34 3.75 8.955 19.32 3.75 -2.66 6.69 3.75 -15.3 20.01 3.94 7.649
+5 24 -12.76 3.75 0.533 -17.33 5.34 -13.48 -22.45 7.07 -8.75 -12.34 3.75 -15.36
+5 24 -13.92 7.14 18.721 -23.47 10.65 19.052 -6.97 14.68 28.56 -20.56 8.02 17.121
+5 24 -37.8 21.06 -19.27 -20 27 -40 -18.83 21.76 -38.6 -40 27.816 -20
+5 24 -36.34 16.54 19.7 -20.8 22.967 37.67 -40 27.816 20 -30.37 12.63 24.18
+5 24 0.026 4.15 -26.94 8.195 1 -18.05 4.779 0 -16.39 10.764 4.11 -25.09
+5 24 -32.15 15.8 10.228 -21.68 6.75 8.774 -24.46 7.71 3.012 -20.56 8.02 17.121
+5 24 -32.15 15.8 10.228 -20.56 8.02 17.121 -21.68 6.75 8.774 -23.47 10.65 19.052
+5 24 -32.15 15.8 10.228 -23.47 10.65 19.052 -20.56 8.02 17.121 -32.99 18.38 18.252
+5 24 22.73 5.62 8.602 8.926 8.19 19.942 12.381 17.05 29.93 20.01 3.94 7.649
+5 24 -12.34 3.75 -15.36 -4.67 6.38 -23.33 -12.51 8.18 -23.82 -7 3.75 -17.51
+5 24 20.01 3.94 7.649 28.24 8.58 -2.09 25.66 7.28 -7.23 22.73 5.62 8.602
+5 24 -17.98 1.61 -14.58 -17.85 1.56 -12.51 -24.75 3.89 -8.33 -15.72 1.15 -15.94
+5 24 10.573 0 18.23 10.603 3.6 18.14 5.894 3.07 17.08 14.964 0 16.589
+5 24 5.894 3.07 17.08 5.999 0 17.215 10.573 0 18.23 2.647 1.71 13.741
+5 24 2.7 0 13.844 2.647 1.71 13.741 1.789 0 9.202 5.894 3.07 17.08
+5 24 14.964 0 16.589 15 3.26 16.469 10.573 0 18.23 17.768 0 12.78
+5 24 17.768 0 12.78 17.804 1.7 12.671 14.964 0 16.589 18.017 0 8.055
+5 24 -14.88 0 16.654 -14.84 3.08 16.678 -18.1 0 11.554 -8.96 0 18.184
+5 24 -18.06 2.73 11.39 -18.1 0 11.554 -14.84 3.08 16.678 -16.9 1.48 5.482
+5 24 -16.93 0 5.517 -16.9 1.48 5.482 -11.95 0 1.984 -18.06 2.73 11.39
+5 24 -8.96 0 18.184 -8.88 3.06 18.174 -14.88 0 16.654 -3.62 0 15.236
+5 24 -3.62 0 15.236 -3.56 2.08 15.19 -8.96 0 18.184 -1.77 0 9.453
+5 24 -18.1 1.63 -8.45 -18.13 0 -8.61 -16.49 1.07 -4.91 -17.85 1.56 -12.51
+5 24 -16.46 0 -4.87 -16.49 1.07 -4.91 -18.1 1.63 -8.45 -13.35 0 -2.46
+5 24 -17.85 1.56 -12.51 -17.87 0 -12.53 -18.13 0 -8.61 -15.72 1.15 -15.94
+5 24 -15.72 1.15 -15.94 -15.78 0 -15.89 -17.85 1.56 -12.51 -12.25 0 -17.94
+5 24 -12.34 0.7 -17.91 -12.25 0 -17.94 -15.72 1.15 -15.94 -8.32 0 -18.08
+5 24 8.195 1 -18.05 8.139 0 -18.04 4.779 0 -16.39 11.901 2.19 -18.03
+5 24 15.275 0 -16.36 15.37 2.74 -16.26 17.603 2.48 -13.2 11.952 0 -18.02
+5 24 17.603 2.48 -13.2 17.569 0 -13.28 15.275 0 -16.36 18.236 1.49 -9.53
+5 24 18.236 0 -9.52 18.236 1.49 -9.53 17.188 0 -5.95 17.569 0 -13.28
+5 24 11.952 0 -18.02 11.901 2.19 -18.03 15.37 2.74 -16.26 8.139 0 -18.04
+5 24 10.603 3.61 18.227 30.49 15.41 24.19 9.477 4.92 21.85 15 3.26 16.469
+5 24 15 3.26 16.469 30.49 15.41 24.19 10.603 3.61 18.227 17.804 1.7 12.671
+5 24 21.11 0.65 9.584 30.49 15.41 24.19 17.804 1.7 12.671 25.31 3.72 11.357
+5 24 30.49 15.41 24.19 17.804 1.7 12.671 21.11 0.65 9.584 15 3.26 16.469
+5 24 10.603 3.6 18.14 30.49 15.41 24.19 9.477 4.92 21.85 15 3.26 16.469
+5 24 -12.34 0.7 -17.91 -13.67 5.41 -26.29 -4.57 3.32 -25.73 -15.72 1.15 -15.94
+5 24 -14.84 3.08 16.678 -18.1 0 11.554 -14.88 0 16.654 -18.06 2.73 11.39
+2 24 -35.71 26.75 -18.55 -18.21 26.75 -36.05
+2 24 -19.22 26.75 -38.12 -38.12 26.75 -19.22
+2 24 -18.21 26.75 -36.05 18.419 26.75 -36.05
+2 24 19.223 26.75 -38.12 -19.22 26.75 -38.12
+2 24 38.13 26.75 -19.22 19.223 26.75 -38.12
+2 24 18.419 26.75 -36.05 36.05 26.75 -18.42
+2 24 38.13 26.75 19.223 38.13 26.75 -19.22
+2 24 36.05 26.75 -18.42 36.05 26.75 18.258
+2 24 19.223 26.75 38.13 38.13 26.75 19.223
+2 24 36.05 26.75 18.258 18.783 26.75 35.53
+2 24 -19.22 26.75 38.13 19.223 26.75 38.13
+2 24 -18.89 26.75 35.53 -35.71 26.75 18.704
+2 24 -38.12 26.75 19.223 -19.22 26.75 38.13
+2 24 -38.12 26.75 -19.22 -38.12 26.75 19.223
+2 24 -35.71 26.75 18.704 -35.71 26.75 -18.55
+2 24 -19.22 32 -38.12 19.223 32 -38.12
+2 24 20 32 -40 -20 32 -40
+2 24 19.223 32 -38.12 38.13 32 -19.22
+2 24 40 32 -20 20 32 -40
+2 24 38.13 32 -19.22 38.13 32 19.223
+2 24 40 32 20 40 32 -20
+2 24 38.13 32 19.223 19.223 32 38.13
+2 24 20 32 40 40 32 20
+2 24 19.223 32 38.13 -19.22 32 38.13
+2 24 -20 32 40 20 32 40
+2 24 -19.22 32 38.13 -38.12 32 19.223
+2 24 -40 32 20 -20 32 40
+2 24 -38.12 32 19.223 -38.12 32 -19.22
+2 24 -40 32 -20 -40 32 20
+2 24 -38.12 32 -19.22 -19.22 32 -38.12
+2 24 -20 32 -40 -40 32 -20
+2 24 -17.85 1.56 -12.51 -18.1 1.63 -8.45
+2 24 -16.49 1.07 -4.91 -13.35 0 -2.46
+2 24 -18.1 1.63 -8.45 -16.49 1.07 -4.91
+2 24 -8.32 0 -18.08 -12.34 0.7 -17.91
+2 24 11.901 2.19 -18.03 8.195 1 -18.05
+2 24 17.188 0 -5.95 18.236 1.49 -9.53
+2 24 18.236 1.49 -9.53 17.603 2.48 -13.2
+2 24 17.603 2.48 -13.2 15.37 2.74 -16.26
+2 24 15.37 2.74 -16.26 11.901 2.19 -18.03
+2 24 -11.95 0 1.984 -16.9 1.48 5.482
+2 24 -16.9 1.48 5.482 -18.06 2.73 11.39
+2 24 -18.06 2.73 11.39 -14.84 3.08 16.678
+2 24 -16.93 0 5.517 -11.95 0 1.984
+2 24 17.768 0 12.78 14.964 0 16.589
+2 24 18.017 0 8.055 17.768 0 12.78
+2 24 -16.46 0 -4.87 -18.13 0 -8.61
+2 24 -13.35 0 -2.46 -16.46 0 -4.87
+2 24 17.569 0 -13.28 18.236 0 -9.52
+2 24 18.236 0 -9.52 17.188 0 -5.95
+2 24 -1.77 0 9.453 -3.62 0 15.236
+2 24 -3.62 0 15.236 -8.96 0 18.184
+2 24 -8.96 0 18.184 -14.88 0 16.654
+2 24 -14.88 0 16.654 -18.1 0 11.554
+2 24 -18.1 0 11.554 -16.93 0 5.517
+2 24 14.964 0 16.589 10.573 0 18.23
+2 24 10.573 0 18.23 5.999 0 17.215
+2 24 5.999 0 17.215 2.7 0 13.844
+2 24 2.7 0 13.844 1.789 0 9.202
+2 24 -18.13 0 -8.61 -17.87 0 -12.53
+2 24 -17.87 0 -12.53 -15.78 0 -15.89
+2 24 -15.78 0 -15.89 -12.25 0 -17.94
+2 24 -12.25 0 -17.94 -8.32 0 -18.08
+2 24 4.779 0 -16.39 8.139 0 -18.04
+2 24 8.139 0 -18.04 11.952 0 -18.02
+2 24 11.952 0 -18.02 15.275 0 -16.36
+2 24 15.275 0 -16.36 17.569 0 -13.28
+2 24 10.603 3.6 18.14 5.894 3.07 17.08
+2 24 2.647 1.71 13.741 1.789 0 9.202
+2 24 2.647 1.71 13.741 5.894 3.07 17.08
+2 24 18.017 0 8.055 17.804 1.7 12.671
+2 24 -8.88 3.06 18.174 -14.84 3.08 16.678
+2 24 -8.88 3.06 18.174 -3.56 2.08 15.19
+2 24 -1.77 0 9.453 -3.56 2.08 15.19
+2 24 -15.72 1.15 -15.94 -17.85 1.56 -12.51
+2 24 4.779 0 -16.39 8.195 1 -18.05
+2 24 -12.76 3.75 0.533 -4.34 3.75 8.955
+2 24 19.32 3.75 -2.66 6.69 3.75 -15.3
+2 24 6.69 3.75 -15.3 -7 3.75 -17.51
+2 24 -7 3.75 -17.51 -12.34 3.75 -15.36
+2 24 -12.34 3.75 -15.36 -12.76 3.75 0.533
+2 24 -17.33 5.34 -13.48 -22.45 7.07 -8.75
+2 24 -22.45 7.07 -8.75 -24.46 7.71 3.012
+2 24 -24.46 7.71 3.012 -21.68 6.75 8.774
+2 24 -21.68 6.75 8.774 -12.76 3.75 0.533
+2 24 -13.92 7.14 18.721 -4.34 3.75 8.955
+2 24 -21.68 6.75 8.774 -20.56 8.02 17.121
+2 24 -20.56 8.02 17.121 -13.92 7.14 18.721
+2 24 19.32 3.75 -2.66 25.66 7.28 -7.23
+2 24 9.847 7.32 -23.2 6.69 3.75 -15.3
+2 24 25.66 7.28 -7.23 24.32 11.08 -20.35
+2 24 24.32 11.08 -20.35 18.565 11.08 -26.1
+2 24 18.565 11.08 -26.1 9.847 7.32 -23.2
+2 24 -4.67 6.38 -23.33 -7 3.75 -17.51
+2 24 9.847 7.32 -23.2 0.756 7.36 -24.76
+2 24 0.756 7.36 -24.76 -4.67 6.38 -23.33
+2 24 12.369 16.36 -33.27 -17.41 23.194 -35.1
+2 24 0.756 7.36 -24.76 12.369 16.36 -33.27
+2 24 -17.41 23.194 -35.1 -20.46 14.23 -27.65
+2 24 -20.46 14.23 -27.65 -12.51 8.18 -23.82
+2 24 -12.51 8.18 -23.82 -4.67 6.38 -23.33
+2 24 18.565 11.08 -26.1 20.85 14.33 -29.5
+2 24 20.85 14.33 -29.5 17.821 17.38 -33.54
+2 24 17.821 17.38 -33.54 12.369 16.36 -33.27
+2 24 -19.34 24.46 34.2 -6.97 14.68 28.56
+2 24 -23.47 10.65 19.052 -28.01 15.11 22
+2 24 -28.01 15.11 22 -19.34 24.46 34.2
+2 24 -6.97 14.68 28.56 -9.5 8.19 21.24
+2 24 -9.5 8.19 21.24 -13.92 7.14 18.721
+2 24 -20.46 14.23 -27.65 -26.91 14.23 -21.19
+2 24 -26.91 14.23 -21.19 -22.83 8.25 -13.63
+2 24 -22.83 8.25 -13.63 -17.33 5.34 -13.48
+2 24 -17.33 5.34 -13.48 -12.34 3.75 -15.36
+2 24 -12.34 3.75 -15.36 -12.51 8.18 -23.82
+2 24 -32.15 15.8 10.228 -24.46 7.71 3.012
+2 24 -34.37 22.61 -17.86 -32.15 15.8 10.228
+2 24 -22.45 7.07 -8.75 -22.83 8.25 -13.63
+2 24 -26.91 14.23 -21.19 -34.37 22.61 -17.86
+2 24 18.783 26.75 35.53 -18.89 26.75 35.53
+2 24 -34.37 22.61 -17.86 -35.71 26.75 -18.55
+2 24 -35.71 26.75 18.704 -32.99 18.38 18.252
+2 24 -32.99 18.38 18.252 -32.15 15.8 10.228
+2 24 -18.89 26.75 35.53 -19.34 24.46 34.2
+2 24 -28.01 15.11 22 -32.99 18.38 18.252
+2 24 18.783 26.75 35.53 19.328 22.126 32.86
+2 24 19.328 22.126 32.86 12.381 17.05 29.93
+2 24 12.381 17.05 29.93 -6.97 14.68 28.56
+2 24 18.419 26.75 -36.05 17.821 17.38 -33.54
+2 24 20.85 14.33 -29.5 25.19 14.33 -25.16
+2 24 25.19 14.33 -25.16 36.05 26.75 -18.42
+2 24 -18.21 26.75 -36.05 -17.41 23.194 -35.1
+2 24 20.8 20.21 36.08 30.49 15.41 24.19
+2 24 30.49 15.41 24.19 39.58 25.426 19.699
+2 24 40 27 20 20 27 40
+2 24 20 27 40 20.8 20.21 36.08
+2 24 39.58 25.426 19.699 40 27 20
+2 24 -20 27 -40 -18.83 21.76 -38.6
+2 24 -29.65 11.89 -22.92 -37.8 21.06 -19.27
+2 24 -18.83 21.76 -38.6 -22.18 11.89 -30.39
+2 24 -22.18 11.89 -30.39 -29.65 11.89 -22.92
+2 24 -13.67 5.41 -26.29 -15.72 1.15 -15.94
+2 24 -15.72 1.15 -15.94 -17.98 1.61 -14.58
+2 24 -17.98 1.61 -14.58 -25.26 5.45 -14.77
+2 24 -25.26 5.45 -14.77 -29.65 11.89 -22.92
+2 24 -22.18 11.89 -30.39 -13.67 5.41 -26.29
+2 24 -24.75 3.89 -8.33 -17.98 1.61 -14.58
+2 24 -23.27 3.33 9.69 -26.63 4.49 2.695
+2 24 -13.35 0 -2.46 -13.38 0 0.56
+2 24 -13.38 0 0.56 -23.27 3.33 9.69
+2 24 -26.63 4.49 2.695 -24.75 3.89 -8.33
+2 24 -13.67 5.41 -26.29 -4.57 3.32 -25.73
+2 24 -4.57 3.32 -25.73 -7.51 0 -18.38
+2 24 -7.51 0 -18.38 -8.32 0 -18.08
+2 24 8.195 1 -18.05 10.764 4.11 -25.09
+2 24 27.87 4.23 -8.35 20.27 0 -2.87
+2 24 20.27 0 -2.87 17.188 0 -5.95
+2 24 26.59 7.87 -20.9 27.87 4.23 -8.35
+2 24 19.485 7.87 -28 26.59 7.87 -20.9
+2 24 10.764 4.11 -25.09 19.485 7.87 -28
+2 24 27.87 4.23 -8.35 30.98 5.8 -2.15
+2 24 30.98 5.8 -2.15 24.93 2.31 8.992
+2 24 24.93 2.31 8.992 21.33 0.36 8.797
+2 24 21.33 0.36 8.797 20.63 0 7.87
+2 24 20.63 0 7.87 20.27 0 -2.87
+2 24 -14.84 3.08 16.678 -14.93 3.75 20.45
+2 24 -14.93 3.75 20.45 -20.67 4.57 19.357
+2 24 -13.38 0 0.56 -11.95 0 1.984
+2 24 -22.57 4.57 17.461 -23.27 3.33 9.69
+2 24 -20.67 4.57 19.357 -22.57 4.57 17.461
+2 24 13.249 14.4 -36.62 0.026 4.15 -26.94
+2 24 0.026 4.15 -26.94 -4.57 3.32 -25.73
+2 24 -18.83 21.76 -38.6 13.249 14.4 -36.62
+2 24 10.764 4.11 -25.09 0.026 4.15 -26.94
+2 24 13.249 14.4 -36.62 19.268 15.52 -36.92
+2 24 19.268 15.52 -36.92 22.55 12.23 -32.55
+2 24 22.55 12.23 -32.55 19.485 7.87 -28
+2 24 26.59 7.87 -20.9 27.76 12.23 -27.34
+2 24 27.76 12.23 -27.34 39.45 24.94 -19.87
+2 24 39.45 24.94 -19.87 36.16 12.67 -1.72
+2 24 36.16 12.67 -1.72 30.98 5.8 -2.15
+2 24 36.16 12.67 -1.72 39.58 25.426 19.699
+2 24 30.49 15.41 24.19 25.31 3.72 11.357
+2 24 25.31 3.72 11.357 24.93 2.31 8.992
+2 24 -20.8 22.967 37.67 -30.37 12.63 24.18
+2 24 -30.37 12.63 24.18 -28.31 10.6 22.84
+2 24 -7.2 12.22 31.47 -20.8 22.967 37.67
+2 24 -28.31 10.6 22.84 -20.67 4.57 19.357
+2 24 -10.05 4.92 23.23 -7.2 12.22 31.47
+2 24 -14.93 3.75 20.45 -10.05 4.92 23.23
+2 24 -35.43 13.74 10.94 -26.63 4.49 2.695
+2 24 -22.57 4.57 17.461 -28.31 10.6 22.84
+2 24 -30.37 12.63 24.18 -36.34 16.54 19.7
+2 24 -36.34 16.54 19.7 -35.43 13.74 10.94
+2 24 -35.43 13.74 10.94 -37.8 21.06 -19.27
+2 24 -25.26 5.45 -14.77 -24.75 3.89 -8.33
+2 24 20.63 0 7.87 18.017 0 8.055
+2 24 -7.51 0 -18.38 4.779 0 -16.39
+2 24 1.789 0 9.202 -1.77 0 9.453
+2 24 -20 27 -40 20 27 -40
+2 24 20 27 -40 19.268 15.52 -36.92
+2 24 40 27 -20 39.45 24.94 -19.87
+2 24 20 27 -40 40 27 -20
+2 24 27.76 12.23 -27.34 22.55 12.23 -32.55
+2 24 40 27 -20 40 27 20
+2 24 20 27 40 -20 27 40
+2 24 13.304 14.73 32.92 20.8 20.21 36.08
+2 24 -20 27 40 -20.8 22.967 37.67
+2 24 -7.2 12.22 31.47 13.304 14.73 32.92
+2 24 -40 27.816 20 -40 27.816 -20
+2 24 -40 27.816 -20 -37.8 21.06 -19.27
+2 24 -36.34 16.54 19.7 -40 27.816 20
+2 24 40 32 20 40 27 20
+2 24 40 27 -20 40 32 -20
+2 24 20 27 -40 20 32 -40
+2 24 -20 27 -40 -20 32 -40
+2 24 20 32 40 20 27 40
+2 24 -20 32 40 -20 27 40
+2 24 -40 32 20 -40 27.816 20
+2 24 -40 27.816 20 -20 27 40
+2 24 -40 32 -20 -40 27.816 -20
+2 24 -20 27 -40 -40 27.816 -20
+2 24 10.603 3.6 18.14 15 3.26 16.469
+2 24 15 3.26 16.469 17.804 1.7 12.671
+2 24 -15.72 1.15 -15.94 -12.34 0.7 -17.91
+2 24 -10.05 4.92 23.23 9.477 4.92 21.85
+2 24 9.477 4.92 21.85 13.304 14.73 32.92
+2 24 9.477 4.92 21.85 30.49 15.41 24.19
+2 24 9.477 4.92 21.85 10.603 3.6 18.14
+2 24 17.804 1.7 12.671 21.11 0.65 9.584
+2 24 21.11 0.65 9.584 25.31 3.72 11.357
+2 24 21.11 0.65 9.584 21.33 0.36 8.797
+2 24 -14.93 3.75 20.45 -8.88 3.06 18.174
+2 24 38.13 32 -19.22 38.13 26.75 -19.22
+2 24 38.13 26.75 19.223 38.13 32 19.223
+2 24 19.223 26.75 38.13 19.223 32 38.13
+2 24 -19.22 26.75 38.13 -19.22 32 38.13
+2 24 -38.12 26.75 19.223 -38.12 32 19.223
+2 24 -38.12 26.75 -19.22 -38.12 32 -19.22
+2 24 -19.22 26.75 -38.12 -19.22 32 -38.12
+2 24 19.223 26.75 -38.12 19.223 32 -38.12
+2 24 36.05 26.75 -18.42 32.8 14.63 -1.71
+2 24 32.8 14.63 -1.71 36.05 26.75 18.258
+2 24 36.05 26.75 18.258 28.08 17.79 22.11
+2 24 28.08 17.79 22.11 19.328 22.126 32.86
+2 24 -23.47 10.65 19.052 -20.56 8.02 17.121
+2 24 8.926 8.19 19.942 -9.5 8.19 21.24
+2 24 12.381 17.05 29.93 8.926 8.19 19.942
+2 24 28.08 17.79 22.11 22.73 5.62 8.602
+2 24 20.01 3.94 7.649 8.926 8.19 19.942
+2 24 22.73 5.62 8.602 20.01 3.94 7.649
+2 24 28.24 8.58 -2.09 22.73 5.62 8.602
+2 24 32.8 14.63 -1.71 28.24 8.58 -2.09
+2 24 25.19 14.33 -25.16 24.32 11.08 -20.35
+2 24 25.66 7.28 -7.23 28.24 8.58 -2.09
+2 24 19.32 3.75 -2.66 20.01 3.94 7.649
+2 24 20.01 3.94 7.649 -4.34 3.75 8.955
+
+0 FILE p/stug-2x2.dat
+0 Stud Group  2 x  2
+0 Name: stug-2x2.dat
+0 Author: Steffen [Steffen]
+0 !LDRAW_ORG Primitive UPDATE 2012-01
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 2005-12-28 [PTadmin] Official Update 2005-01
+0 !HISTORY 2007-05-04 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+0 !HISTORY 2011-07-01 [PTadmin] Renamed from stug2
+0 !HISTORY 2011-07-25 [PTadmin] Official Update 2011-01
+0 !HISTORY 2012-02-16 [Philo] Changed to CCW
+0 !HISTORY 2012-03-30 [PTadmin] Official Update 2012-01
+
+
+1 16 -10 0 -10 1 0 0 0 1 0 0 0 1 p/stud.dat
+1 16 10 0 -10 1 0 0 0 1 0 0 0 1 p/stud.dat
+1 16 -10 0 10 1 0 0 0 1 0 0 0 1 p/stud.dat
+1 16 10 0 10 1 0 0 0 1 0 0 0 1 p/stud.dat
+
+0 FILE p/stud.dat
+0 Stud
+0 Name: stud.dat
+0 Author: James Jessiman
+0 !LDRAW_ORG Primitive UPDATE 2012-01
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 2002-04-04 [sbliss] Modified for BFC compliance
+0 !HISTORY 2002-04-25 [PTadmin] Official Update 2002-02
+0 !HISTORY 2007-06-24 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+0 !HISTORY 2012-02-16 [Philo] Changed to CCW
+0 !HISTORY 2012-03-30 [PTadmin] Official Update 2012-01
+
+
+1 16 0 0 0 6 0 0 0 1 0 0 0 6 p/4-4edge.dat
+1 16 0 -4 0 6 0 0 0 1 0 0 0 6 p/4-4edge.dat
+1 16 0 0 0 6 0 0 0 -4 0 0 0 6 p/4-4cyli.dat
+1 16 0 -4 0 6 0 0 0 1 0 0 0 6 p/4-4disc.dat
+
+0 FILE p/4-4disc.dat
+0 Disc 1.0
+0 Name: 4-4disc.dat
+0 Author: James Jessiman
+0 !LDRAW_ORG Primitive UPDATE 2002-02
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 1998-12-15 [PTadmin] Official Update 1998-10
+0 !HISTORY 2002-03-23 [sbliss] Added BFC statement
+0 !HISTORY 2002-04-25 [PTadmin] Official Update 2002-02
+0 !HISTORY 2007-06-24 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+
+
+3 16 0 0 0 1 0 0 0.9239 0 0.3827
+3 16 0 0 0 0.9239 0 0.3827 0.7071 0 0.7071
+3 16 0 0 0 0.7071 0 0.7071 0.3827 0 0.9239
+3 16 0 0 0 0.3827 0 0.9239 0 0 1
+3 16 0 0 0 0 0 1 -0.3827 0 0.9239
+3 16 0 0 0 -0.3827 0 0.9239 -0.7071 0 0.7071
+3 16 0 0 0 -0.7071 0 0.7071 -0.9239 0 0.3827
+3 16 0 0 0 -0.9239 0 0.3827 -1 0 -0
+3 16 0 0 0 -1 0 -0 -0.9239 0 -0.3827
+3 16 0 0 0 -0.9239 0 -0.3827 -0.7071 0 -0.7071
+3 16 0 0 0 -0.7071 0 -0.7071 -0.3827 0 -0.9239
+3 16 0 0 0 -0.3827 0 -0.9239 0 0 -1
+3 16 0 0 0 0 0 -1 0.3827 0 -0.9239
+3 16 0 0 0 0.3827 0 -0.9239 0.7071 0 -0.7071
+3 16 0 0 0 0.7071 0 -0.7071 0.9239 0 -0.3827
+3 16 0 0 0 0.9239 0 -0.3827 1 0 0
+0
+
+0 FILE p/stud4.dat
+0 Stud Tube Open
+0 Name: stud4.dat
+0 Author: James Jessiman
+0 !LDRAW_ORG Primitive UPDATE 2009-02
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 1999-07-05 [PTadmin] Official Update 1999-05
+0 !HISTORY 2002-04-04 [sbliss] Modified for BFC compliance
+0 !HISTORY 2002-04-25 [PTadmin] Official Update 2002-02
+0 !HISTORY 2007-06-24 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+0 !HISTORY 2009-06-21 [cwdee] Update ring references to 4-4ring
+0 !HISTORY 2009-09-03 [PTadmin] Official Update 2009-02
+
+
+1 16 0 -4 0 6 0 0 0 1 0 0 0 6 p/4-4edge.dat
+1 16 0 -4 0 8 0 0 0 1 0 0 0 8 p/4-4edge.dat
+1 16 0 0 0 6 0 0 0 1 0 0 0 6 p/4-4edge.dat
+1 16 0 0 0 8 0 0 0 1 0 0 0 8 p/4-4edge.dat
+0 BFC INVERTNEXT
+1 16 0 -4 0 6 0 0 0 4 0 0 0 6 p/4-4cyli.dat
+1 16 0 -4 0 8 0 0 0 4 0 0 0 8 p/4-4cyli.dat
+1 16 0 -4 0 2 0 0 0 1 0 0 0 2 p/4-4ring3.dat
+0
+
+0 FILE p/4-4ring3.dat
+0 Ring  3 x 1.0
+0 Name: 4-4ring3.dat
+0 Author: James Jessiman
+0 !LDRAW_ORG Primitive UPDATE 2009-01
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 1998-12-15 [PTadmin] Official Update 1998-10
+0 !HISTORY 2002-04-05 [hafhead] Added BFC statement
+0 !HISTORY 2002-04-25 [PTadmin] Official Update 2002-02
+0 !HISTORY 2007-06-24 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+0 !HISTORY 2008-08-26 [cwdee] Switch polygon winding and rename
+0 !HISTORY 2009-05-02 [PTadmin] Official Update 2009-01
+
+
+4 16 -1.5308 0 3.6956 -1.1481 0 2.7717 0 0 3 0 0 4
+4 16 -2.8284 0 2.8284 -2.1213 0 2.1213 -1.1481 0 2.7717 -1.5308 0 3.6956
+4 16 -3.6956 0 1.5308 -2.7717 0 1.1481 -2.1213 0 2.1213 -2.8284 0 2.8284
+4 16 -4 0 0 -3 0 0 -2.7717 0 1.1481 -3.6956 0 1.5308
+4 16 -3.6956 0 -1.5308 -2.7717 0 -1.1481 -3 0 0 -4 0 0
+4 16 -2.8284 0 -2.8284 -2.1213 0 -2.1213 -2.7717 0 -1.1481 -3.6956 0 -1.5308
+4 16 -1.5308 0 -3.6956 -1.1481 0 -2.7717 -2.1213 0 -2.1213 -2.8284 0 -2.8284
+4 16 0 0 -4 0 0 -3 -1.1481 0 -2.7717 -1.5308 0 -3.6956
+4 16 1.5308 0 -3.6956 1.1481 0 -2.7717 0 0 -3 0 0 -4
+4 16 2.8284 0 -2.8284 2.1213 0 -2.1213 1.1481 0 -2.7717 1.5308 0 -3.6956
+4 16 3.6956 0 -1.5308 2.7717 0 -1.1481 2.1213 0 -2.1213 2.8284 0 -2.8284
+4 16 4 0 0 3 0 0 2.7717 0 -1.1481 3.6956 0 -1.5308
+4 16 3.6956 0 1.5308 2.7717 0 1.1481 3 0 0 4 0 0
+4 16 2.8284 0 2.8284 2.1213 0 2.1213 2.7717 0 1.1481 3.6956 0 1.5308
+4 16 1.5308 0 3.6956 1.1481 0 2.7717 2.1213 0 2.1213 2.8284 0 2.8284
+4 16 0 0 4 0 0 3 1.1481 0 2.7717 1.5308 0 3.6956
+0
+
+0 FILE p/4-4cyli.dat
+0 Cylinder 1.0
+0 Name: 4-4cyli.dat
+0 Author: James Jessiman
+0 !LDRAW_ORG Primitive UPDATE 2005-01
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 1998-12-15 [PTadmin] Official Update 1998-10
+0 !HISTORY 2002-03-23 [sbliss] Added BFC statement; merged headers from files in distributions LDraw 0.27 and Complete.
+0 !HISTORY 2002-04-25 [PTadmin] Official Update 2002-02
+0 !HISTORY 2004-12-14 [guyvivan] BFC CCW
+0 !HISTORY 2005-12-28 [PTadmin] Official Update 2005-01
+0 !HISTORY 2007-06-24 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+
+
+4 16 1 1 0 0.9239 1 0.3827 0.9239 0 0.3827 1 0 0
+5 24 1 0 0 1 1 0 0.9239 0 0.3827 0.9239 0 -0.3827
+4 16 0.9239 1 0.3827 0.7071 1 0.7071 0.7071 0 0.7071 0.9239 0 0.3827
+5 24 0.9239 0 0.3827 0.9239 1 0.3827 0.7071 0 0.7071 1 0 0
+4 16 0.7071 1 0.7071 0.3827 1 0.9239 0.3827 0 0.9239 0.7071 0 0.7071
+5 24 0.7071 0 0.7071 0.7071 1 0.7071 0.3827 0 0.9239 0.9239 0 0.3827
+4 16 0.3827 1 0.9239 0 1 1 0 0 1 0.3827 0 0.9239
+5 24 0.3827 0 0.9239 0.3827 1 0.9239 0 0 1 0.7071 0 0.7071
+4 16 0 1 1 -0.3827 1 0.9239 -0.3827 0 0.9239 0 0 1
+5 24 0 0 1 0 1 1 -0.3827 0 0.9239 0.3827 0 0.9239
+4 16 -0.3827 1 0.9239 -0.7071 1 0.7071 -0.7071 0 0.7071 -0.3827 0 0.9239
+5 24 -0.3827 0 0.9239 -0.3827 1 0.9239 -0.7071 0 0.7071 0 0 1
+4 16 -0.7071 1 0.7071 -0.9239 1 0.3827 -0.9239 0 0.3827 -0.7071 0 0.7071
+5 24 -0.7071 0 0.7071 -0.7071 1 0.7071 -0.9239 0 0.3827 -0.3827 0 0.9239
+4 16 -0.9239 1 0.3827 -1 1 0 -1 0 0 -0.9239 0 0.3827
+5 24 -0.9239 0 0.3827 -0.9239 1 0.3827 -1 0 0 -0.7071 0 0.7071
+4 16 -1 1 0 -0.9239 1 -0.3827 -0.9239 0 -0.3827 -1 0 0
+5 24 -1 0 0 -1 1 0 -0.9239 0 -0.3827 -0.9239 0 0.3827
+4 16 -0.9239 1 -0.3827 -0.7071 1 -0.7071 -0.7071 0 -0.7071 -0.9239 0 -0.3827
+5 24 -0.9239 0 -0.3827 -0.9239 1 -0.3827 -0.7071 0 -0.7071 -1 0 0
+4 16 -0.7071 1 -0.7071 -0.3827 1 -0.9239 -0.3827 0 -0.9239 -0.7071 0 -0.7071
+5 24 -0.7071 0 -0.7071 -0.7071 1 -0.7071 -0.3827 0 -0.9239 -0.9239 0 -0.3827
+4 16 -0.3827 1 -0.9239 0 1 -1 0 0 -1 -0.3827 0 -0.9239
+5 24 -0.3827 0 -0.9239 -0.3827 1 -0.9239 0 0 -1 -0.7071 0 -0.7071
+4 16 0 1 -1 0.3827 1 -0.9239 0.3827 0 -0.9239 0 0 -1
+5 24 0 0 -1 0 1 -1 0.3827 0 -0.9239 -0.3827 0 -0.9239
+4 16 0.3827 1 -0.9239 0.7071 1 -0.7071 0.7071 0 -0.7071 0.3827 0 -0.9239
+5 24 0.3827 0 -0.9239 0.3827 1 -0.9239 0.7071 0 -0.7071 0 0 -1
+4 16 0.7071 1 -0.7071 0.9239 1 -0.3827 0.9239 0 -0.3827 0.7071 0 -0.7071
+5 24 0.7071 0 -0.7071 0.7071 1 -0.7071 0.9239 0 -0.3827 0.3827 0 -0.9239
+4 16 0.9239 1 -0.3827 1 1 0 1 0 0 0.9239 0 -0.3827
+5 24 0.9239 0 -0.3827 0.9239 1 -0.3827 1 0 0 0.7071 0 -0.7071
+0
+
+0 FILE p/4-4edge.dat
+0 Circle 1.0
+0 Name: 4-4edge.dat
+0 Author: James Jessiman
+0 !LDRAW_ORG Primitive UPDATE 2017-01
+0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 1998-12-15 [PTadmin] Official Update 1998-10
+0 !HISTORY 2005-12-28 [PTadmin] Official Update 2005-01
+0 !HISTORY 2007-06-24 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+0 !HISTORY 2017-01-15 [Steffen] BFCed
+0 !HISTORY 2017-12-30 [PTadmin] Official Update 2017-01
+
+
+2 24 1 0 0 0.9239 0 0.3827
+2 24 0.9239 0 0.3827 0.7071 0 0.7071
+2 24 0.7071 0 0.7071 0.3827 0 0.9239
+2 24 0.3827 0 0.9239 0 0 1
+2 24 0 0 1 -0.3827 0 0.9239
+2 24 -0.3827 0 0.9239 -0.7071 0 0.7071
+2 24 -0.7071 0 0.7071 -0.9239 0 0.3827
+2 24 -0.9239 0 0.3827 -1 0 -0
+2 24 -1 0 -0 -0.9239 0 -0.3827
+2 24 -0.9239 0 -0.3827 -0.7071 0 -0.7071
+2 24 -0.7071 0 -0.7071 -0.3827 0 -0.9239
+2 24 -0.3827 0 -0.9239 0 0 -1
+2 24 0 0 -1 0.3827 0 -0.9239
+2 24 0.3827 0 -0.9239 0.7071 0 -0.7071
+2 24 0.7071 0 -0.7071 0.9239 0 -0.3827
+2 24 0.9239 0 -0.3827 1 0 0
+
+

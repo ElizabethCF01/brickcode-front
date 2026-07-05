@@ -95,6 +95,30 @@ export const ICON_TIME = svgDataUri(`
   <path d="M12 7v5l3.2 2"/>
 </svg>`)
 
+// Sensores — a sensor "eye"/lens emitting detection arcs (reads as the SPIKE
+// colour/distance sensor face without copying the reference's SensorLight.svg).
+export const ICON_SENSOR = svgDataUri(`
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" ${STROKE}>
+  <circle cx="9" cy="12" r="4.6"/>
+  <circle cx="9" cy="12" r="1.6" fill="#ffffff" stroke="none"/>
+  <path d="M16.5 8.2a6.4 6.4 0 0 1 0 7.6"/>
+  <path d="M19.5 6a10 10 0 0 1 0 12"/>
+</svg>`)
+
+/**
+ * Filled colour swatch (circle) for image-dropdown options — the SPIKE-style
+ * colour picker shows real colour circles instead of text. The thin white ring
+ * keeps dark swatches visible on the cyan sensor block and light swatches
+ * visible on the white dropdown menu.
+ */
+export function colorCircle(hex: string): string {
+  return svgDataUri(`
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="9.5" fill="${hex}" stroke="#ffffff" stroke-width="1.6"/>
+  <circle cx="12" cy="12" r="10.6" fill="none" stroke="rgba(0,0,0,0.25)" stroke-width="0.8"/>
+</svg>`)
+}
+
 /**
  * Build a Blockly `field_image` arg for a block's leading icon. Use it as the
  * first entry of `args0` with `%1` at the start of `message0`.

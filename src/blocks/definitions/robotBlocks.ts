@@ -1,7 +1,8 @@
 import * as Blockly from 'blockly'
 import {
   ICON_ROTATE_CW, ICON_ROTATE_CCW, ICON_ARROW_LEFT, ICON_ARROW_RIGHT, imageOption,
-  ICON_EVENT, ICON_MOVE, ICON_MOTOR, ICON_LIGHT, ICON_SOUND, ICON_TIME, blockIcon,
+  ICON_EVENT, ICON_MOVE, ICON_MOTOR, ICON_LIGHT, ICON_SOUND, ICON_TIME, ICON_SENSOR,
+  blockIcon, colorCircle,
 } from './blockIcons'
 // Side-effect import: registers the official Apache-2.0 `field_bitmap` custom
 // field (a drawable pixel grid) and its CSS in Blockly's global registry.
@@ -29,6 +30,20 @@ const SPIKE_LIGHT = '#9B6AF6'   // Light / 3×3 matrix (purple)
 const SPIKE_MOTOR = '#0090F5'   // Motor (blue)
 const SPIKE_SOUND = '#C061F1'   // Sound (magenta)
 const SPIKE_OP    = '#59C059'   // Operators (green)
+const SPIKE_SENSOR = '#3FCCF1'  // Sensors (cyan — matches the SPIKE app palette)
+// Matches the Control category colour in BlocklyWorkspace's toolbox.
+const CONTROL_ORANGE = '#FF8C00'
+
+// Colour-picker swatches for `sensor_sees_color`. Hexes mirror SensorPanel's
+// COLOR_DISPLAY so the block swatch and the live readout chip look identical.
+const COLOR_OPTIONS = [
+  imageOption(colorCircle('#DA291C'), 'rojo',     'RED'),
+  imageOption(colorCircle('#2E7D32'), 'verde',    'GREEN'),
+  imageOption(colorCircle('#006CB7'), 'azul',     'BLUE'),
+  imageOption(colorCircle('#FFD700'), 'amarillo', 'YELLOW'),
+  imageOption(colorCircle('#F5F5F5'), 'blanco',   'WHITE'),
+  imageOption(colorCircle('#1a1a1a'), 'negro',    'BLACK'),
+]
 
 // Shared dropdown option lists.
 const PORT_OPTIONS = [['A', 'A'], ['B', 'B']]
@@ -116,11 +131,32 @@ const blockJsonArray: object[] = [
   },
   {
     // Value block — no previousStatement/nextStatement; has output instead.
+    // Sensor blocks carry the leading sensor glyph like the SPIKE app (the
+    // reference sim puts SensorLight.svg inside its sensor reporters too).
     type: 'sensor_distance',
-    message0: 'Distancia frontal (cm)',
+    message0: '%1 Distancia frontal (cm)',
+    args0: [blockIcon(ICON_SENSOR, 'sensor')],
     output: 'Number',
-    colour: LEGO_YELLOW,
+    colour: SPIKE_SENSOR,
     tooltip: 'Devuelve la distancia en centímetros al obstáculo más cercano.',
+  },
+  {
+    // Boolean reporter for the colour sensor — plugs into "si… entonces" /
+    // "repetir hasta que". SPIKE-style: sensor glyph + a picker of real colour
+    // circles (not text). Codes must match `DetectableColor` (colorRegistry).
+    type: 'sensor_sees_color',
+    message0: '%1 ¿Ve el color %2?',
+    args0: [
+      blockIcon(ICON_SENSOR, 'sensor'),
+      {
+        type: 'field_dropdown',
+        name: 'COLOR',
+        options: COLOR_OPTIONS,
+      },
+    ],
+    output: 'Boolean',
+    colour: SPIKE_SENSOR,
+    tooltip: 'Verdadero cuando el sensor de color ve el color elegido (de cerca).',
   },
   {
     type: 'wait_seconds',
@@ -344,6 +380,36 @@ const blockJsonArray: object[] = [
     tooltip: 'Detiene cualquier sonido que esté sonando.',
   },
 
+  // ── Control (SPIKE-style additions next to the native controls_*) ──────────
+  {
+    // Scratch/SPIKE "forever". Runs its body until the program stops. No
+    // nextStatement on purpose — like SPIKE, nothing can follow a forever loop.
+    type: 'control_forever',
+    message0: 'por siempre %1',
+    args0: [{ type: 'input_statement', name: 'DO' }],
+    previousStatement: null,
+    colour: CONTROL_ORANGE,
+    tooltip: 'Repite los bloques de dentro sin parar (el patrón "vigilar y reaccionar").',
+  },
+  {
+    type: 'control_wait_until',
+    message0: 'esperar hasta que %1',
+    args0: [{ type: 'input_value', name: 'CONDITION', check: 'Boolean' }],
+    previousStatement: null,
+    nextStatement: null,
+    colour: CONTROL_ORANGE,
+    tooltip: 'Pausa el programa hasta que la condición sea verdadera.',
+  },
+  {
+    // Terminal block: stops program + motors. No nextStatement — nothing can
+    // run after it.
+    type: 'control_stop',
+    message0: 'parar el programa',
+    previousStatement: null,
+    colour: CONTROL_ORANGE,
+    tooltip: 'Detiene el programa y frena los motores.',
+  },
+
   // ── Operators ───────────────────────────────────────────────────────────────
   {
     // Reporter (value block) — random integer between FROM and TO inclusive.
@@ -415,6 +481,7 @@ function patchRemoveTopBlock(): void {
  */
 export function buildRobotToolbox(
   includeSensor: boolean,
+  includeColorSensor = false,
 ): Blockly.utils.toolbox.ToolboxDefinition {
   type Cat = Blockly.utils.toolbox.ToolboxItemInfo
 
@@ -471,12 +538,17 @@ export function buildRobotToolbox(
     },
   ]
 
-  if (includeSensor) {
+  // Sensores category is data-driven per sensor kind: distance-only robots
+  // don't see the colour block and vice versa.
+  const sensorBlocks: Blockly.utils.toolbox.ToolboxItemInfo[] = []
+  if (includeSensor)      sensorBlocks.push({ kind: 'block', type: 'sensor_distance' })
+  if (includeColorSensor) sensorBlocks.push({ kind: 'block', type: 'sensor_sees_color' })
+  if (sensorBlocks.length > 0) {
     categories.push({
       kind: 'category',
       name: 'Sensores',
-      colour: LEGO_YELLOW,
-      contents: [{ kind: 'block', type: 'sensor_distance' }],
+      colour: SPIKE_SENSOR,
+      contents: sensorBlocks,
     })
   }
 

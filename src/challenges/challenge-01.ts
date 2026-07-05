@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { placeProps } from '../engine/ldraw/decorProps'
 import type { SimpleRobot } from '../interpreter/BlockInterpreter'
 import type { ChallengeEngine, ChallengeResult, LevelDefinition } from './types'
 
@@ -67,10 +68,32 @@ export const challenge01 = {
     mesh.position.set(0, 0.011, ZONE_CENTER_Z)
     scene.add(mesh)
 
+    // Decorative LEGO props around the field perimeter. Pure visuals (no
+    // colliders) and well clear of the robot's straight run at x ≈ 0, z 0→−5.
+    const props = [
+      placeProps(scene, '/ldraw/models/packed/tree-pine.mpd', [
+        { x: -6, z: -6, rotationY: 0.3 },
+        { x: 6, z: -7, rotationY: 2.4, scale: 0.8 },
+        { x: -7, z: 3, rotationY: 4.1, scale: 1.15 },
+        { x: 7, z: 5, rotationY: 1.2 },
+        { x: 5.5, z: -3, rotationY: 5.3, scale: 0.7 },
+      ], { fitLongest: 1.5 }),
+      placeProps(scene, '/ldraw/models/packed/rock-big.mpd', [
+        { x: -4.5, z: -2, rotationY: 0.8 },
+        { x: 4, z: 2.5, rotationY: 2.9, scale: 0.75 },
+      ], { fitLongest: 1 }),
+      placeProps(scene, '/ldraw/models/packed/flowers.mpd', [
+        { x: -3.5, z: 4 },
+        { x: 3.8, z: -5.5, rotationY: 1.9 },
+        { x: 6.5, z: -1, rotationY: 3.7 },
+      ], { fitLongest: 1.3 }),
+    ]
+
     return () => {
       geo.dispose()
       mat.dispose()
       scene.remove(mesh)
+      props.forEach((p) => p.dispose())
     }
   },
 

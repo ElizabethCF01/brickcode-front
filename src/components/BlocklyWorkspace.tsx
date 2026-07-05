@@ -16,17 +16,25 @@ type ToolboxItem = Blockly.utils.toolbox.ToolboxItemInfo
  * Combine the robot category (sensor block included only when the active robot
  * has a sensor) with the built-in Control and Matemáticas categories.
  */
-function buildFullToolbox(hasSensor: boolean): Blockly.utils.toolbox.ToolboxDefinition {
+function buildFullToolbox(
+  hasSensor: boolean,
+  hasColorSensor: boolean,
+): Blockly.utils.toolbox.ToolboxDefinition {
   return {
     kind: 'categoryToolbox',
     contents: [
       // Spread the robot category from the data-driven robot toolbox.
-      ...((buildRobotToolbox(hasSensor) as { contents: ToolboxItem[] }).contents),
+      ...((buildRobotToolbox(hasSensor, hasColorSensor) as { contents: ToolboxItem[] }).contents),
       {
         kind: 'category',
         name: 'Control',
         colour: '#FF8C00',
         contents: [
+          // SPIKE-style control trio first: forever / wait-until / stop — the
+          // canonical watch-and-react vocabulary.
+          { kind: 'block', type: 'control_forever' },
+          { kind: 'block', type: 'control_wait_until' },
+          { kind: 'block', type: 'control_stop' },
           // controls_repeat (no shadow inputs) instead of controls_repeat_ext
           // (whose default math_number shadow triggers a Blockly bug:
           // "Block not present in workspace's list of top-most blocks" when
@@ -44,6 +52,10 @@ function buildFullToolbox(hasSensor: boolean): Blockly.utils.toolbox.ToolboxDefi
           { kind: 'block', type: 'math_number' },
           { kind: 'block', type: 'math_arithmetic' },
           { kind: 'block', type: 'logic_compare' },
+          // Combine/negate conditions ("si ve verde Y distancia < 25").
+          { kind: 'block', type: 'logic_operation' },
+          { kind: 'block', type: 'logic_negate' },
+          { kind: 'block', type: 'logic_boolean' },
           { kind: 'block', type: 'operator_random' },
         ],
       } as ToolboxItem,
@@ -55,14 +67,24 @@ export default function BlocklyWorkspace() {
   const containerRef = useRef<HTMLDivElement>(null)
   const workspaceRef = useRef<Blockly.WorkspaceSvg | null>(null)
   const hasSensor = useSimulationStore((s) => s.hasSensor)
+  const hasColorSensor = useSimulationStore((s) => s.hasColorSensor)
 
-  // Rebuild the toolbox when the active robot's sensor presence becomes known
-  // (the engine sets `hasSensor` asynchronously after this component mounts).
+  // Rebuild the toolbox when the active robot's sensor kit becomes known
+  // (the engine sets these asynchronously after this component mounts).
   useEffect(() => {
     const workspace = workspaceRef.current
     if (!workspace) return
-    workspace.updateToolbox(structuredClone(buildFullToolbox(hasSensor)))
-  }, [hasSensor])
+    workspace.updateToolbox(structuredClone(buildFullToolbox(hasSensor, hasColorSensor)))
+    // The ContinuousToolbox builds its single all-categories flyout once in
+    // init() and only refreshes it on block create/delete events — categories
+    // added by updateToolbox (e.g. Sensores arriving async) never show their
+    // blocks without an explicit refreshSelection(), which re-shows the flyout
+    // from the updated toolbox contents.
+    const toolbox = workspace.getToolbox()
+    if (toolbox && 'refreshSelection' in toolbox) {
+      (toolbox as { refreshSelection(): void }).refreshSelection()
+    }
+  }, [hasSensor, hasColorSensor])
 
   useEffect(() => {
     const container = containerRef.current
@@ -73,7 +95,7 @@ export default function BlocklyWorkspace() {
     while (container.firstChild) container.removeChild(container.firstChild)
 
     const workspace = Blockly.inject(container, {
-      toolbox: structuredClone(buildFullToolbox(hasSensor)),
+      toolbox: structuredClone(buildFullToolbox(hasSensor, hasColorSensor)),
       renderer: 'zelos',
       trashcan: true,
       sounds: true,

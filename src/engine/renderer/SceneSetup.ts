@@ -10,8 +10,8 @@ export interface SceneRefs {
 
 export function createScene(canvas: HTMLCanvasElement): SceneRefs {
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x87ceeb)
-  scene.fog = new THREE.Fog(0x87ceeb, 20, 60)
+  scene.background = new THREE.Color(0x9fd8f2)
+  scene.fog = new THREE.Fog(0x9fd8f2, 25, 70)
 
   const camera = new THREE.PerspectiveCamera(
     60,
@@ -29,9 +29,13 @@ export function createScene(canvas: HTMLCanvasElement): SceneRefs {
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
-  // Lights
-  const ambient = new THREE.AmbientLight(0xffffff, 0.5)
+  // Lights — a hemisphere light (sky blue from above, grass green from below)
+  // instead of a flat ambient gives the LEGO props softer, warmer shading.
+  const ambient = new THREE.AmbientLight(0xffffff, 0.25)
   scene.add(ambient)
+
+  const hemi = new THREE.HemisphereLight(0xcfe8ff, 0x7da868, 0.55)
+  scene.add(hemi)
 
   const sun = new THREE.DirectionalLight(0xffffff, 1.2)
   sun.position.set(10, 20, 10)
@@ -47,7 +51,7 @@ export function createScene(canvas: HTMLCanvasElement): SceneRefs {
 
   // Floor (20 x 20 m)
   const floorGeo = new THREE.PlaneGeometry(20, 20)
-  const floorMat = new THREE.MeshLambertMaterial({ color: 0x4caf50 })
+  const floorMat = new THREE.MeshLambertMaterial({ color: 0x69a75b })
   const floor = new THREE.Mesh(floorGeo, floorMat)
   floor.rotation.x = -Math.PI / 2
   floor.receiveShadow = true

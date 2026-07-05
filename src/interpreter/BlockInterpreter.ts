@@ -73,6 +73,16 @@ export interface ISensor {
 }
 
 /**
+ * Colour sensor API required by the interpreter (`sensor_sees_color` block).
+ * `LegoColorSensor` satisfies this; colour codes match the block's dropdown
+ * (`RED`, `GREEN`, `BLUE`, `YELLOW`, `WHITE`, `BLACK`).
+ */
+export interface IColorSensor {
+  sees(color: string): boolean
+  getColor(): string | null
+}
+
+/**
  * Hub effects surface for the SPIKE Essential 3×3 light matrix.
  * The engine supplies an implementation that writes to `simulationStore`;
  * headless tests can pass a mock or omit it (light blocks become no-ops).
@@ -129,6 +139,12 @@ export interface SimpleRobot {
    */
   motorsByPort?: Record<string, IMotorPort>
   sensor: ISensor
+  /**
+   * Optional colour sensor. Robots without one make `sensor_sees_color` always
+   * false; the UI hides colour blocks when `hasColorSensor` is falsy.
+   */
+  colorSensor?: IColorSensor
+  hasColorSensor?: boolean
   /**
    * Whether this robot actually carries a distance sensor. Procedural robots
    * (`SimpleRobot`) are `true`; imported `.ldr` robots are `true` only when the
@@ -482,6 +498,29 @@ export class BlockInterpreter {
         break
       }
 
+      case 'control_forever': {
+        // SPIKE/Scratch "forever" — the watch-and-react pattern. Same 50 ms
+        // yield per lap as whileUntil so physics/sensors advance between laps.
+        while (this._running) {
+          await this.executeSequence(block.getInputTargetBlock('DO'))
+          await this.sleep(50)
+        }
+        break
+      }
+
+      case 'control_wait_until': {
+        while (this._running && !this.evaluateValue(block.getInputTargetBlock('CONDITION'))) {
+          await this.sleep(50)
+        }
+        break
+      }
+
+      case 'control_stop':
+        // Ends the program: stop() drops _running, so every enclosing loop and
+        // sequence unwinds; it also brakes the motors and silences the hub.
+        this.stop()
+        break
+
       // Unknown block types are silently skipped so a workspace with experimental
       // blocks doesn't crash an otherwise valid program.
     }
@@ -497,6 +536,28 @@ export class BlockInterpreter {
     switch (block.type) {
       case 'sensor_distance':
         return this.robot.sensor.getValue()
+
+      case 'sensor_sees_color': {
+        // Boolean reporter: 1 when the colour sensor currently sees the chosen
+        // colour, 0 otherwise (or when the robot has no colour sensor).
+        const wanted = String(block.getFieldValue('COLOR') ?? '')
+        return this.robot.colorSensor?.sees(wanted) ? 1 : 0
+      }
+
+      // ── Logic operators (Blockly natives; booleans are 1/0 numbers here) ──
+      case 'logic_boolean':
+        return block.getFieldValue('BOOL') === 'TRUE' ? 1 : 0
+
+      case 'logic_operation': {
+        const a = this.evaluateValue(block.getInputTargetBlock('A')) !== 0
+        const b = this.evaluateValue(block.getInputTargetBlock('B')) !== 0
+        const and = (block.getFieldValue('OP') ?? 'AND') === 'AND'
+        const result = and ? a && b : a || b
+        return result ? 1 : 0
+      }
+
+      case 'logic_negate':
+        return this.evaluateValue(block.getInputTargetBlock('BOOL')) === 0 ? 1 : 0
 
       case 'motor_position': {
         const port = block.getFieldValue('PORT') ?? 'A'

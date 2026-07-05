@@ -14,19 +14,23 @@ export default function SimulatorCanvas() {
     let disposed = false
     let engine: SimulationEngine | undefined
 
-    SimulationEngine.create(canvas).then(e => {
+    // App only mounts once a level is active, so activeLevel is set here. The
+    // level's robot hint decides which robot the engine builds (sensor levels
+    // request the procedural SimpleRobot).
+    const level = useChallengeStore.getState().activeLevel
+
+    SimulationEngine.create(canvas, level?.robot ?? 'imported', level?.sensors).then(e => {
       // Guard against React StrictMode double-mount cleanup running before resolve.
       if (disposed) { e.dispose(); return }
 
       engine = e
-      // App only mounts once a level is active, so activeLevel is set here.
-      const level = useChallengeStore.getState().activeLevel
       if (level) engine.loadChallenge(level.setup.bind(level))
       engine.startRAF()
       setEngine(engine)
-      // Tell the UI whether this robot has a sensor so sensor-only panels and
-      // toolbox blocks can hide themselves for motors-only robots.
+      // Tell the UI which sensors this robot carries so sensor-only panels and
+      // toolbox blocks can hide themselves for robots without them.
       useSimulationStore.getState().setHasSensor(engine.robot.hasSensor ?? false)
+      useSimulationStore.getState().setHasColorSensor(engine.robot.hasColorSensor ?? false)
     })
 
     const ro = new ResizeObserver(() => {

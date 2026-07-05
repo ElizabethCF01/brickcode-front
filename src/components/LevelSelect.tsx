@@ -12,9 +12,10 @@ const CATEGORY_LABEL: Record<LevelCategory, string> = {
   lights: 'Luces',
   sound: 'Sonido',
 }
+// Mirrors the SPIKE toolbox palette in robotBlocks.ts (Sensores = cyan).
 const CATEGORY_COLOR: Record<LevelCategory, string> = {
   motors: '#0090F5',
-  sensors: '#FFD700',
+  sensors: '#3FCCF1',
   lights: '#9B6AF6',
   sound: '#C061F1',
 }

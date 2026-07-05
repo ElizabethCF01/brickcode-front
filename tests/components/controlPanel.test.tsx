@@ -4,9 +4,11 @@
 // does not — interpreter/engine/store singletons are mocked.
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, fireEvent, waitFor } from '@testing-library/react'
+import { render, fireEvent, waitFor, act } from '@testing-library/react'
 import ControlPanel from '../../src/components/ControlPanel'
 import { useSimulationStore } from '../../src/store/simulationStore'
+import { useChallengeStore } from '../../src/store/challengeStore'
+import { challenge01 } from '../../src/challenges/challenge-01'
 
 // ── Mocks for the singletons ControlPanel reaches into ──────────────────────
 const recorder = {
@@ -22,6 +24,7 @@ const engine = {
   interpreter: { run: vi.fn().mockResolvedValue(undefined), stop: vi.fn() },
   robot: { getPosition: () => ({ x: 0, y: 0, z: -3 }) },
   resetRobot: vi.fn(),
+  resetChallenge: vi.fn(),
 }
 
 const signOut = vi.fn()
@@ -35,7 +38,10 @@ describe('ControlPanel recording wiring', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     recorder.isRecording.mockReturnValue(true)
-    useSimulationStore.setState({ status: 'stopped' })
+    useSimulationStore.setState({ status: 'stopped', autoStopRequested: false })
+    // ControlPanel now reads the active level from the store (level-select
+    // refactor); without one, Run/Stop bail out early.
+    useChallengeStore.setState({ activeLevel: challenge01 })
   })
 
   it('Run starts a session, records program_run_started, then seals + flushes', async () => {
@@ -69,6 +75,25 @@ describe('ControlPanel recording wiring', () => {
     expect(engine.interpreter.stop).toHaveBeenCalled()
     await waitFor(() => expect(sync.flush).toHaveBeenCalled())
     expect(recorder.endSession).toHaveBeenCalled()
+  })
+
+  it('scenarioDecidesEnd: program finishing does not seal; the scenario auto-stop does', async () => {
+    useChallengeStore.setState({
+      activeLevel: { ...challenge01, scenarioDecidesEnd: true },
+    })
+    const { getByText } = render(<ControlPanel />)
+    fireEvent.click(getByText('▶ Ejecutar'))
+
+    // The mocked run() resolves immediately — but the run must stay live.
+    await waitFor(() => expect(engine.interpreter.run).toHaveBeenCalled())
+    expect(recorder.endSession).not.toHaveBeenCalled()
+    expect(useSimulationStore.getState().status).toBe('running')
+
+    // The scripted scene latches its verdict and requests the stop.
+    act(() => useSimulationStore.getState().requestAutoStop())
+    await waitFor(() => expect(recorder.endSession).toHaveBeenCalled())
+    expect(useSimulationStore.getState().status).toBe('stopped')
+    expect(sync.flush).toHaveBeenCalled()
   })
 
   it('Reset discards the in-progress recording without flushing', () => {

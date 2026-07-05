@@ -564,4 +564,84 @@ describe('BlockInterpreter', () => {
     expect(onBlock).toHaveBeenCalledWith('controls_repeat_ext')
     expect(onBlock.mock.calls.filter(([t]) => t === 'motor_stop')).toHaveLength(3)
   })
+
+  // ── SPIKE control blocks: forever / wait-until / stop ─────────────────────
+
+  it('control_forever repeats its body until stop() is called', async () => {
+    const robot = makeRobot()
+    const interpreter = new BlockInterpreter(robot)
+    const body = makeBlock('motor_stop')
+    const forever = makeBlock('control_forever', {}, null, { DO: body })
+
+    const done = interpreter.run(makeWorkspace([forever]) as Workspace)
+    // Each lap runs the body then yields 50 ms → ~10 laps in 500 ms.
+    await vi.advanceTimersByTimeAsync(500)
+    const lapsBeforeStop = (robot.motors.left.stop as ReturnType<typeof vi.fn>).mock.calls.length
+    expect(lapsBeforeStop).toBeGreaterThanOrEqual(5)
+
+    interpreter.stop()
+    await vi.advanceTimersByTimeAsync(100)
+    await done
+    expect(interpreter.isRunning()).toBe(false)
+  })
+
+  it('control_wait_until blocks until its condition becomes true', async () => {
+    const robot = makeRobot()
+    const sensorMock = robot.sensor.getValue as ReturnType<typeof vi.fn>
+    sensorMock.mockReturnValue(100)   // far — condition false
+    const interpreter = new BlockInterpreter(robot)
+
+    // esperar hasta que (distancia < 20) → luego parar motores
+    const cond = makeBlock('logic_compare', { OP: 'LT' }, null, {
+      A: makeBlock('sensor_distance'),
+      B: makeBlock('math_number', { NUM: '20' }),
+    })
+    const after = makeBlock('motor_stop')
+    const waitUntil = makeBlock('control_wait_until', {}, after, { CONDITION: cond })
+
+    const done = interpreter.run(makeWorkspace([waitUntil]) as Workspace)
+    await vi.advanceTimersByTimeAsync(300)
+    expect(robot.motors.left.stop).not.toHaveBeenCalled()   // still waiting
+
+    sensorMock.mockReturnValue(5)                            // now close
+    await vi.advanceTimersByTimeAsync(100)
+    await done
+    expect(robot.motors.left.stop).toHaveBeenCalled()        // `after` ran
+  })
+
+  it('control_stop ends the program: following blocks never run', async () => {
+    const robot = makeRobot()
+    const interpreter = new BlockInterpreter(robot)
+    const never = makeBlock('drive_forward', { SPEED: '360', DURATION: '1' })
+    const stopBlock = makeBlock('control_stop', {}, never)
+
+    await interpreter.run(makeWorkspace([stopBlock]) as Workspace)
+
+    expect(robot.motors.left.setSpeed).not.toHaveBeenCalled() // `never` skipped
+    expect(robot.motors.left.stop).toHaveBeenCalled()         // motors braked
+    expect(interpreter.isRunning()).toBe(false)
+  })
+
+  // ── Logic operators (y / o / no / verdadero-falso) ─────────────────────────
+
+  it('logic_operation AND/OR and logic_negate gate a controls_if branch', async () => {
+    const robot = makeRobot()
+    const interpreter = new BlockInterpreter(robot)
+    const T = () => makeBlock('logic_boolean', { BOOL: 'TRUE' })
+    const F = () => makeBlock('logic_boolean', { BOOL: 'FALSE' })
+
+    // si (VERDADERO y (no FALSO)) entonces → parar motores
+    const negatedFalse = makeBlock('logic_negate', {}, null, { BOOL: F() })
+    const andBlock = makeBlock('logic_operation', { OP: 'AND' }, null, { A: T(), B: negatedFalse })
+    const doBranch = makeBlock('motor_stop')
+    const ifTrue = makeBlock('controls_if', {}, null, { IF0: andBlock, DO0: doBranch })
+    await interpreter.run(makeWorkspace([ifTrue]) as Workspace)
+    expect(robot.motors.left.stop).toHaveBeenCalledTimes(1)
+
+    // si (FALSO o FALSO) entonces → NO debe ejecutar la rama
+    const orBlock = makeBlock('logic_operation', { OP: 'OR' }, null, { A: F(), B: F() })
+    const ifFalse = makeBlock('controls_if', {}, null, { IF0: orBlock, DO0: makeBlock('motor_stop') })
+    await interpreter.run(makeWorkspace([ifFalse]) as Workspace)
+    expect(robot.motors.left.stop).toHaveBeenCalledTimes(1)   // unchanged
+  })
 })

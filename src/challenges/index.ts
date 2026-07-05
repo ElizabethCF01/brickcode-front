@@ -1,4 +1,5 @@
 import { challenge01 } from './challenge-01'
+import { challengeBoat } from './challenge-boat'
 import type { Level, LevelDefinition } from './types'
 
 export type { Level, LevelDefinition, LevelMeta, LevelCategory, LevelDifficulty } from './types'
@@ -10,16 +11,7 @@ export type { Level, LevelDefinition, LevelMeta, LevelCategory, LevelDifficulty 
  */
 export const LEVELS: Level[] = [
   challenge01,
-  {
-    id: 'challenge-boat',
-    title: '🐊 El cocodrilo y el bote',
-    description:
-      'El cocodrilo se acerca al bote. Programa el bote para que encienda la alarma y las luces cuando lo detecte cerca.',
-    difficulty: 2,
-    tags: ['sensors', 'lights'],
-    hints: [],
-    comingSoon: true,
-  },
+  challengeBoat,
   {
     id: 'challenge-cave',
     title: '🔦 El coche de la cueva',
@@ -34,7 +26,7 @@ export const LEVELS: Level[] = [
 
 /** True when a level can actually be launched (has scene + success logic). */
 export function isPlayable(level: Level): level is LevelDefinition {
-  return 'setup' in level && typeof (level as LevelDefinition).setup === 'function'
+  return 'setup' in level && typeof level.setup === 'function'
 }
 
 /** Look up a level by id (e.g. to restore the last-played level). */

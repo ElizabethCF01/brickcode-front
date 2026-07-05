@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useSimulationStore } from '../store/simulationStore'
 import { useChallengeStore } from '../store/challengeStore'
 import { getEngine } from '../engine/engineSingleton'
@@ -29,6 +30,34 @@ async function finishSession(challengeId: string, success: boolean): Promise<voi
 
 export default function ControlPanel({ onBackToLevels }: Readonly<ControlPanelProps>) {
   const { status, setStatus, showEditor, toggleEditor } = useSimulationStore()
+  const autoStopRequested = useSimulationStore((s) => s.autoStopRequested)
+
+  // End the current run — from manual Stop, a finite program finishing, or a
+  // scripted scenario auto-stopping. Evaluates once (guarded on running status),
+  // records the result, and seals the session. Reads fresh state so the guard
+  // holds even when several of those paths fire in the same run.
+  const finishRun = () => {
+    const engine = getEngine()
+    const level  = useChallengeStore.getState().activeLevel
+    if (!engine || !level) return
+    if (useSimulationStore.getState().status !== 'running') return
+    engine.interpreter.stop()
+    setStatus('stopped')
+    const result = level.evaluate(engine.robot)
+    useChallengeStore.getState().setResult(result)
+    if (result.success) markLevelCompleted(level.id)
+    void finishSession(level.id, result.success)
+  }
+
+  // A scripted scenario (e.g. the crocodile reaching the boat) asked to end the
+  // run — the reactive `forever` program never resolves on its own.
+  useEffect(() => {
+    if (!autoStopRequested) return
+    finishRun()
+    useSimulationStore.getState().clearAutoStop()
+    // finishRun reads fresh state; re-running only when the flag flips is correct.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStopRequested])
 
   const handleRun = () => {
     const engine    = getEngine()
@@ -36,8 +65,10 @@ export default function ControlPanel({ onBackToLevels }: Readonly<ControlPanelPr
     const level     = useChallengeStore.getState().activeLevel
     if (!engine || !workspace || !level || status === 'running') return
 
-    // Clear any previous result and mark running.
+    // Clear any previous result, reset the scripted scene, and mark running.
     useChallengeStore.getState().setResult(null)
+    useSimulationStore.getState().clearAutoStop()
+    engine.resetChallenge()
     setStatus('running')
 
     // Begin recording this run (events stream in via the interpreter sink).
@@ -45,26 +76,22 @@ export default function ControlPanel({ onBackToLevels }: Readonly<ControlPanelPr
     recorder.startSession([level.id])
     recorder.recordEvent('program_run_started', { challengeId: level.id })
 
+    // Resolves when a finite program ends; for a reactive `forever` program it
+    // resolves only after finishRun() calls interpreter.stop() (the status guard
+    // makes that a no-op the second time).
+    //
+    // Scenario-driven levels opt out of ending on natural program completion:
+    // the scene keeps playing (crocodile keeps approaching, hub keeps its
+    // lights) until the scenario latches a verdict and requests the auto-stop.
+    // Otherwise "repetir hasta que ve verde → luces" would be evaluated the
+    // instant the program ends, long before the outcome is decided.
     engine.interpreter.run(workspace).then(() => {
-      // Program finished naturally (all blocks executed without Stop).
-      setStatus('stopped')
-      const result = level.evaluate(engine.robot)
-      useChallengeStore.getState().setResult(result)
-      if (result.success) markLevelCompleted(level.id)
-      void finishSession(level.id, result.success)
+      if (!level.scenarioDecidesEnd) finishRun()
     })
   }
 
   const handleStop = () => {
-    const engine = getEngine()
-    const level  = useChallengeStore.getState().activeLevel
-    if (!engine || !level) return
-    engine.interpreter.stop()
-    setStatus('stopped')
-    const result = level.evaluate(engine.robot)
-    useChallengeStore.getState().setResult(result)
-    if (result.success) markLevelCompleted(level.id)
-    void finishSession(level.id, result.success)
+    finishRun()
   }
 
   const handleReset = () => {
@@ -77,6 +104,7 @@ export default function ControlPanel({ onBackToLevels }: Readonly<ControlPanelPr
     // completed run, so it should not be sealed or flushed.
     getRecorder().dispose()
     setStatus('stopped')
+    useSimulationStore.getState().clearAutoStop()
     useChallengeStore.getState().setResult(null)
   }
 

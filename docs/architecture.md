@@ -234,8 +234,10 @@ All blocks are registered with `registerRobotBlocks()` (call once at startup) an
 1. `world.step()` — Rapier integrates the dynamic hub + wheels under the revolute joint motors.
 2. `robot.step(dt)` — syncs hub visual to physics, integrates motor angle, repositions sensor origin to the (rotated) hub-front offset.
 3. `robot.sensor.step(world)` — fires the ray.
-4. Push `sensor.getValue()` to `simulationStore.sensorValues['front']`.
-5. Render via Three.js.
+4. `challenge.update(dt)` — only while `status === 'running'` (scripted scenes don't creep while editing).
+5. `challenge.ambient(dt)` — every frame regardless of status; cosmetic-only animation (e.g. water waves).
+6. Push `sensor.getValue()` to `simulationStore.sensorValues['front']`.
+7. Render via Three.js.
 
 ### Singletons
 
@@ -316,6 +318,125 @@ without a redeploy.
 
 ---
 
+## Reactive challenges & the boat/crocodile level
+
+**Files**: `src/challenges/challenge-boat.ts`, `src/challenges/types.ts`,
+`src/engine/SimulationEngine.ts`, `src/store/simulationStore.ts`,
+`src/components/ControlPanel.tsx`, `src/engine/renderer/SimulatorCanvas.tsx`.
+
+challenge-01 is a *finite* program ("move 2 s") — `interpreter.run().then()`
+fires evaluation when the blocks finish. A **reactive** level (watch a sensor,
+react with lights) is a `forever`-style loop that never resolves on its own, and
+its world is animated (a crocodile approaches). Three pieces were added:
+
+1. **Challenge lifecycle** (`types.ts` `ChallengeHandle`). `setup()` may now
+   return `{ dispose, update?(dt), reset?() }` instead of a bare dispose fn (still
+   supported — `loadChallenge` normalizes). `SimulationEngine._tick` calls
+   `update(PHYSICS_DT)` each physics step **only while `status === 'running'`**
+   (nothing creeps while the kid is dragging blocks). `resetChallenge()` runs on
+   run-start (ControlPanel) and Reset (`resetRobot`).
+
+2. **Per-level robot hint** (`types.ts` `RobotKind`; `SimulationEngine.create(canvas, kind)`).
+   Reactive levels set `robot: 'simple'` — the procedural `SimpleRobot` always has
+   a front distance sensor, whereas the env-var import (taxi) is motors-only.
+   `SimulatorCanvas` passes `activeLevel.robot`. **Discriminator**: `hasSensor`
+   must be true for the boat, else the Sensores category hides and it's unplayable.
+
+3. **Scenario-driven stop** (`simulationStore.autoStopRequested` +
+   `requestAutoStop`/`clearAutoStop`). When the scenario ends (croc reached the
+   boat), `update()` raises the flag; a `ControlPanel` effect calls the shared
+   `finishRun()` (stop interpreter → evaluate → record). `finishRun` is guarded on
+   `status==='running'` so manual Stop, natural `run().then`, and auto-stop can all
+   fire without double-evaluating.
+
+4. **Scenario decides the end** (`LevelDefinition.scenarioDecidesEnd`). Without
+   it, a *finite* reactive program ("repetir hasta que ve verde → luces") was
+   evaluated the instant it ended — the loop exits at the colour sensor's 50 cm
+   range, the sim froze, the croc never reached the 25 cm danger zone, and the
+   verdict was the null-latch fallback (❌). With the flag, `ControlPanel` skips
+   `finishRun` on natural program completion; the scene keeps playing (hub keeps
+   the lights the program left) until `update()` latches a verdict and requests
+   the auto-stop. Termination is guaranteed: the croc always reaches `ARRIVE_CM`,
+   latching failure if nothing happened. Manual Stop/Reset unchanged.
+
+5. **Per-level sensor kit** (`LevelDefinition.sensors` →
+   `SimulationEngine.create(canvas, kind, sensors)` → `SimpleRobotConfig.sensors`).
+   Mirrors the real kit: SPIKE Essential has **only the colour sensor** (distance
+   is a Prime part), so the boat declares `{ distance: false, color: true }` —
+   the Sensores category then shows only the colour block, the distance readout
+   hides, and the distance-sensor part mesh is hidden on the rig. Both sensor
+   objects are still constructed (the interpreter interface requires `sensor`);
+   only the `hasSensor`/`hasColorSensor` gating changes.
+
+**The boat level** (`challenge-boat.ts`): a kinematic-position-based crocodile
+slides along the SimpleRobot sensor ray (x=0, y=0.4, from z=−0.355 toward −Z),
+starting 90 cm out, at 18 cm/s. The sensor's `castRay(solid)` detects its collider
+for free. `update()` **latches the verdict during the approach** (not at stop
+time): success the moment the hub is lit while the croc is within `DANGER_CM`
+(25), failure if it reaches `ARRIVE_CM` (4) unlit; `evaluate()` just returns the
+latch. Solve path with existing blocks: `repetir hasta que (Distancia frontal < 25)`
+then a `light_display_*` alarm — `controls_whileUntil` yields 50 ms/iteration so
+the croc keeps moving.
+
+**Real LEGO visuals** load async with a procedural fallback. `boat.ldr`/`coco.ldr`
+were packed to `.mpd` (`LDRAW_LIB_PATH=… pnpm run pack-ldraw` — the packer already
+globs every file in `models/source/`). `loadDecorModel(url)`
+(`src/engine/ldraw/loadDecorModel.ts`) loads a packed `.mpd` as an origin-centred,
+optionally size-fitted scene prop, returning `null` (never throwing) if the model
+is absent. The crocodile swaps its proc mesh for `coco.mpd` inside the wrapper
+group; the boat calls `SimpleRobot.attachImportedVisual(boat.mpd)` (exposed to
+levels via `ChallengeEngine.robot`), which hides the hub/wheels and mounts the
+boat while the sensor ray keeps firing. If a model isn't packed, the proc croc /
+SimpleRobot hub stay.
+
+*Follow-up*: the toolbox still shows Movimiento for this level (SimpleRobot can
+drive), which breaks the "stationary boat" fiction — hiding categories per level
+needs the capability model discussed for non-mobile robots.
+
+---
+
+## Colour sensor
+
+**Files**: `src/engine/colorRegistry.ts`, `src/engine/components/LegoColorSensor.ts`,
+`src/engine/components/SimpleRobot.ts`, `src/interpreter/BlockInterpreter.ts`,
+`src/blocks/definitions/robotBlocks.ts`, `src/store/simulationStore.ts`,
+`src/components/SensorPanel.tsx`, `tests/engine/legoColorSensor.test.ts`.
+
+The boat model visually carries a SPIKE **colour** sensor (part 37308), so the
+sensor became functional. Design mirrors `LegoDistanceSensor` (a ray, stepped
+after `world.step()`), but answers "*what colour* is the thing I hit?":
+
+- **`colorRegistry`** — module-level `Map<colliderHandle, DetectableColor>`
+  (`RED|GREEN|BLUE|YELLOW|WHITE|BLACK`). Detectable scene objects (the crocodile,
+  future colour tiles) register on creation, unregister on dispose. Keyed on the
+  Rapier collider handle the ray already returns — no extra geometry queries.
+- **`LegoColorSensor`** — casts the same front ray with a deliberately **short
+  range (50 cm** vs the distance sensor's 200) like the real part, and caches
+  `colorForCollider(hit)`. Pure physics + state (no mesh — the model shows the
+  part), so it tests headless.
+- **`SimpleRobot`** — carries both sensors on the same front origin
+  (`hasColorSensor = true`); `step()` moves both ray origins.
+- **Block `sensor_sees_color`** — Boolean reporter *"¿Ve el color 🔴/🟢/…?"*
+  that plugs into `si… entonces` / `repetir hasta que`. Chosen over a
+  "detected colour" value reporter: no colour-comparison blocks needed, matches
+  the SPIKE app, and keeps the CT signal (a condition) in one block. Interpreter
+  case returns `colorSensor?.sees(code) ? 1 : 0`.
+- **Data-driven UI** — `buildRobotToolbox(includeSensor, includeColorSensor)`
+  builds the Sensores category per sensor kind; `simulationStore.hasColorSensor`
+  gates it (same pattern as `hasSensor`). `_tick` publishes
+  `detectedColor` (identity-guarded, render-cheap) and `SensorPanel` shows a
+  swatch + name readout.
+- **Boat level** — the crocodile's collider registers as `GREEN`, so the level is
+  now solvable two ways: `Distancia frontal < 25` **or** `¿Ve el color verde?`
+  (range 50 cm ≥ danger zone 25 cm, so the colour path also arms the alarm in
+  time). A hint advertises the colour route.
+
+Rapier caveat (encoded in the test): new colliders only appear in scene queries
+(`castRay`) after the next `world.step()` — in the engine sensors always step
+right after the world, so this is only visible headless.
+
+---
+
 ## Model-driven sensor UI
 
 **Files**: `src/store/simulationStore.ts`, `src/engine/renderer/SimulatorCanvas.tsx`,
@@ -345,8 +466,14 @@ has none.
   with/without the "Sensores" label + `sensor_distance` block. `ROBOT_TOOLBOX`
   is kept (`= buildRobotToolbox(true)`) for compatibility.
 - `BlocklyWorkspace` injects with the current `hasSensor` and calls
-  `workspace.updateToolbox()` in a `[hasSensor]` effect when it changes — it
-  does **not** re-inject (that would dispose the kid's blocks).
+  `workspace.updateToolbox()` in a `[hasSensor, hasColorSensor]` effect when it
+  changes — it does **not** re-inject (that would dispose the kid's blocks).
+  **Gotcha:** the `ContinuousToolbox` plugin builds its single all-categories
+  flyout once in `init()` and only refreshes it on block create/delete events,
+  so a category added later by `updateToolbox` (Sensores arriving after the
+  engine resolves) renders no blocks. The effect therefore also calls
+  `toolbox.refreshSelection()`, which re-shows the flyout from the updated
+  contents.
 - `SimulationEngine._tick` only publishes `sensor.getValue()` to the store when
   `robot.hasSensor`.
 
@@ -418,6 +545,102 @@ The script writes `public/ldraw/models/packed/<id>.mpd` for each entry in `LDRAW
 | `tire`  | `parts/3482.dat` | `LegoMotor` (tyre — mounts on 3483) |
 
 Adding a part = append to `LDRAW_CATALOG`, run `pnpm run pack-ldraw`, commit the new `.mpd`.
+
+### Adding a source model (props & imported robots)
+
+Whole models — a crocodile, a boat, an imported robot — live in
+`public/ldraw/models/source/*.ldr` (Studio 2.0 / LDraw exports). Unlike parts,
+**they are not listed in a catalog**: `packLDrawParts.ts` auto-discovers every
+file in `source/` (`discoverSourceModels()`) and packs each to
+`packed/<basename>.mpd`. So the full workflow to add one is:
+
+1. Export/save the model as an `.ldr` and drop it in `public/ldraw/models/source/`.
+   Every part it references must exist in the LDraw library (below), or packing
+   fails for that file (the others still pack).
+2. Pack (needs the raw LDraw library — it is *not* in the repo, see above):
+
+   ```bash
+   # Always pack with the project's library — it carries the Studio `-bl`
+   # parts copied in for boat/cave_car (see the gotcha below). The pristine
+   # copy in ~/Downloads/ldraw does NOT, and packing with it silently breaks
+   # those models (boat.mpd loses 67351-bl and fails to render).
+   LDRAW_LIB_PATH=/Users/sysadmin/Desktop/projects/capstone/draw-library pnpm run pack-ldraw
+   ```
+
+   The run reports `packing N source model(s)` and writes `packed/<name>.mpd`.
+3. **Commit the `.mpd`** (not the source-library, not `source/` is optional but
+   nice to keep). Teammates and CI use the committed `.mpd`; they never need the
+   ~170 MB library.
+
+Using a packed model in code:
+
+- **As a decorative scene prop** (e.g. the crocodile): `loadDecorModel('/ldraw/models/packed/<name>.mpd')`
+  in a level's `setup()` — origin-centred, `null`-safe if unpacked. See
+  *Reactive challenges & the boat/crocodile level*.
+- **As repeated scenery** (trees, rocks, reeds…): `placeProps(scene, url, placements, opts)`
+  (`src/engine/ldraw/decorProps.ts`) — loads once, clones per placement, returns
+  a `{ dispose() }` handle. See *Scene decoration & ambient animation*.
+- **As the robot's visual** (e.g. the boat): `SimpleRobot.attachImportedVisual(group)`
+  (exposed to levels via `ChallengeEngine.robot`), or the whole-robot env-var path
+  `VITE_IMPORTED_ROBOT_MODEL=/ldraw/models/packed/<name>.mpd` → `DynamicRobot`.
+
+Common tweaks (LDraw models load upside-down and at native size):
+`loadDecorModel` flips 180° around X by default (`flip`) and can size-fit
+(`fitLongest`, world units); `VITE_IMPORTED_ROBOT_FLIP` / `..._LIFT_Y` do the same
+for env-var robots. Adjust orientation with a Y-rotation if the model faces the
+wrong way.
+
+**Gotcha — Studio custom parts (`-bl` suffix).** Studio 2.0 exports may reference
+parts that only exist in Studio's own library
+(`/Applications/Studio 2.0/ldraw/UnOfficial/parts/*-bl.dat`), not the standard
+LDraw library. The packer only searches `parts/` + `p/`, so those references are
+left **un-inlined**, and `LDrawLoader` then 404s trying to fetch them and the
+whole model fails to render (symptom: the model silently doesn't appear, while
+others load fine). Diagnose by scanning the packed `.mpd` for `type-1` refs whose
+target isn't a `0 FILE` in the same file. Fix by copying the missing
+`UnOfficial/parts/<id>.dat` into the pack library's `parts/` and re-packing (their
+sub-primitives are usually already standard). This is how `boat`'s `67351-bl` hub
+was resolved. Separately, to drop a coiled **cable** from the model, edit the
+source `.ldr` to reference the plain part instead of the `…c01` "with cable"
+assembly — `boat` swaps `47592c01-bl` (LED Matrix with Coiled Cable) for `47592`
+(matrix only), same idea as the taxi using plain parts. *(cave_car still has one
+unresolved printed part, `3626cpb1354.dat`; it's `comingSoon` so not yet fixed.)*
+
+### Scene decoration & ambient animation
+
+Levels dress their scenes with two mechanisms, both purely visual (no Rapier
+bodies, invisible to the distance/colour sensors):
+
+- **LDraw decor props** — small hand-written `.ldr` compositions in
+  `source/` (`tree-pine`, `tree-palm`, `rock-big`, `reeds`, `flowers`), packed
+  like any source model. `placeProps(scene, url, placements, opts)`
+  (`src/engine/ldraw/decorProps.ts`) loads the `.mpd` once via `loadDecorModel`
+  (so it inherits `flip`/`fitLongest`/`bottomY` normalization, default
+  `bottomY: 0` to rest on the floor) and clones it per placement
+  (`{x, z, y?, rotationY?, scale?}`). Clones share geometry/materials, so the
+  returned handle's `dispose()` removes all instances and frees GPU resources
+  once via the original. Like `loadDecorModel` it never throws — unpacked model
+  or headless tests (no LDraw manager) simply place nothing. Each instance is
+  wrapped in an outer `Group` so per-placement rotation/scale never composes
+  with the loader's internal flip.
+- **`ChallengeHandle.ambient(dt)`** — optional hook called by
+  `SimulationEngine._tick` once per rendered frame *regardless of run state*
+  (unlike `update`, which is gated on `running`). Used by the boat level to
+  animate the river: each frame the water plane's vertices are displaced by
+  three overlapping sines AND recoloured per-vertex from their wave height
+  (trough `#1565C0` → crest `#42A5F5` → foam `#90CAF9`, `vertexColors` +
+  `flatShading`, no `computeVertexNormals`). Height-based colouring is what
+  makes the waves read from any camera angle — pure lighting contrast on the
+  facets was invisible, and letting troughs dip below the deep slab produced
+  ugly hard-edged dark patches (the trough floor must stay above the slab:
+  `WATER_BASE_Y − WAVE_AMP > 0.01`). Ambient must never touch gameplay or
+  physics.
+
+The boat level's river is three procedural meshes (solid deep-water slab under
+a translucent animated wave plane, flanked by two sand-bank boxes) plus banks
+of palms/reeds/rocks/flowers via `placeProps`; challenge-01 scatters
+pines/rocks/flowers around the field perimeter. All positions keep clear of the
+robot's driving lane.
 
 ### Vendored packer
 

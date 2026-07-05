@@ -36,8 +36,9 @@ Motores · Luz · Sonido · Sensores · Tiempo** (+ Control y Matemáticas que a
 | Motores | `motor_run_for`, `motor_start`, `motor_stop_port`, `motor_position` (reporter) |
 | Luz | `light_display_matrix` (**editor 3×3 dibujable**), `light_display_image` (presets), `light_set_pixel`, `light_off` |
 | Sonido | `sound_beep`, `sound_play_note` (Do–Si), `sound_stop` |
-| Operadores | `operator_random` (en Matemáticas) |
-| Control | `controls_if` ampliado con rama `else`/`else-if` |
+| Operadores | `operator_random`, `logic_operation` (y/o), `logic_negate` (no), `logic_boolean` (en Matemáticas) |
+| Control | `controls_if` con `else`/`else-if` + **trío SPIKE**: `control_forever` ("por siempre", sin `nextStatement` como en SPIKE), `control_wait_until` ("esperar hasta que"), `control_stop` ("parar el programa" — llama a `interpreter.stop()`) |
+| Sensores | `sensor_distance`, `sensor_sees_color` ("¿Ve el color …?", booleano, círculos de color) |
 
 Subsistemas nuevos:
 - **Hub 3×3**: `IHub` → `HubLights` → `simulationStore.hubMatrix` → `HubMatrixPanel`
@@ -53,8 +54,16 @@ Alineación visual:
   en Motores, flechas ←/→ en "Girar".
 - ✅ **Glifo líder dentro de cada bloque de acción** (como SPIKE): `blockIcon()`
   mete un `field_image` al inicio de `message0`. Glifos propios por familia
-  (evento/movimiento/motor/luz/sonido/tiempo) en `blockIcons.ts`. Reporters y
-  operadores **sin** glifo. Verificado en navegador a 2×.
+  (evento/movimiento/motor/luz/sonido/tiempo/**sensor**) en `blockIcons.ts`.
+  Operadores **sin** glifo; los reporters de **sensor sí llevan glifo** — en el
+  sim de referencia los `flippersensors_*` llevan `SensorLight.svg` dentro
+  (glifo propio `ICON_SENSOR`, no copiado). Verificado en navegador a 2×.
+- ✅ **Sensores estilo SPIKE** (2026-07): categoría y bloques de sensor en
+  **cian `#3FCCF1`** (color de sensores del sim de referencia; antes amarillo).
+  `sensor_sees_color` ("¿Ve el color …?", output `Boolean`) usa un selector de
+  **círculos de color reales** (`colorCircle()` en `blockIcons.ts` +
+  `imageOption`, mismos hex que el chip del `SensorPanel`) — equivalente sin
+  plugins nuevos al `field_grid_dropdown` de la referencia.
 - ❌ **Iconos redondos por categoría** (riel): prototipado y **revertido** por
   decisión de la usuaria — en SPIKE los iconos van dentro de las piezas. El riel
   conserva la barra fina de color (`index.css`).
@@ -118,11 +127,12 @@ pnpm dlx playwright@latest install chromium
    iconos dentro de las piezas, no en el riel). Ver "Alineación visual".
 2. ~~Iconos en más bloques~~ — **HECHO**: glifo líder en todos los bloques de
    acción (movimiento, motores, luz, sonido, eventos, tiempo) vía `blockIcon()`.
-3. **Sensor de Color** — el bloque grande que falta de Essential. Requiere:
-   objetos coloreados en la escena (extender `Baseplate.ts` o ladrillos de color)
-   + un `LegoColorSensor` (ray-cast que devuelve el color del material) + bloques
-   `sensor_color` / `is_color` / `reflectivity`. Ya existe la clave LDraw
-   `SENSOR_COLOR` y el rol `sensor_color` en el parser. Habilita el "Bar Graph".
+3. ~~Sensor de Color~~ — **HECHO** (2026-07, ver `architecture.md` §Colour
+   sensor): `LegoColorSensor` (ray-cast + `colorRegistry` collider→color) +
+   bloque booleano `sensor_sees_color` con círculos de color; el cocodrilo del
+   nivel del bote se registra como `GREEN`. Pendiente de esa línea: **props de
+   color arrastrables** (tiles) para un nivel dedicado, y `reflectivity` /
+   "Bar Graph" si se quiere ir más lejos.
 4. **Movimiento avanzado**: `set_movement_speed`, `start_move` (continuo), `steer`.
 5. **Motor de eventos concurrentes** (Tier C): hats disparados por condición
    (`when_color`, `when_pressed`, `when_tilted`) con pilas concurrentes —

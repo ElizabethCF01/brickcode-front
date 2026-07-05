@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import RAPIER from '@dimforge/rapier3d-compat'
 import { LegoMotor } from './LegoMotor'
 import { LegoDistanceSensor } from './LegoDistanceSensor'
+import { LegoColorSensor } from './LegoColorSensor'
 import type { LDrawLibraryManager } from '../ldraw/LDrawLibraryManager'
 import type { IMotor, IMotorPort, SimpleRobot as ISimpleRobot } from '../../interpreter/BlockInterpreter'
 
@@ -49,6 +50,13 @@ export interface SimpleRobotConfig {
   position: THREE.Vector3
   /** Optional LDraw manager — when present, hub/motors/wheels/sensor use LDraw clones. */
   ldraw?: LDrawLibraryManager
+  /**
+   * Which sensors this rig carries. Omitted = both (backwards compatible).
+   * Both sensor objects are always constructed (the interpreter interface
+   * requires `sensor`); these flags drive `hasSensor`/`hasColorSensor`, which
+   * gate the toolbox blocks, panels, and per-frame publishing.
+   */
+  sensors?: { distance?: boolean; color?: boolean }
 }
 
 /**
@@ -61,8 +69,11 @@ export interface SimpleRobotConfig {
 export class SimpleRobot implements ISimpleRobot {
   readonly hubBody:         RAPIER.RigidBody
   readonly sensor:          LegoDistanceSensor
-  // Procedural rig always carries a front distance sensor.
-  readonly hasSensor:       boolean = true
+  readonly colorSensor:     LegoColorSensor
+  // Sensor kit is level-configurable (config.sensors); defaults to both. Both
+  // sensors share the front-face ray origin, like the SPIKE combo mount.
+  readonly hasSensor:       boolean
+  readonly hasColorSensor:  boolean
   readonly wheelBaseWU:     number = WHEEL_BASE_WU
   readonly wheelRadiusWU:   number = WHEEL_RADIUS
   // Procedural rig: idealised geometry, no decorative casters → kinematic
@@ -99,6 +110,8 @@ export class SimpleRobot implements ISimpleRobot {
     this.world           = world
     this.scene           = scene
     this.initialPosition = config.position.clone()
+    this.hasSensor       = config.sensors?.distance ?? true
+    this.hasColorSensor  = config.sensors?.color ?? true
     const p              = config.position
 
     // ── Hub dynamic body + compound collider (hub box + motor boxes + sensor box) ─
@@ -278,6 +291,15 @@ export class SimpleRobot implements ISimpleRobot {
       },
       scene,
     )
+    // A robot configured without the distance sensor shouldn't display its part.
+    if (!this.hasSensor) this.sensor.setBodyVisible(false)
+
+    // ── Colour sensor (same front origin; short range like the real part) ────
+    this.colorSensor = new LegoColorSensor({
+      position:  new THREE.Vector3(p.x, p.y + SENSOR_LOCAL.y, p.z + SENSOR_LOCAL.z),
+      direction: new THREE.Vector3(0, 0, -1),
+      maxRange:  50,
+    })
   }
 
   /**
@@ -344,6 +366,18 @@ export class SimpleRobot implements ISimpleRobot {
     this.hubGroup.add(group)
   }
 
+  /**
+   * Show/hide the procedural robot visuals (hub, motors, wheels, sensor body)
+   * without touching physics — used by levels that replace the robot's look with
+   * a decorative model (e.g. the boat). The distance-sensor ray keeps firing.
+   */
+  setVisualHidden(hidden: boolean): void {
+    this.hubGroup.children.forEach((child) => { child.visible = !hidden })
+    this.leftRawMotor.setVisualVisible(!hidden)
+    this.rightRawMotor.setVisualVisible(!hidden)
+    this.sensor.setBodyVisible(!hidden)
+  }
+
   /** Current world-space position of the hub centre (world units). */
   getPosition(): { x: number; y: number; z: number } {
     const t = this.hubBody.translation()
@@ -361,11 +395,12 @@ export class SimpleRobot implements ISimpleRobot {
     this.hubGroup.position.set(t.x, t.y, t.z)
     this.hubGroup.quaternion.set(r.x, r.y, r.z, r.w)
 
-    // Move sensor origin to the (rotated) hub-local sensor offset.
+    // Move both sensor origins to the (rotated) hub-local sensor offset.
     this._sensorWorld.set(SENSOR_LOCAL.x, SENSOR_LOCAL.y, SENSOR_LOCAL.z)
       .applyQuaternion(this.hubGroup.quaternion)
       .add(this.hubGroup.position)
     this.sensor.setWorldPosition(this._sensorWorld)
+    this.colorSensor.setWorldPosition(this._sensorWorld)
   }
 
   /** Reposition the robot at its initial pose, zero velocities, brake motors. */
@@ -400,6 +435,7 @@ export class SimpleRobot implements ISimpleRobot {
 
   dispose(): void {
     this.sensor.dispose()
+    this.colorSensor.dispose()
     this.leftRawMotor.dispose()
     this.rightRawMotor.dispose()
     this.world.removeRigidBody(this.leftWheelBody)

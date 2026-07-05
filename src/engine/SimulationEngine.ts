@@ -17,13 +17,14 @@ type RuntimeRobot = ISimpleRobot & {
   reset(): void
   dispose(): void
   sensor: ISimpleRobot['sensor'] & { step?(world: RAPIER.World): void }
+  colorSensor?: NonNullable<ISimpleRobot['colorSensor']> & { step?(world: RAPIER.World): void }
 }
 import { BlockInterpreter } from '../interpreter/BlockInterpreter'
 import { HubLights } from './HubLights'
 import { HubSound } from './HubSound'
 import { useSimulationStore } from '../store/simulationStore'
 import { getRecorder } from '../recording/recordingSingleton'
-import type { ChallengeEngine } from '../challenges/types'
+import type { ChallengeEngine, ChallengeHandle, ChallengeSetupResult, RobotKind } from '../challenges/types'
 
 // Single RAPIER WASM init — calling RAPIER.init() twice under React StrictMode
 // creates two World instances that alias the same WASM heap, triggering the
@@ -48,7 +49,7 @@ export class SimulationEngine implements ChallengeEngine {
 
   private _rafId    = 0
   private _lastTime = 0
-  private _challengeDispose: (() => void) | null = null
+  private _challenge: ChallengeHandle | null = null
 
   // Physics-step accumulator. world.step() advances simulation by a fixed
   // PHYSICS_DT regardless of how often rAF fires; we accumulate real elapsed
@@ -78,7 +79,11 @@ export class SimulationEngine implements ChallengeEngine {
 
   // ── Factory ────────────────────────────────────────────────────────────────
 
-  static async create(canvas: HTMLCanvasElement): Promise<SimulationEngine> {
+  static async create(
+    canvas: HTMLCanvasElement,
+    robotKind: RobotKind = 'imported',
+    sensors?: { distance?: boolean; color?: boolean },
+  ): Promise<SimulationEngine> {
     await ensureRapierInit()
     const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 })
 
@@ -112,9 +117,13 @@ export class SimulationEngine implements ChallengeEngine {
     //                                  If only ROBOT_MODEL is set and points at /packed/<x>.mpd,
     //                                  we derive ROBOT_SOURCE as /source/<x>.ldr.
     //   VITE_IMPORTED_ROBOT_FLIP    — "true" to apply a 180° X-flip (Studio Y-down workaround)
+    // Levels that need a distance sensor request `robot: 'simple'`; the
+    // procedural SimpleRobot always carries a front sensor, whereas the env-var
+    // import (e.g. the taxi) may be motors-only. Skipping the import branch
+    // forces the SimpleRobot fallback below.
     let robot: RuntimeRobot | null = null
     const packedUrl = import.meta.env.VITE_IMPORTED_ROBOT_MODEL as string | undefined
-    if (packedUrl && ldraw) {
+    if (robotKind !== 'simple' && packedUrl && ldraw) {
       const sourceUrl = (import.meta.env.VITE_IMPORTED_ROBOT_SOURCE as string | undefined)
         ?? packedUrl.replace('/packed/', '/source/').replace(/\.mpd$/i, '.ldr')
       const flip = String(import.meta.env.VITE_IMPORTED_ROBOT_FLIP ?? '').toLowerCase() === 'true'
@@ -153,7 +162,7 @@ export class SimulationEngine implements ChallengeEngine {
 
     if (!robot) {
       robot = new SimpleRobot(
-        { position: initialPosition, ldraw },
+        { position: initialPosition, ldraw, sensors },
         world,
         refs.scene,
       )
@@ -164,10 +173,20 @@ export class SimulationEngine implements ChallengeEngine {
 
   // ── Challenge management ───────────────────────────────────────────────────
 
-  /** Call a level's setup(engine) via this method to track the teardown. */
-  loadChallenge(setup: (engine: ChallengeEngine) => () => void): void {
-    this._challengeDispose?.()
-    this._challengeDispose = setup(this)
+  /**
+   * Run a level's setup(engine) and keep the returned handle so the RAF loop can
+   * animate/reset a scripted scene and dispose it later. `setup` may return a
+   * bare dispose function (static scenes like challenge-01) or a full handle.
+   */
+  loadChallenge(setup: (engine: ChallengeEngine) => ChallengeSetupResult): void {
+    this._challenge?.dispose()
+    const result = setup(this)
+    this._challenge = typeof result === 'function' ? { dispose: result } : result
+  }
+
+  /** Restore the scripted scene to its start state (run-start / Reset). */
+  resetChallenge(): void {
+    this._challenge?.reset?.()
   }
 
   // ── RAF loop ───────────────────────────────────────────────────────────────
@@ -194,6 +213,7 @@ export class SimulationEngine implements ChallengeEngine {
     this.robot.reset()
     this.hub.clearDisplay()
     this.sound.stop()
+    this._challenge?.reset?.()
   }
 
   /** Notify the renderer of a canvas size change. */
@@ -204,7 +224,7 @@ export class SimulationEngine implements ChallengeEngine {
   /** Free all GPU and physics resources. */
   dispose(): void {
     this.stopRAF()
-    this._challengeDispose?.()
+    this._challenge?.dispose()
     this.robot.dispose()
     this.sound.dispose()
     this._refs.renderer.dispose()
@@ -216,19 +236,34 @@ export class SimulationEngine implements ChallengeEngine {
     // Decouple physics rate from rAF rate. Each world.step() advances
     // simulation by exactly PHYSICS_DT regardless of display refresh rate;
     // we accumulate real elapsed time and run as many steps as needed.
+    // Scripted challenge scenes (e.g. an approaching crocodile) advance only
+    // while the student's program is running, so nothing creeps forward while
+    // they are still dragging blocks.
+    const running = useSimulationStore.getState().status === 'running'
+
     this._physicsAccumulator += Math.min(rafDt, SimulationEngine.MAX_FRAME_DT)
     while (this._physicsAccumulator >= SimulationEngine.PHYSICS_DT) {
       this.world.step()
       this.robot.step(SimulationEngine.PHYSICS_DT)
       if (this.robot.sensor.step) this.robot.sensor.step(this.world)
+      this.robot.colorSensor?.step?.(this.world)
+      if (running) this._challenge?.update?.(SimulationEngine.PHYSICS_DT)
       this._physicsAccumulator -= SimulationEngine.PHYSICS_DT
     }
+
+    // Cosmetic scene animation (water, ambience) runs every frame, even while
+    // the student is editing blocks — only gameplay (update) is gated above.
+    this._challenge?.ambient?.(Math.min(rafDt, SimulationEngine.MAX_FRAME_DT))
 
     // Render once per rAF, regardless of how many physics steps ran.
     // Only publish a sensor reading when the robot actually has a sensor —
     // motors-only robots would otherwise feed the panel a meaningless value.
     if (this.robot.hasSensor) {
       useSimulationStore.getState().setSensorValue('front', this.robot.sensor.getValue())
+    }
+    if (this.robot.hasColorSensor && this.robot.colorSensor) {
+      // setDetectedColor no-ops on identical values, so this is render-cheap.
+      useSimulationStore.getState().setDetectedColor(this.robot.colorSensor.getColor())
     }
     this._refs.controls.update()
     this._refs.renderer.render(this._refs.scene, this._refs.camera)
