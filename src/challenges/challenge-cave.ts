@@ -322,7 +322,7 @@ export const challengeCave = {
       const color = ambientLight.color.clone(); const intensity = ambientLight.intensity
       envRestore.push(() => { ambientLight.color.copy(color); ambientLight.intensity = intensity })
       ambientLight.color.set(0xffd9b3)
-      ambientLight.intensity = 0.12
+      ambientLight.intensity = 0.2
     }
 
     const hemiLight = (scene.getObjectByName('hemi-light')
@@ -335,7 +335,7 @@ export const challengeCave = {
       })
       hemiLight.color.set(0x3a2a5d)
       hemiLight.groundColor.set(0x1c1428)
-      hemiLight.intensity = 0.3
+      hemiLight.intensity = 0.45
     }
 
     const sunLight = (scene.getObjectByName('sun-light')
@@ -429,7 +429,10 @@ export const challengeCave = {
     for (const [x, z] of batSpots) {
       const bat = new THREE.Group()
       bat.position.set(x, BAT_HANG_Y, z)
-      bat.rotation.x = Math.PI          // hang head-down (asleep)
+      // rotation.z = π rolls the upright model 180° about its own facing axis:
+      // head-down (asleep) AND still facing +Z — toward the car, which enters
+      // from +Z. (rotation.x = π would hang it head-down but facing −Z, away.)
+      bat.rotation.z = Math.PI
       root.add(bat)
       bats.push(bat)
     }
@@ -700,7 +703,8 @@ export const challengeCave = {
         s.crystalMat.emissiveIntensity = 1.2 + 0.5 * pulse
         s.crystalLight.intensity = 1.1 + 0.4 * pulse
 
-        s.bats.forEach((bat, i) => { bat.rotation.z = 0.12 * Math.sin(s.t * 1.8 + i * 1.7) })
+        // Gentle nod on X (the roll axis Z now holds the head-down orientation).
+        s.bats.forEach((bat, i) => { bat.rotation.x = 0.12 * Math.sin(s.t * 1.8 + i * 1.7) })
       },
 
       reset(): void {

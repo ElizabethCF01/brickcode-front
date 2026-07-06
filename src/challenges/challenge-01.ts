@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { placeProps } from '../engine/ldraw/decorProps'
+import { buildSkyDome } from '../engine/renderer/skyDome'
 import type { SimpleRobot } from '../interpreter/BlockInterpreter'
 import type { ChallengeEngine, ChallengeResult, LevelDefinition } from './types'
 
@@ -74,6 +75,11 @@ export const challenge01 = {
     mesh.position.set(0, 0.011, ZONE_CENTER_Z)
     scene.add(mesh)
 
+    // Daytime sky dome. Horizon matches the scene's fog/background (#9fd8f2) so
+    // distant props fade seamlessly into it — no need to touch scene.fog.
+    const sky = buildSkyDome({ sun: { direction: [-10, 18, 6], color: '#fff4d6', size: 7 } })
+    scene.add(sky.group)
+
     // Decorative LEGO props around the field perimeter. Pure visuals (no
     // colliders) and well clear of the robot's straight run at x ≈ 0, z 0→−5.
     const props = [
@@ -99,6 +105,8 @@ export const challenge01 = {
       geo.dispose()
       mat.dispose()
       scene.remove(mesh)
+      scene.remove(sky.group)
+      sky.dispose()
       props.forEach((p) => p.dispose())
     }
   },

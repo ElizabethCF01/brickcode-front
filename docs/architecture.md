@@ -513,6 +513,31 @@ Difficulty 2; `robot: 'simple'`, `sensors: { distance: false, color: false }`
 
 ---
 
+## Sky dome helper (daytime skybox)
+
+**File**: `src/engine/renderer/skyDome.ts`.
+
+`buildSkyDome(opts)` returns `{ group, dispose }`: a procedural daytime "skybox"
+— an inward-facing gradient sphere (horizon → zenith), an optional additive sun
+glow, and deterministic puffy clouds (golden-angle spiral over the upper dome).
+A true cubemap needs 6 external textures, dead on arrival against the app's
+no-external-asset constraint, so the dome is the house style (same trick as the
+cave's inline `buildSky`: `side: BackSide`, `depthWrite:false`, `renderOrder:-1`,
+`fog:false` — paints first, everything renders over it, backdrop stays full-colour
+while props still fade into `scene.fog`).
+
+Used by the two opening levels — **challenge-01** (taxi) and **challenge-boat**.
+Both cameras only orbit the origin (`controls.target ≈ 0`, `maxDistance` 30), so a
+radius-80 dome centred at the origin always contains the camera → **no per-frame
+camera-follow** (unlike the cave car, which drives ~38 WU away and must re-centre
+its dome each frame). Each level adds `sky.group` in `setup()` and calls
+`sky.dispose()` + `scene.remove` in its teardown. Horizon defaults to the scene's
+existing fog/background colour (`#9fd8f2`), so neither level touches `scene.fog`.
+The cave keeps its own bespoke sunset `buildSky` (camera-centred, stars, warm
+gradient) — not folded in, to avoid pre-generalizing a working complex level.
+
+---
+
 ## Colour sensor
 
 **Files**: `src/engine/colorRegistry.ts`, `src/engine/components/LegoColorSensor.ts`,
