@@ -27,9 +27,10 @@ const NOTE_HZ: Record<string, number> = {
   SOL: 392,    LA:  440,   SI: 493.88,
 }
 
-// ── Hub 3×3 light-matrix preset images (row-major, 0–100 brightness) ───────
-// SPIKE Essential's hub carries a 3×3 light matrix. These named patterns back
-// the `light_display_image` dropdown; keys must match the block's options.
+// ── 3×3 light-matrix preset images (row-major, 0–100 brightness) ───────────
+// The 3×3 Color Light Matrix (SPIKE Essential element 47592) is a separate
+// piece connected to the hub, not part of the hub itself. These named patterns
+// back the `light_display_image` dropdown; keys must match the block's options.
 const PRESET_IMAGES: Record<string, number[]> = {
   // Heart: two bumps on top, full middle, point at the bottom.
   CORAZON:  [100,   0, 100, 100, 100, 100,   0, 100,   0],

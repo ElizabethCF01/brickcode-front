@@ -40,4 +40,16 @@ describe('createScene', () => {
     expect(refs.renderer).toBeDefined()
     expect(refs.controls).toBeDefined()
   })
+
+  it('names the global lights so levels can retune them (per-level environments)', async () => {
+    const { createScene } = await import('../../src/engine/renderer/SceneSetup')
+    const canvas = document.createElement('canvas')
+    Object.defineProperty(canvas, 'clientWidth', { value: 800, configurable: true })
+    Object.defineProperty(canvas, 'clientHeight', { value: 600, configurable: true })
+    const refs = createScene(canvas)
+    expect(refs.scene.getObjectByName('ambient-light')).toBeDefined()
+    expect(refs.scene.getObjectByName('hemi-light')).toBeDefined()
+    expect(refs.scene.getObjectByName('sun-light')).toBeDefined()
+    expect(refs.scene.getObjectByName('main-floor')).toBeDefined()
+  })
 })

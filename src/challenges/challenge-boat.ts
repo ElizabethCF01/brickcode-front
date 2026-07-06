@@ -125,6 +125,10 @@ export const challengeBoat = {
   sensors:     { distance: false, color: true },
   // The crocodile decides the outcome, not the end of the kid's program.
   scenarioDecidesEnd: true,
+  // The boat is anchored — driving blocks would only let kids break the scene.
+  hiddenCategories: ['Movimiento', 'Motores'],
+  // Drives the per-level loading screen (see levelAssets).
+  decorModels: [COCO_MODEL, BOAT_MODEL, PALM_MODEL, REED_MODEL, ROCK_MODEL, FLOWER_MODEL],
   hints: [
     'Usa "por siempre" con un "si… entonces" dentro: así el bote vigila sin parar',
     'La condición: "¿Ve el color verde?" — ¡el cocodrilo es verde!',

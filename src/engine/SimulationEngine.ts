@@ -24,7 +24,7 @@ import { HubLights } from './HubLights'
 import { HubSound } from './HubSound'
 import { useSimulationStore } from '../store/simulationStore'
 import { getRecorder } from '../recording/recordingSingleton'
-import type { ChallengeEngine, ChallengeHandle, ChallengeSetupResult, RobotKind } from '../challenges/types'
+import type { ChallengeCameraRig, ChallengeEngine, ChallengeHandle, ChallengeSetupResult, RobotKind } from '../challenges/types'
 
 // Single RAPIER WASM init — calling RAPIER.init() twice under React StrictMode
 // creates two World instances that alias the same WASM heap, triggering the
@@ -59,6 +59,11 @@ export class SimulationEngine implements ChallengeEngine {
   private _physicsAccumulator = 0
   private static readonly PHYSICS_DT      = 1 / 60  // seconds — Rapier default
   private static readonly MAX_FRAME_DT    = 0.25    // cap when tab regains focus
+
+  /** Camera + orbit target for levels that need to follow the robot. */
+  get cameraRig(): ChallengeCameraRig {
+    return { camera: this._refs.camera, controls: this._refs.controls }
+  }
 
   private constructor(world: RAPIER.World, refs: SceneRefs, robot: RuntimeRobot) {
     this.world       = world

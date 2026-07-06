@@ -1,5 +1,6 @@
 import { challenge01 } from './challenge-01'
 import { challengeBoat } from './challenge-boat'
+import { challengeCave } from './challenge-cave'
 import type { Level, LevelDefinition } from './types'
 
 export type { Level, LevelDefinition, LevelMeta, LevelCategory, LevelDifficulty } from './types'
@@ -12,16 +13,7 @@ export type { Level, LevelDefinition, LevelMeta, LevelCategory, LevelDifficulty 
 export const LEVELS: Level[] = [
   challenge01,
   challengeBoat,
-  {
-    id: 'challenge-cave',
-    title: '🔦 El coche de la cueva',
-    description:
-      'El coche recorre una cueva oscura. Programa las luces del hub para iluminar el camino en el momento justo.',
-    difficulty: 2,
-    tags: ['lights'],
-    hints: [],
-    comingSoon: true,
-  },
+  challengeCave,
 ]
 
 /** True when a level can actually be launched (has scene + success logic). */

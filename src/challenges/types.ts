@@ -6,9 +6,9 @@ import type { ChallengeResult } from '../store/challengeStore'
 export type { ChallengeResult }
 
 /**
- * The slice of the robot a level's `setup()` may touch — currently just
- * swapping the procedural visual for an imported LDraw model (e.g. the boat).
- * Optional because not every runtime robot supports it (only `SimpleRobot`).
+ * The slice of the robot a level's `setup()` may touch — swapping procedural
+ * visuals for imported LDraw models, hiding them, or placing the rig directly
+ * for scripted scenes. Optional because not every runtime robot supports it.
  */
 export type ChallengeRobot = SimpleRobot & {
   attachImportedVisual?(
@@ -17,6 +17,19 @@ export type ChallengeRobot = SimpleRobot & {
   ): void
   /** Hide the procedural robot visual so a decorative model can stand in for it. */
   setVisualHidden?(hidden: boolean): void
+  /** Directly place the rig for levels whose actor motion is scenario-owned. */
+  setScriptedPose?(position: { x: number; y: number; z: number }): void
+}
+
+/**
+ * Camera access for levels whose course leaves the default framing (e.g. the
+ * cave car drives ~38 WU away). Kept minimal on purpose: `controls` only needs
+ * a mutable `target`, so headless tests and the challenge type surface stay
+ * free of OrbitControls.
+ */
+export interface ChallengeCameraRig {
+  camera: THREE.PerspectiveCamera
+  controls: { target: THREE.Vector3 }
 }
 
 /**
@@ -27,6 +40,8 @@ export interface ChallengeEngine {
   world: RAPIER.World
   scene: THREE.Scene
   robot: ChallengeRobot
+  /** Absent in headless tests — levels must guard every use. */
+  cameraRig?: ChallengeCameraRig
 }
 
 /**
@@ -103,6 +118,18 @@ export interface LevelDefinition extends LevelMeta {
    * the crocodile ever reaches the danger zone.
    */
   scenarioDecidesEnd?: boolean
+  /**
+   * Toolbox category names to hide for this level (e.g. `['Movimiento',
+   * 'Motores']` when the scenario drives the robot itself). Names must match
+   * the categories built by `buildRobotToolbox` / `BlocklyWorkspace`.
+   */
+  hiddenCategories?: string[]
+  /**
+   * Packed decor models (`/ldraw/models/packed/*.mpd`) this level loads at
+   * runtime (props, scene actors, robot skins). Drives the per-level loading
+   * screen (`levelAssets`) so progress reflects what the level really uses.
+   */
+  decorModels?: string[]
   setup: (engine: ChallengeEngine) => ChallengeSetupResult
   evaluate: (robot: SimpleRobot) => ChallengeResult
 }

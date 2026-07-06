@@ -24,7 +24,7 @@ export default function LoadingScreen({ loaded, total, error }: LoadingScreenPro
           </>
         ) : (
           <>
-            <div className="text-sm text-gray-400">Cargando piezas LEGO…</div>
+            <div className="text-sm text-gray-400">Cargando las piezas del nivel…</div>
 
             <div className="w-full h-2 bg-gray-800 rounded overflow-hidden">
               <div

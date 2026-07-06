@@ -239,6 +239,25 @@ All blocks are registered with `registerRobotBlocks()` (call once at startup) an
 6. Push `sensor.getValue()` to `simulationStore.sensorValues['front']`.
 7. Render via Three.js.
 
+---
+
+## Scripted Level Actors
+
+**Files**: `src/engine/components/SimpleRobot.ts`, `src/challenges/challenge-cave.ts`
+
+Some levels use the robot rig as a decorative actor rather than as a student-driven
+motor vehicle. The cave car is the current example: the real SPIKE Essential build
+has no drive motors, and the child only programs the light module timing.
+
+For those levels, `SimpleRobot.setScriptedPose(position)` moves the hub and both
+hidden wheel bodies directly, zeros velocities, brakes the motor joints, and syncs
+the visual group plus sensor origins immediately. This keeps imported/decorative
+models attached through `attachImportedVisual()` aligned with the physics rig while
+avoiding hidden wheel torque, side drift, or pivoting.
+
+`challenge-cave` uses this path to advance the car in a straight line at 18 cm/s
+toward `-Z`; it no longer calls `motors.left/right.setSpeed()` during gameplay.
+
 ### Singletons
 
 `src/engine/engineSingleton.ts` and `src/blocks/workspaceSingleton.ts` expose module-level references so `ControlPanel` can access both without React context or prop drilling.
@@ -299,17 +318,25 @@ without a redeploy.
   (`motors | sensors | lights | sound`) drive the grid's category filter and reuse
   the SPIKE toolbox palette colours.
 - `index.ts` — `LEVELS: Level[]` catalog + `isPlayable()` type guard + `getLevel(id)`.
-  `challenge01` is entry 1; boat/cocodrilo and cave-car are `comingSoon` metadata
-  placeholders (visible, not launchable) until their level files land.
+  All three entries are playable: `challenge01`, `challengeBoat`, `challengeCave`
+  (`comingSoon` metadata placeholders remain supported for future levels).
 - `challengeStore` — replaced the unused narrow `Challenge`/`setChallenge` with
   `activeLevel: LevelDefinition | null` + `setActiveLevel`. **Single source of
   truth**: `SimulatorCanvas`, `ControlPanel`, and `ChallengePanel` all read the
   active level from the store (no more direct `challenge01` imports).
-- `SimulatorApp.SimulatorReady` gates on `activeLevel`: after LDraw preload it
-  shows `LevelSelect`; selecting a level sets the store and mounts `App`; the
-  "← Niveles" button (`App` → `ControlPanel` `onBackToLevels`) clears it. Because
-  `App` unmounts on the way back, the next pick rebuilds the engine + scene fresh
-  in `SimulatorCanvas` (which binds `activeLevel.setup`).
+- `SimulatorApp.SimulatorReady` gates on `activeLevel`: `LevelSelect` shows
+  **immediately** (no upfront preload); selecting a level sets the store and
+  mounts `App` behind a **per-level `LevelAssetsGate`**. The gate loads exactly
+  what the level uses — `levelAssets(level)` = the SimpleRobot part kit
+  (5 catalog parts; always included because the imported-robot path falls back
+  to SimpleRobot and `getPart` throws on cache misses) + the imported robot's
+  packed model/source (env) + the level's `decorModels` — so the progress bar
+  is honest instead of the old fixed 11-part preload. Parts load through a
+  shared `LDrawLibraryManager.preloadParts` (cached keys complete instantly on
+  level switches); models are warmed into the browser HTTP cache with `fetch`.
+  The "← Niveles" button (`App` → `ControlPanel` `onBackToLevels`) clears the
+  level. Because `App` unmounts on the way back, the next pick rebuilds the
+  engine + scene fresh in `SimulatorCanvas` (which binds `activeLevel.setup`).
 - **Completion** (`completion.ts`) — the ✅ badge is backed by a `localStorage`
   set (`brickcode.completedLevels`), written in `ControlPanel` when `evaluate()`
   succeeds. This mirrors the authoritative `challenge_evaluated {success:true}`
@@ -384,14 +411,105 @@ globs every file in `models/source/`). `loadDecorModel(url)`
 (`src/engine/ldraw/loadDecorModel.ts`) loads a packed `.mpd` as an origin-centred,
 optionally size-fitted scene prop, returning `null` (never throwing) if the model
 is absent. The crocodile swaps its proc mesh for `coco.mpd` inside the wrapper
-group; the boat calls `SimpleRobot.attachImportedVisual(boat.mpd)` (exposed to
-levels via `ChallengeEngine.robot`), which hides the hub/wheels and mounts the
-boat while the sensor ray keeps firing. If a model isn't packed, the proc croc /
-SimpleRobot hub stay.
+group; the boat calls `SimpleRobot.setVisualHidden(true)` and drops `boat.mpd`
+into the scene as a **static prop** standing in for the hidden (stationary) robot
+while the sensor ray keeps firing. (`attachImportedVisual` — mounting a model on
+the moving robot — sat unused until the cave level, below.) If a model isn't
+packed, the proc croc / SimpleRobot hub stay.
 
-*Follow-up*: the toolbox still shows Movimiento for this level (SimpleRobot can
-drive), which breaks the "stationary boat" fiction — hiding categories per level
-needs the capability model discussed for non-mobile robots.
+**Per-level toolbox hiding** (`LevelDefinition.hiddenCategories`, resolves the old
+follow-up about Movimiento showing on the stationary boat): a level lists toolbox
+category names to hide (boat and cave: `['Movimiento', 'Motores']`).
+`filterToolboxCategories(def, hidden)` (`robotBlocks.ts`) filters the **full**
+toolbox (robot categories + Control/Matemáticas) and `BlocklyWorkspace` threads
+`activeLevel?.hiddenCategories` from `challengeStore` into both the initial
+inject and the `updateToolbox` effect.
+
+---
+
+## Cave level (challenge-cave): auto-drive, timing choreography, per-level environment
+
+**Files**: `src/challenges/challenge-cave.ts`, `src/challenges/types.ts`,
+`src/engine/SimulationEngine.ts`, `src/engine/renderer/SceneSetup.ts`,
+`tests/challenges/challengeCave.test.ts`.
+
+Level 3 inverts the boat's trick: the **robot itself is the moving actor**. The
+level drives it (the kid has no movement blocks) and the kid programs only the
+front light module connected to the hub — ON in the dark stretches, OFF beside the sleeping bats. Like the
+real SPIKE Essential cave car, the build has **no sensors at all**, so this is
+a **timing level**: the kid choreographs the light with `wait_seconds` blocks,
+guided by what they can see coming (the dark mouth, the blue crystal glow).
+Difficulty 2; `robot: 'simple'`, `sensors: { distance: false, color: false }`
+(no Sensores category at all), `scenarioDecidesEnd: true`,
+`hiddenCategories: ['Movimiento', 'Motores']`, tags `['lights']`.
+
+1. **Level-driven robot**: `update(dt)` advances the car with
+   `SimpleRobot.setScriptedPose()` at 18 cm/s along `-Z`, keeping the hidden
+   physics rig aligned under `cave_car.mpd` without applying wheel torque. This
+   matches the motorless real kit and prevents the decorative car from spinning
+   around the hidden rear wheels. `reset()` calls **`robot.reset()` directly** —
+   never `engine.resetRobot()`, which calls back into `challenge.reset()` and
+   would recurse. It also zeroes the hub matrix state (`setHubMatrix`), otherwise
+   a light left on from the previous run passes the first dark zone for free
+   (run-start only calls `resetChallenge()`, not `resetRobot()`).
+
+2. **Timing windows** (18 cm/s from z = 0): light must be ON before ~4.4 s
+   (DARK_A at z ∈ [−8, −13]), OFF between ~7.2–10.8 s (bats at [−19.5, −24.5]),
+   ON again between ~13.6–17.2 s (DARK_B at [−31, −36]); exit at z = −38
+   (~21 s). Each toggle window is ~3.6 s — generous for kids; the hint gives a
+   working rhythm (enciende → espera 8 → apaga → espera 7 → enciende). All cave
+   geometry is visual-only — no colliders anywhere on the course. *(An earlier
+   sensor-based design used drive-through `setSensor(true)` colour-curtain
+   colliders; scrapped when the level was aligned with the sensorless real kit.
+   The mechanism itself — rays hit Rapier sensor colliders unless
+   `QueryFilterFlags.EXCLUDE_SENSORS` is passed; contacts ignore them — remains
+   pinned by a test in `legoColorSensor.test.ts` for future levels.)*
+
+3. **Verdict latching** (boat pattern): in a dark zone with the hub matrix unlit →
+   crash (fail); in the bat zone lit → bats wake (fail); past `EXIT_Z` → success.
+   All latch `active.result`, stop the motors and `requestAutoStop()`;
+   `evaluate()` returns the latch.
+
+4. **Per-level environment (mutate + record + restore)**: `SceneSetup` has no
+   per-level hook, so the level mutates the shared scene in `setup()` — dusk
+   background/fog, dimmed warm lights — and records an **undo closure per
+   mutation** (`envRestore`), all replayed in `dispose()`. The global lights now
+   carry `.name` tags (`ambient-light`, `hemi-light`, `sun-light`, plus
+   `main-floor`/`main-grid`) so levels look them up with `getObjectByName`
+   (instanceof fallback kept). Sky dome (per-vertex gradient sphere, `BackSide`,
+   `depthWrite:false`, camera-centred each frame), stars, sun glow, fireflies,
+   crystals and bats are all children of one `root` group → one `scene.remove`.
+   Verified by StrictMode's double mount and by returning to level select
+   (`challenge-01` must come back in daylight).
+
+5. **`ChallengeEngine.cameraRig`** (optional; getter on `SimulationEngine`
+   exposing `{ camera, controls: { target } }`): forced by geometry — the
+   three-zone course runs to z ≈ −38 while the default camera
+   sits at (0, 4, 7) with `maxDistance` 30. `update()` lerps `controls.target`
+   toward the car and translates the camera by the same delta (preserving the
+   kid's orbit angle); headless tests omit the rig, so every use is guarded. The
+   physics ground collider is 100×100 (only the *visual* floor is 20×20 — the
+   level adds its own strip), so no new collider is needed.
+
+6. **Car visual via `attachImportedVisual`** (first real use of that API): a
+   procedural stand-in mounts immediately, then the real **`cave_car.mpd`**
+   swaps in async — the same upgrade path as boat/coco. `buildProcCaveCar()`
+   builds a chunky yellow explorer car (chassis/cabin/windshield/bumper/roof
+   bar/wheels) from primitives; mounting it also hides the default EV3-hub
+   LDraw visuals, flagged by the user as rendering broken.
+   `attachImportedVisual` assumes LDraw Y-down input and flips the group 180°
+   around X, so the Y-up proc build lives inside a counter-flipped
+   (`rotation.x = π`) inner wrapper. The LDraw model loads via
+   `loadDecorModel(url, { fitLongest })` with the heading in the attach's
+   `extraRotationY` (not `loadDecorModel`'s `rotationY` — that world-axis
+   quaternion composes badly with the attach's euler flip). cave_car's missing
+   printed head `3626cpb1354.dat` was resolved 2026-07-05 by copying it from
+   Studio's `UnOfficial/parts/` into `draw-library/parts/` and re-packing
+   (§Packing gotcha — same fix as the boat's `67351-bl`). Wiring the real model
+   also exposed a latent attach bug: it *assigned* `group.position.y` from the
+   bbox (correct only for groups arriving at position 0), so the pre-positioned
+   `loadDecorModel` output floated in mid-air. Fixed to apply a delta on all
+   axes; regression test in `tests/engine/simpleRobotVisual.test.ts`.
 
 ---
 
@@ -603,8 +721,9 @@ sub-primitives are usually already standard). This is how `boat`'s `67351-bl` hu
 was resolved. Separately, to drop a coiled **cable** from the model, edit the
 source `.ldr` to reference the plain part instead of the `…c01` "with cable"
 assembly — `boat` swaps `47592c01-bl` (LED Matrix with Coiled Cable) for `47592`
-(matrix only), same idea as the taxi using plain parts. *(cave_car still has one
-unresolved printed part, `3626cpb1354.dat`; it's `comingSoon` so not yet fixed.)*
+(matrix only), same idea as the taxi using plain parts. *(cave_car's unresolved
+printed head `3626cpb1354.dat` was fixed the same way on 2026-07-05 — copied into
+`draw-library/parts/` and re-packed; the part's sub-primitives were already there.)*
 
 ### Scene decoration & ambient animation
 

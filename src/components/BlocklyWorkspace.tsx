@@ -6,17 +6,28 @@ import { registerContinuousToolbox } from '@blockly/continuous-toolbox'
 // RecyclableBlockFlyoutInflater in Blockly's global registry. Must run before
 // any Blockly.inject() call. Idempotent — registry overrides allowed.
 registerContinuousToolbox()
-import { buildRobotToolbox } from '../blocks/definitions/robotBlocks'
+import { buildRobotToolbox, filterToolboxCategories } from '../blocks/definitions/robotBlocks'
 import { setWorkspace } from '../blocks/workspaceSingleton'
 import { useSimulationStore } from '../store/simulationStore'
+import { useChallengeStore } from '../store/challengeStore'
 
 type ToolboxItem = Blockly.utils.toolbox.ToolboxItemInfo
 
 /**
  * Combine the robot category (sensor block included only when the active robot
- * has a sensor) with the built-in Control and Matemáticas categories.
+ * has a sensor) with the built-in Control and Matemáticas categories, then drop
+ * any categories the active level hides (`LevelDefinition.hiddenCategories`) —
+ * the filter runs on the FULL toolbox so levels can hide Control/Matemáticas too.
  */
 function buildFullToolbox(
+  hasSensor: boolean,
+  hasColorSensor: boolean,
+  hiddenCategories?: string[],
+): Blockly.utils.toolbox.ToolboxDefinition {
+  return filterToolboxCategories(buildBaseToolbox(hasSensor, hasColorSensor), hiddenCategories)
+}
+
+function buildBaseToolbox(
   hasSensor: boolean,
   hasColorSensor: boolean,
 ): Blockly.utils.toolbox.ToolboxDefinition {
@@ -68,13 +79,14 @@ export default function BlocklyWorkspace() {
   const workspaceRef = useRef<Blockly.WorkspaceSvg | null>(null)
   const hasSensor = useSimulationStore((s) => s.hasSensor)
   const hasColorSensor = useSimulationStore((s) => s.hasColorSensor)
+  const hiddenCategories = useChallengeStore((s) => s.activeLevel?.hiddenCategories)
 
   // Rebuild the toolbox when the active robot's sensor kit becomes known
   // (the engine sets these asynchronously after this component mounts).
   useEffect(() => {
     const workspace = workspaceRef.current
     if (!workspace) return
-    workspace.updateToolbox(structuredClone(buildFullToolbox(hasSensor, hasColorSensor)))
+    workspace.updateToolbox(structuredClone(buildFullToolbox(hasSensor, hasColorSensor, hiddenCategories)))
     // The ContinuousToolbox builds its single all-categories flyout once in
     // init() and only refreshes it on block create/delete events — categories
     // added by updateToolbox (e.g. Sensores arriving async) never show their
@@ -84,7 +96,7 @@ export default function BlocklyWorkspace() {
     if (toolbox && 'refreshSelection' in toolbox) {
       (toolbox as { refreshSelection(): void }).refreshSelection()
     }
-  }, [hasSensor, hasColorSensor])
+  }, [hasSensor, hasColorSensor, hiddenCategories])
 
   useEffect(() => {
     const container = containerRef.current
@@ -95,7 +107,7 @@ export default function BlocklyWorkspace() {
     while (container.firstChild) container.removeChild(container.firstChild)
 
     const workspace = Blockly.inject(container, {
-      toolbox: structuredClone(buildFullToolbox(hasSensor, hasColorSensor)),
+      toolbox: structuredClone(buildFullToolbox(hasSensor, hasColorSensor, hiddenCategories)),
       renderer: 'zelos',
       trashcan: true,
       sounds: true,

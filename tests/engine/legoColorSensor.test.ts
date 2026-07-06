@@ -72,6 +72,27 @@ describe('LegoColorSensor', () => {
     unregisterColliderColor(far.handle)
   })
 
+  it('detects Rapier sensor colliders (drive-through colour markers)', () => {
+    // Pins an engine capability for future levels: `setSensor(true)` colliders
+    // produce no contact forces (a robot drives through) but castRay still hits
+    // them because Rapier excludes sensors only via the opt-in
+    // QueryFilterFlags.EXCLUDE_SENSORS, which LegoColorSensor never passes.
+    const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 })
+    const curtain = world.createCollider(
+      RAPIER.ColliderDesc.cuboid(2.5, 1, 0.05).setTranslation(0, 1, -2).setSensor(true),
+    )
+    world.step()
+    registerColliderColor(curtain.handle, 'BLACK')
+
+    const sensor = makeSensor()
+    sensor.step(world)
+
+    expect(curtain.isSensor()).toBe(true)
+    expect(sensor.getColor()).toBe('BLACK')
+
+    unregisterColliderColor(curtain.handle)
+  })
+
   it('tracks a moving origin via setWorldPosition', () => {
     const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 })
     const collider = addBox(world, -10)             // 100 cm from origin — out of range

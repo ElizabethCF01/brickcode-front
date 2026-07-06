@@ -227,7 +227,7 @@ const blockJsonArray: object[] = [
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_LIGHT,
-    tooltip: 'Dibuja una imagen en la matriz de luces 3×3 del hub.',
+    tooltip: 'Dibuja una imagen en la matriz de luces 3×3.',
   },
   {
     type: 'light_display_image',
@@ -250,7 +250,7 @@ const blockJsonArray: object[] = [
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_LIGHT,
-    tooltip: 'Muestra una imagen en la matriz de luces 3×3 del hub.',
+    tooltip: 'Muestra una imagen en la matriz de luces 3×3.',
   },
   {
     type: 'light_set_pixel',
@@ -273,7 +273,7 @@ const blockJsonArray: object[] = [
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_LIGHT,
-    tooltip: 'Apaga toda la matriz de luces del hub.',
+    tooltip: 'Apaga toda la matriz de luces.',
   },
 
   // ── Motors addressed by port (SPIKE Essential ports A / B) ─────────────────
@@ -560,6 +560,25 @@ export function buildRobotToolbox(
   })
 
   return { kind: 'categoryToolbox', contents: categories }
+}
+
+/**
+ * Drop the named categories from a category toolbox — used by levels that
+ * declare `hiddenCategories` (e.g. the scenario drives the robot itself, so
+ * Movimiento/Motores would only mislead). Pure: returns a new definition,
+ * no-ops when `hidden` is empty or the definition has no `contents`.
+ */
+export function filterToolboxCategories(
+  toolbox: Blockly.utils.toolbox.ToolboxDefinition,
+  hidden?: string[],
+): Blockly.utils.toolbox.ToolboxDefinition {
+  if (!hidden || hidden.length === 0) return toolbox
+  const def = toolbox as { kind?: string; contents?: Array<{ name?: string }> }
+  if (!Array.isArray(def.contents)) return toolbox
+  return {
+    ...def,
+    contents: def.contents.filter((item) => !(item.name && hidden.includes(item.name))),
+  } as Blockly.utils.toolbox.ToolboxDefinition
 }
 
 /**

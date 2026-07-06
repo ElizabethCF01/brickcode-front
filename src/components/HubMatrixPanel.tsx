@@ -10,7 +10,7 @@ export default function HubMatrixPanel() {
 
   return (
     <div className="bg-black/60 rounded-lg p-2 pointer-events-none select-none">
-      <div className="text-[10px] text-gray-300 mb-1 text-center">Hub</div>
+      <div className="text-[10px] text-gray-300 mb-1 text-center">Luz</div>
       <div className="grid grid-cols-3 gap-1">
         {hubMatrix.map((brightness, i) => (
           <div

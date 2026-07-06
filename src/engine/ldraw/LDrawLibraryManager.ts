@@ -42,24 +42,32 @@ export class LDrawLibraryManager {
   }
 
   /**
-   * Loads every entry in BRICKCODE_PARTS in parallel and stores a scaled
-   * THREE.Group in the cache. `onProgress` fires once per completed part.
+   * Loads the given catalog parts in parallel and stores a scaled THREE.Group
+   * per key in the cache. Already-cached keys complete immediately (the
+   * manager is shared across levels, so parts loaded for a previous level are
+   * free). `onPartLoaded` fires once per key — cached or fetched — so callers
+   * can drive a progress bar that reflects only what this level really uses.
    */
-  async preloadAll(onProgress?: (loaded: number, total: number) => void): Promise<void> {
-    const entries = Object.entries(BRICKCODE_PARTS) as [PartKey, string][]
-    const total = entries.length
-    let loaded = 0
-
+  async preloadParts(keys: PartKey[], onPartLoaded?: () => void): Promise<void> {
     await Promise.all(
-      entries.map(async ([key, id]) => {
-        const url = `${PACKED_BASE}/${id}.mpd`
-        const group = (await this.loader.loadAsync(url)) as THREE.Group
-        group.scale.setScalar(LDU_TO_WU)
-        this.cache.set(key, group)
-        loaded += 1
-        onProgress?.(loaded, total)
+      keys.map(async (key) => {
+        if (!this.cache.has(key)) {
+          const url = `${PACKED_BASE}/${BRICKCODE_PARTS[key]}.mpd`
+          const group = (await this.loader.loadAsync(url)) as THREE.Group
+          group.scale.setScalar(LDU_TO_WU)
+          this.cache.set(key, group)
+        }
+        onPartLoaded?.()
       }),
     )
+  }
+
+  /** Loads every entry in BRICKCODE_PARTS. Kept for tools/tests; the app now
+   * preloads per level via `preloadParts` (see `levelAssets`). */
+  async preloadAll(onProgress?: (loaded: number, total: number) => void): Promise<void> {
+    const keys = Object.keys(BRICKCODE_PARTS) as PartKey[]
+    let loaded = 0
+    await this.preloadParts(keys, () => onProgress?.(++loaded, keys.length))
   }
 
   /**
@@ -70,7 +78,7 @@ export class LDrawLibraryManager {
     const cached = this.cache.get(key)
     if (!cached) {
       throw new Error(
-        `LDrawLibraryManager: part "${key}" not preloaded. Call preloadAll() first.`,
+        `LDrawLibraryManager: part "${key}" not preloaded. Include it in the level's preload (preloadParts).`,
       )
     }
     const clone = cached.clone(true)

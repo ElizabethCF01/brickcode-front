@@ -29,6 +29,10 @@ const ZONE_WIDTH_WU = LATERAL_TOL_WU * 2          // 2.4 WU
 const ZONE_DEPTH_WU = GOAL_TOL_WU * 2             // 1.4 WU
 const ZONE_CENTER_Z = -GOAL_FORWARD_WU            // ahead of the robot (−Z)
 
+const PINE_MODEL   = '/ldraw/models/packed/tree-pine.mpd'
+const ROCK_MODEL   = '/ldraw/models/packed/rock-big.mpd'
+const FLOWER_MODEL = '/ldraw/models/packed/flowers.mpd'
+
 export const challenge01 = {
   id:          'challenge-01',
   title:       '🏁 ¡Llega a la meta!',
@@ -40,6 +44,8 @@ export const challenge01 = {
     'Ajusta la velocidad o el tiempo: si te quedas corto, aumenta; si te pasas, reduce',
     'Conduce recto — si el robot gira, se saldrá de la zona por un lado',
   ],
+  // Drives the per-level loading screen (see levelAssets).
+  decorModels: [PINE_MODEL, ROCK_MODEL, FLOWER_MODEL],
 
   /**
    * Draws a flat green goal zone on the floor `GOAL_FORWARD_CM` ahead of the
@@ -71,18 +77,18 @@ export const challenge01 = {
     // Decorative LEGO props around the field perimeter. Pure visuals (no
     // colliders) and well clear of the robot's straight run at x ≈ 0, z 0→−5.
     const props = [
-      placeProps(scene, '/ldraw/models/packed/tree-pine.mpd', [
+      placeProps(scene, PINE_MODEL, [
         { x: -6, z: -6, rotationY: 0.3 },
         { x: 6, z: -7, rotationY: 2.4, scale: 0.8 },
         { x: -7, z: 3, rotationY: 4.1, scale: 1.15 },
         { x: 7, z: 5, rotationY: 1.2 },
         { x: 5.5, z: -3, rotationY: 5.3, scale: 0.7 },
       ], { fitLongest: 1.5 }),
-      placeProps(scene, '/ldraw/models/packed/rock-big.mpd', [
+      placeProps(scene, ROCK_MODEL, [
         { x: -4.5, z: -2, rotationY: 0.8 },
         { x: 4, z: 2.5, rotationY: 2.9, scale: 0.75 },
       ], { fitLongest: 1 }),
-      placeProps(scene, '/ldraw/models/packed/flowers.mpd', [
+      placeProps(scene, FLOWER_MODEL, [
         { x: -3.5, z: 4 },
         { x: 3.8, z: -5.5, rotationY: 1.9 },
         { x: 6.5, z: -1, rotationY: 3.7 },

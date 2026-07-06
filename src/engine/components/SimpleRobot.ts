@@ -344,13 +344,12 @@ export class SimpleRobot implements ISimpleRobot {
 
     // Align horizontally by centroid (X/Z) and vertically by bottom-to-floor.
     // The hub centre sits at world y = HUB_Y; the floor is at world y = 0.
-    // In hub-local space, the floor is at y = -HUB_Y. Setting
-    // group.position.y so that bbox.min.y maps to -HUB_Y puts the model's
-    // bottom flush with the ground. This is the visual you want for a robot
-    // that's "standing on its wheels" and removes the floating-above-ground
-    // illusion caused by centroid alignment.
+    // In hub-local space, the floor is at y = -HUB_Y. All three axes apply a
+    // DELTA (the bbox already includes the group's current position): groups
+    // that arrive pre-positioned — e.g. loadDecorModel output, which centres
+    // itself — would otherwise end up floating by their prior offset.
     group.position.x -= centre.x
-    group.position.y = -HUB_Y - bbox.min.y
+    group.position.y += -HUB_Y - bbox.min.y
     group.position.z -= centre.z
 
     if (options?.extraOffset) group.position.add(options.extraOffset)
@@ -384,12 +383,7 @@ export class SimpleRobot implements ISimpleRobot {
     return { x: t.x, y: t.y, z: t.z }
   }
 
-  /** Step motors and update sensor origin from the hub transform. Call after world.step(). */
-  step(deltaTime: number): void {
-    this.leftRawMotor.step(deltaTime)
-    this.rightRawMotor.step(deltaTime)
-
-    // Sync hub visual to the dynamic body
+  private syncVisualAndSensors(): void {
     const t = this.hubBody.translation()
     const r = this.hubBody.rotation()
     this.hubGroup.position.set(t.x, t.y, t.z)
@@ -403,18 +397,29 @@ export class SimpleRobot implements ISimpleRobot {
     this.colorSensor.setWorldPosition(this._sensorWorld)
   }
 
-  /** Reposition the robot at its initial pose, zero velocities, brake motors. */
-  reset(): void {
-    const p = this.initialPosition
+  /** Step motors and update sensor origin from the hub transform. Call after world.step(). */
+  step(deltaTime: number): void {
+    this.leftRawMotor.step(deltaTime)
+    this.rightRawMotor.step(deltaTime)
+    this.syncVisualAndSensors()
+  }
+
+  /**
+   * Place the whole rig directly for scripted levels.
+   *
+   * This keeps the hidden SimpleRobot physics aligned under decorative models
+   * that are moved by a scenario rather than by student motor blocks.
+   */
+  setScriptedPose(position: { x: number; y: number; z: number }): void {
     const zero = { x: 0, y: 0, z: 0 }
 
-    this.hubBody.setTranslation({ x: p.x, y: p.y, z: p.z }, true)
+    this.hubBody.setTranslation(position, true)
     this.hubBody.setRotation({ x: 0, y: 0, z: 0, w: 1 }, true)
     this.hubBody.setLinvel(zero, true)
     this.hubBody.setAngvel(zero, true)
 
     this.leftWheelBody.setTranslation(
-      { x: p.x + WHEEL_ANCHOR_L.x, y: p.y + WHEEL_ANCHOR_L.y, z: p.z },
+      { x: position.x + WHEEL_ANCHOR_L.x, y: position.y + WHEEL_ANCHOR_L.y, z: position.z },
       true,
     )
     this.leftWheelBody.setRotation({ x: 0, y: 0, z: 0, w: 1 }, true)
@@ -422,7 +427,7 @@ export class SimpleRobot implements ISimpleRobot {
     this.leftWheelBody.setAngvel(zero, true)
 
     this.rightWheelBody.setTranslation(
-      { x: p.x + WHEEL_ANCHOR_R.x, y: p.y + WHEEL_ANCHOR_R.y, z: p.z },
+      { x: position.x + WHEEL_ANCHOR_R.x, y: position.y + WHEEL_ANCHOR_R.y, z: position.z },
       true,
     )
     this.rightWheelBody.setRotation({ x: 0, y: 0, z: 0, w: 1 }, true)
@@ -431,6 +436,14 @@ export class SimpleRobot implements ISimpleRobot {
 
     this.motors.left.stop()
     this.motors.right.stop()
+    this.leftRawMotor.step(0)
+    this.rightRawMotor.step(0)
+    this.syncVisualAndSensors()
+  }
+
+  /** Reposition the robot at its initial pose, zero velocities, brake motors. */
+  reset(): void {
+    this.setScriptedPose(this.initialPosition)
   }
 
   dispose(): void {
@@ -448,4 +461,3 @@ export class SimpleRobot implements ISimpleRobot {
     this.motorMat?.dispose()
   }
 }
-

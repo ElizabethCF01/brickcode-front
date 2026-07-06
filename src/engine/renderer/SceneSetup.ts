@@ -31,13 +31,18 @@ export function createScene(canvas: HTMLCanvasElement): SceneRefs {
 
   // Lights — a hemisphere light (sky blue from above, grass green from below)
   // instead of a flat ambient gives the LEGO props softer, warmer shading.
+  // Named so levels can look them up (getObjectByName) to dim/restore the
+  // global lighting for per-level environments (e.g. the cave's sunset).
   const ambient = new THREE.AmbientLight(0xffffff, 0.25)
+  ambient.name = 'ambient-light'
   scene.add(ambient)
 
   const hemi = new THREE.HemisphereLight(0xcfe8ff, 0x7da868, 0.55)
+  hemi.name = 'hemi-light'
   scene.add(hemi)
 
   const sun = new THREE.DirectionalLight(0xffffff, 1.2)
+  sun.name = 'sun-light'
   sun.position.set(10, 20, 10)
   sun.castShadow = true
   sun.shadow.mapSize.set(2048, 2048)
@@ -53,12 +58,14 @@ export function createScene(canvas: HTMLCanvasElement): SceneRefs {
   const floorGeo = new THREE.PlaneGeometry(20, 20)
   const floorMat = new THREE.MeshLambertMaterial({ color: 0x69a75b })
   const floor = new THREE.Mesh(floorGeo, floorMat)
+  floor.name = 'main-floor'
   floor.rotation.x = -Math.PI / 2
   floor.receiveShadow = true
   scene.add(floor)
 
   // Grid helper for visual reference
   const grid = new THREE.GridHelper(20, 20, 0x000000, 0x000000)
+  grid.name = 'main-grid'
   grid.material.opacity = 0.15
   grid.material.transparent = true
   scene.add(grid)

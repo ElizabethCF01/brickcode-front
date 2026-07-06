@@ -28,4 +28,5 @@ export const LDRAW_CATALOG: LDrawCatalogEntry[] = [
   { id: 'sensor-color',    file: 'parts/95650.dat', displayName: 'EV3 Color Sensor' },
   { id: 'beam-3',          file: 'parts/32523.dat', displayName: 'Technic Beam 3' },
   { id: 'beam-5',          file: 'parts/32316.dat', displayName: 'Technic Beam 5' },
+  { id: 'bat',             file: 'parts/30103.dat', displayName: 'Animal Bat' },
 ]
