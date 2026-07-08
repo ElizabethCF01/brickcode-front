@@ -5,11 +5,11 @@ import { dash } from '../paths'
 import { Loading, ErrorBox, PageHeader } from '../ui'
 
 const LABELS: Record<string, string> = {
-  program_run_started: '▶ Programa iniciado',
-  program_run_ended: '⏹ Programa terminado',
-  challenge_evaluated: '🏁 Reto evaluado',
-  block_executed: '🧩 Bloque',
-  events_capped: '⚠ Límite de eventos alcanzado',
+  program_run_started: '▶ Program started',
+  program_run_ended: '⏹ Program ended',
+  challenge_evaluated: '🏁 Challenge evaluated',
+  block_executed: '🧩 Block',
+  events_capped: '⚠ Event limit reached',
 }
 
 export default function SessionPage() {
@@ -19,9 +19,9 @@ export default function SessionPage() {
   return (
     <>
       <PageHeader
-        title="Detalle de la sesión"
-        subtitle={data ? `${data.events.length} eventos · reto ${data.challengeIds.join(', ') || '—'}` : undefined}
-        back={{ to: dash.classes, label: 'Clases' }}
+        title="Session detail"
+        subtitle={data ? `${data.events.length} events · challenge ${data.challengeIds.join(', ') || '—'}` : undefined}
+        back={{ to: dash.classes, label: 'Classes' }}
       />
       {loading && <Loading />}
       {error && <ErrorBox message={error} />}
@@ -51,7 +51,7 @@ function renderPayload(type: string, payload?: Record<string, unknown>): React.R
   if (type === 'challenge_evaluated' && 'success' in payload) {
     return (
       <span className={`text-sm ${payload.success ? 'text-emerald-600' : 'text-amber-600'}`}>
-        {payload.success ? '✓ Conseguido' : '✗ No conseguido'}
+        {payload.success ? '✓ Achieved' : '✗ Not achieved'}
       </span>
     )
   }

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 
 export function Loading() {
-  return <p className="text-slate-500 py-8 text-center">Cargando…</p>
+  return <p className="text-slate-500 py-8 text-center">Loading…</p>
 }
 
 export function ErrorBox({ message }: { message: string }) {

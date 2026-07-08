@@ -9,11 +9,11 @@ const names = (toolbox: unknown): Array<string | undefined> =>
 describe('filterToolboxCategories', () => {
   it('drops the named categories and keeps the rest in order', () => {
     const full = buildRobotToolbox(true, true)
-    const filtered = filterToolboxCategories(full, ['Movimiento', 'Motores'])
+    const filtered = filterToolboxCategories(full, ['Movement', 'Motors'])
 
-    expect(names(filtered)).toEqual(['Eventos', 'Luz', 'Sonido', 'Sensores', 'Tiempo'])
+    expect(names(filtered)).toEqual(['Events', 'Light', 'Sound', 'Sensors', 'Time'])
     // Pure: the source definition is untouched.
-    expect(names(full)).toContain('Movimiento')
+    expect(names(full)).toContain('Movement')
   })
 
   it('no-ops when nothing is hidden', () => {

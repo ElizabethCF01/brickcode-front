@@ -1,20 +1,20 @@
 export default function Attribution() {
   return (
     <div className="px-4 py-1 bg-gray-900 border-t border-gray-800 text-[10px] leading-snug text-gray-500 text-center shrink-0">
-      Piezas: <a
+      Parts: <a
         href="https://library.ldraw.org/"
         target="_blank"
         rel="noopener noreferrer"
         className="underline hover:text-gray-300"
-      >LDraw™ Parts Library</a> bajo{' '}
+      >LDraw™ Parts Library</a> under{' '}
       <a
         href="https://creativecommons.org/licenses/by/2.0/"
         target="_blank"
         rel="noopener noreferrer"
         className="underline hover:text-gray-300"
       >CC BY 2.0</a>.
-      LDraw™ es marca registrada de la Estate of James Jessiman.
-      LEGO® es marca registrada de The LEGO Group, que no patrocina, avala ni autoriza este proyecto.
+      LDraw™ is a trademark of the Estate of James Jessiman.
+      LEGO® is a trademark of The LEGO Group, which does not sponsor, endorse, or authorize this project.
     </div>
   )
 }

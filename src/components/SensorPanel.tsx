@@ -3,19 +3,19 @@ import { useSimulationStore } from '../store/simulationStore'
 const SENSOR_MAX_CM = 100
 
 const STATUS_LABELS: Record<string, string> = {
-  stopped: 'En reposo',
-  running: 'Ejecutando',
-  paused: 'Pausado',
+  stopped: 'Idle',
+  running: 'Running',
+  paused: 'Paused',
 }
 
 // Display name + swatch colour per detectable colour code (see colorRegistry).
 const COLOR_DISPLAY: Record<string, { label: string; hex: string }> = {
-  RED:    { label: 'rojo',     hex: '#DA291C' },
-  GREEN:  { label: 'verde',    hex: '#2E7D32' },
-  BLUE:   { label: 'azul',     hex: '#006CB7' },
-  YELLOW: { label: 'amarillo', hex: '#FFD700' },
-  WHITE:  { label: 'blanco',   hex: '#F5F5F5' },
-  BLACK:  { label: 'negro',    hex: '#1a1a1a' },
+  RED:    { label: 'red',    hex: '#DA291C' },
+  GREEN:  { label: 'green',  hex: '#2E7D32' },
+  BLUE:   { label: 'blue',   hex: '#006CB7' },
+  YELLOW: { label: 'yellow', hex: '#FFD700' },
+  WHITE:  { label: 'white',  hex: '#F5F5F5' },
+  BLACK:  { label: 'black',  hex: '#1a1a1a' },
 }
 
 export default function SensorPanel() {
@@ -32,7 +32,7 @@ export default function SensorPanel() {
           Motors-only robots (e.g. imported spike-taxi) hide this entirely. */}
       {hasSensor && (
         <div className="flex items-center gap-3">
-          <span className="text-gray-400 whitespace-nowrap">Sensor frontal:</span>
+          <span className="text-gray-400 whitespace-nowrap">Front sensor:</span>
 
           <div className="w-32 h-4 bg-gray-700 rounded overflow-hidden">
             <div
@@ -63,7 +63,7 @@ export default function SensorPanel() {
       )}
 
       <div className="ml-auto flex items-center gap-2 text-gray-400">
-        <span>Estado:</span>
+        <span>Status:</span>
         <span
           className={`font-medium ${
             status === 'running' ? 'text-green-400' : 'text-gray-300'

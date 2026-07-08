@@ -106,13 +106,13 @@ const DEBUG_LIGHT_ANCHOR = false
 const DEBUG_RADIUS       = 0.35   // world units each marker sits from the origin
 // [local direction (respects tilt), colour, label reported to the user]
 const DEBUG_MARKERS: { dir: [number, number, number]; color: number; label: string }[] = [
-  { dir: [ 0,  0,  0], color: 0xffffff, label: 'BLANCO  = origen de la pieza' },
-  { dir: [ 1,  0,  0], color: 0xff0000, label: 'ROJO    = +X local' },
-  { dir: [-1,  0,  0], color: 0xff8800, label: 'NARANJA = −X local' },
-  { dir: [ 0,  1,  0], color: 0x00ff00, label: 'VERDE   = +Y local' },
-  { dir: [ 0, -1,  0], color: 0xffff00, label: 'AMARILLO= −Y local' },
-  { dir: [ 0,  0,  1], color: 0x0066ff, label: 'AZUL    = +Z local' },
-  { dir: [ 0,  0, -1], color: 0x00ffff, label: 'CIAN    = −Z local' },
+  { dir: [ 0,  0,  0], color: 0xffffff, label: 'WHITE  = part origin' },
+  { dir: [ 1,  0,  0], color: 0xff0000, label: 'RED    = +X local' },
+  { dir: [-1,  0,  0], color: 0xff8800, label: 'ORANGE = −X local' },
+  { dir: [ 0,  1,  0], color: 0x00ff00, label: 'GREEN  = +Y local' },
+  { dir: [ 0, -1,  0], color: 0xffff00, label: 'YELLOW = −Y local' },
+  { dir: [ 0,  0,  1], color: 0x0066ff, label: 'BLUE   = +Z local' },
+  { dir: [ 0,  0, -1], color: 0x00ffff, label: 'CYAN   = −Z local' },
 ]
 
 /**
@@ -212,9 +212,9 @@ function buildProcCrocodile(): { group: THREE.Group; disposables: { dispose(): v
 
 export const challengeBoat = {
   id:          'challenge-boat',
-  title:       '🐊 El cocodrilo y el bote',
+  title:       '🐊 The crocodile and the boat',
   description:
-    'El cocodrilo se acerca al bote. Programa el bote para que encienda las luces del hub (¡la alarma!) en cuanto el sensor lo detecte cerca, antes de que llegue.',
+    'The crocodile is approaching the boat. Program the boat to turn on the hub lights (the alarm!) as soon as the sensor detects it nearby, before it arrives.',
   difficulty:  2,
   tags:        ['sensors', 'lights'],
   robot:       'simple',
@@ -224,13 +224,13 @@ export const challengeBoat = {
   // The crocodile decides the outcome, not the end of the kid's program.
   scenarioDecidesEnd: true,
   // The boat is anchored — driving blocks would only let kids break the scene.
-  hiddenCategories: ['Movimiento', 'Motores'],
+  hiddenCategories: ['Movement', 'Motors'],
   // Drives the per-level loading screen (see levelAssets).
   decorModels: [COCO_MODEL, BOAT_MODEL, PALM_MODEL, REED_MODEL, ROCK_MODEL, FLOWER_MODEL],
   hints: [
-    'Usa "por siempre" con un "si… entonces" dentro: así el bote vigila sin parar',
-    'La condición: "¿Ve el color verde?" — ¡el cocodrilo es verde!',
-    'Cuando lo detecte, muestra una imagen en la matriz 3×3 del hub: ¡esa es la alarma!',
+    'Use "forever" with an "if… then" inside: that way the boat keeps watching without stopping',
+    'The condition: "Sees the color green?" — the crocodile is green!',
+    'When it detects it, show an image on the hub\'s 3×3 matrix: that\'s the alarm!',
   ],
 
   /**
@@ -543,13 +543,13 @@ export const challengeBoat = {
         if (gapCm <= DANGER_CM && hubLit) {
           s.result = {
             success: true,
-            message: '🚨 ¡Sonaste la alarma a tiempo! El cocodrilo se asustó y se fue.',
+            message: '🚨 You sounded the alarm in time! The crocodile got scared and left.',
           }
           useSimulationStore.getState().requestAutoStop()
         } else if (gapCm <= ARRIVE_CM) {
           s.result = {
             success: false,
-            message: '🐊 El cocodrilo llegó al bote. Enciende las luces cuando el sensor lo detecte cerca.',
+            message: '🐊 The crocodile reached the boat. Turn on the lights when the sensor detects it nearby.',
           }
           useSimulationStore.getState().requestAutoStop()
         }
@@ -596,7 +596,7 @@ export const challengeBoat = {
     return (
       active?.result ?? {
         success: false,
-        message: 'Programa la reacción y pulsa Ejecutar: cuando el sensor detecte al cocodrilo cerca, enciende las luces.',
+        message: 'Program the reaction and press Run: when the sensor detects the crocodile nearby, turn on the lights.',
       }
     )
   },

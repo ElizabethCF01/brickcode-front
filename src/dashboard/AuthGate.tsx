@@ -34,18 +34,18 @@ export default function AuthGate({ children }: { children: ReactNode }) {
     return (
       <CenteredCard>
         <p className="text-slate-700">
-          Backend no configurado. Define <code className="font-mono">VITE_SUPABASE_URL</code> y{' '}
+          Backend not configured. Set <code className="font-mono">VITE_SUPABASE_URL</code> and{' '}
           <code className="font-mono">VITE_SUPABASE_ANON_KEY</code>.
         </p>
       </CenteredCard>
     )
   }
 
-  if (!ready) return <CenteredCard><p className="text-slate-500">Cargando…</p></CenteredCard>
+  if (!ready) return <CenteredCard><p className="text-slate-500">Loading…</p></CenteredCard>
   if (!session) return <LoginForm />
-  if (isTeacher === null) return <CenteredCard><p className="text-slate-500">Cargando…</p></CenteredCard>
+  if (isTeacher === null) return <CenteredCard><p className="text-slate-500">Loading…</p></CenteredCard>
   if (!isTeacher) {
-    return <LoginForm note="Esta cuenta no es de profesor. Inicia sesión con una cuenta de profesor." />
+    return <LoginForm note="This account is not a teacher account. Sign in with a teacher account." />
   }
   return <>{children}</>
 }

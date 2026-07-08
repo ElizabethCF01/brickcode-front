@@ -17,7 +17,7 @@ export default function StudentLoginForm({ note }: { note?: string }) {
   const [busy, setBusy] = useState(false)
 
   if (!supabase) {
-    return <Centered><p className="text-gray-300">Backend no configurado.</p></Centered>
+    return <Centered><p className="text-gray-300">Backend not configured.</p></Centered>
   }
 
   const submit = async (e: React.FormEvent) => {
@@ -29,7 +29,7 @@ export default function StudentLoginForm({ note }: { note?: string }) {
         : await supabase.auth.signUp({ email, password, options: { data: { role: 'student' } } })
       if (res.error) setError(res.error.message)
       else if (mode === 'signup' && !res.data.session) {
-        setError('Revisa tu correo para confirmar la cuenta, luego inicia sesión.')
+        setError('Check your email to confirm the account, then sign in.')
       }
     } finally {
       setBusy(false)
@@ -43,25 +43,25 @@ export default function StudentLoginForm({ note }: { note?: string }) {
         <span>BrickCode</span>
       </h1>
       <p className="mt-1 mb-6 text-sm text-gray-400">
-        {note ?? (mode === 'login' ? 'Entra para programar tu robot.' : 'Crea tu cuenta de alumno.')}
+        {note ?? (mode === 'login' ? 'Log in to program your robot.' : 'Create your student account.')}
       </p>
       <form onSubmit={submit} className="flex flex-col gap-3">
-        <Field label="Correo" value={email} onChange={setEmail} type="email" placeholder="alumno@escuela.es" required />
-        <Field label="Contraseña" value={password} onChange={setPassword} type="password" required />
+        <Field label="Email" value={email} onChange={setEmail} type="email" placeholder="student@school.edu" required />
+        <Field label="Password" value={password} onChange={setPassword} type="password" required />
         {error && <p className="text-sm text-red-400">{error}</p>}
         <button
           type="submit"
           disabled={busy}
           className="mt-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-600 py-2.5 font-medium text-white transition-colors"
         >
-          {busy ? '…' : mode === 'login' ? 'Entrar' : 'Crear cuenta'}
+          {busy ? '…' : mode === 'login' ? 'Sign in' : 'Create account'}
         </button>
       </form>
       <button
         onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(null) }}
         className="mt-4 text-sm text-indigo-400 hover:underline"
       >
-        {mode === 'login' ? '¿No tienes cuenta? Crear una' : '¿Ya tienes cuenta? Entrar'}
+        {mode === 'login' ? 'No account? Create one' : 'Already have an account? Sign in'}
       </button>
     </Centered>
   )

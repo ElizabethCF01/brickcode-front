@@ -21,7 +21,7 @@ describe('StudentAuthGate', () => {
   it('shows the student login when there is no session', async () => {
     auth.getSession.mockResolvedValue({ data: { session: null } })
     render(<StudentAuthGate><div>SIMULATOR</div></StudentAuthGate>)
-    expect(await screen.findByPlaceholderText('alumno@escuela.es')).toBeTruthy()
+    expect(await screen.findByPlaceholderText('student@school.edu')).toBeTruthy()
     expect(screen.queryByText('SIMULATOR')).toBeNull()
   })
 
@@ -29,7 +29,7 @@ describe('StudentAuthGate', () => {
     setTeacher(true)
     auth.getSession.mockResolvedValue({ data: { session: { user: { id: 't' } } } })
     render(<StudentAuthGate><div>SIMULATOR</div></StudentAuthGate>)
-    expect(await screen.findByText(/Inicia sesión como alumno/)).toBeTruthy()
+    expect(await screen.findByText(/Sign in as a student/)).toBeTruthy()
     expect(screen.queryByText('SIMULATOR')).toBeNull()
   })
 
@@ -50,18 +50,18 @@ describe('JoinClassModal (enrollment)', () => {
     render(<JoinClassModal onEnrolled={onEnrolled} />)
 
     fireEvent.change(screen.getByPlaceholderText('ABC123'), { target: { value: 'c9mwjb' } })
-    fireEvent.change(screen.getByPlaceholderText('Estrella7'), { target: { value: 'Estrella7' } })
-    fireEvent.click(screen.getByText('Unirme'))
+    fireEvent.change(screen.getByPlaceholderText('Star7'), { target: { value: 'Star7' } })
+    fireEvent.click(screen.getByText('Join'))
 
     await waitFor(() => expect(onEnrolled).toHaveBeenCalled())
-    expect(rpc).toHaveBeenCalledWith('join_class', { p_class_code: 'C9MWJB', p_pseudonym: 'Estrella7' })
+    expect(rpc).toHaveBeenCalledWith('join_class', { p_class_code: 'C9MWJB', p_pseudonym: 'Star7' })
   })
 
   it('surfaces an invalid class code', async () => {
     rpc.mockResolvedValue({ data: null, error: new Error('invalid class code') })
     render(<JoinClassModal onEnrolled={vi.fn()} />)
     fireEvent.change(screen.getByPlaceholderText('ABC123'), { target: { value: 'NOPE12' } })
-    fireEvent.click(screen.getByText('Unirme'))
-    expect(await screen.findByText(/no válido/i)).toBeTruthy()
+    fireEvent.click(screen.getByText('Join'))
+    expect(await screen.findByText(/Invalid class code/i)).toBeTruthy()
   })
 })

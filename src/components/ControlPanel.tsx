@@ -119,18 +119,18 @@ export default function ControlPanel({ onBackToLevels }: Readonly<ControlPanelPr
         <button
           onClick={onBackToLevels}
           className="text-xs px-2.5 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-200"
-          title="Volver a la lista de niveles"
+          title="Back to the level list"
         >
-          ← Niveles
+          ← Levels
         </button>
       )}
 
       <button
         onClick={() => getSupabase()?.auth.signOut()}
         className="text-xs px-2.5 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-200"
-        title="Cerrar sesión"
+        title="Sign out"
       >
-        🚪 Cerrar sesión
+        🚪 Sign out
       </button>
 
       <div className="flex gap-2 ml-auto">
@@ -143,7 +143,7 @@ export default function ControlPanel({ onBackToLevels }: Readonly<ControlPanelPr
                 : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
             }`}
         >
-          📝 Bloques
+          📝 Blocks
         </button>
         <div className="w-px bg-gray-600 mx-1" />
         <button
@@ -153,7 +153,7 @@ export default function ControlPanel({ onBackToLevels }: Readonly<ControlPanelPr
             bg-green-600 hover:bg-green-500 disabled:bg-gray-600 disabled:text-gray-400
             text-white transition-colors"
         >
-          ▶ Ejecutar
+          ▶ Run
         </button>
 
         <button
@@ -163,7 +163,7 @@ export default function ControlPanel({ onBackToLevels }: Readonly<ControlPanelPr
             bg-red-600 hover:bg-red-500 disabled:bg-gray-600 disabled:text-gray-400
             text-white transition-colors"
         >
-          ⏹ Parar
+          ⏹ Stop
         </button>
 
         <button

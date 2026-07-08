@@ -47,7 +47,7 @@ export default function App({ onBackToLevels }: Readonly<AppProps>) {
         {/* Top-left overlay stack: orbit hint + hub 3×3 light matrix */}
         <div className="absolute top-3 left-3 flex flex-col gap-2 items-start">
           <div className="bg-black/50 text-white text-xs px-2 py-1 rounded pointer-events-none">
-            Arrastra para orbitar · Rueda para zoom
+            Drag to orbit · Scroll to zoom
           </div>
           <HubMatrixPanel />
         </div>
@@ -75,11 +75,11 @@ export default function App({ onBackToLevels }: Readonly<AppProps>) {
         >
           {/* Drawer header */}
           <div className="flex items-center justify-between px-3 py-1.5 bg-gray-800 border-b border-gray-700 shrink-0">
-            <span className="text-xs text-gray-400">Editor de bloques</span>
+            <span className="text-xs text-gray-400">Block editor</span>
             <button
               onClick={toggleEditor}
               className="text-gray-400 hover:text-white text-lg leading-none px-1"
-              title="Cerrar editor"
+              title="Close editor"
             >
               ✕
             </button>

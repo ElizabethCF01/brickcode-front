@@ -21,7 +21,7 @@ export default function EnrollmentGate({ children }: { children: ReactNode }) {
   }, [version])
 
   if (state === 'loading') {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-gray-400">Cargando…</div>
+    return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-gray-400">Loading…</div>
   }
   if (state === 'need') return <JoinClassModal onEnrolled={() => setVersion((v) => v + 1)} />
   return <>{children}</>

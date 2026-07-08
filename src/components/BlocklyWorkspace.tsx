@@ -57,7 +57,7 @@ function buildBaseToolbox(
       } as ToolboxItem,
       {
         kind: 'category',
-        name: 'Matemáticas',
+        name: 'Math',
         colour: '#5C81A6',
         contents: [
           { kind: 'block', type: 'math_number' },

@@ -36,14 +36,14 @@ const FLOWER_MODEL = '/ldraw/models/packed/flowers.mpd'
 
 export const challenge01 = {
   id:          'challenge-01',
-  title:       '🏁 ¡Llega a la meta!',
-  description: 'Programa el robot para que avance y se detenga dentro de la zona verde, a unos 30 cm hacia adelante.',
+  title:       '🏁 Reach the goal!',
+  description: 'Program the robot to drive forward and stop inside the green zone, about 30 cm ahead.',
   difficulty:  1,
   tags:        ['motors'],
   hints: [
-    'Usa el bloque "Mover adelante" e indica cuántos segundos avanza',
-    'Ajusta la velocidad o el tiempo: si te quedas corto, aumenta; si te pasas, reduce',
-    'Conduce recto — si el robot gira, se saldrá de la zona por un lado',
+    'Use the "Move forward" block and set how many seconds it drives',
+    'Adjust the speed or the time: if you fall short, increase it; if you overshoot, reduce it',
+    'Drive straight — if the robot turns, it will drift out of the zone to one side',
   ],
   // Drives the per-level loading screen (see levelAssets).
   decorModels: [PINE_MODEL, ROCK_MODEL, FLOWER_MODEL],
@@ -122,7 +122,7 @@ export const challenge01 = {
   evaluate(robot: SimpleRobot): ChallengeResult {
     const pos = robot.getPosition?.()
     if (!pos) {
-      return { success: false, message: 'No se pudo leer la posición del robot.' }
+      return { success: false, message: 'Could not read the robot\'s position.' }
     }
 
     // Forward distance is along −z; sideways drift is |x|.
@@ -136,27 +136,27 @@ export const challenge01 = {
     if (inDepthBand && isStraight) {
       return {
         success: true,
-        message: `¡Llegaste a la meta! Te detuviste a ${forwardCm} cm.`,
+        message: `You reached the goal! You stopped at ${forwardCm} cm.`,
       }
     }
 
     if (!isStraight) {
       return {
         success: false,
-        message: 'El robot se salió de la zona por un lado. Intenta conducir más recto.',
+        message: 'The robot drifted out of the zone to one side. Try driving straighter.',
       }
     }
 
     if (forwardWU < GOAL_FORWARD_WU - GOAL_TOL_WU) {
       return {
         success: false,
-        message: `Te quedaste corto: avanzaste ${forwardCm} cm. Aumenta el tiempo o la velocidad.`,
+        message: `You fell short: you drove ${forwardCm} cm. Increase the time or the speed.`,
       }
     }
 
     return {
       success: false,
-      message: `Te pasaste: avanzaste ${forwardCm} cm. Reduce el tiempo o la velocidad.`,
+      message: `You overshot: you drove ${forwardCm} cm. Reduce the time or the speed.`,
     }
   },
 } satisfies LevelDefinition

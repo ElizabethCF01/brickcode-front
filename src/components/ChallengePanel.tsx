@@ -18,7 +18,7 @@ export default function ChallengePanel() {
           onClick={() => setShowHints(h => !h)}
           className="text-gray-400 hover:text-gray-200 text-xs underline"
         >
-          {showHints ? 'Ocultar pistas' : 'Ver pistas 💡'}
+          {showHints ? 'Hide hints' : 'Show hints 💡'}
         </button>
       </div>
 

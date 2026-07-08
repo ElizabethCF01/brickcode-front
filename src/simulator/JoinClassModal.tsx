@@ -24,7 +24,7 @@ export default function JoinClassModal({ onEnrolled }: { onEnrolled: () => void 
       p_pseudonym: pseudonym,
     })
     if (rpcErr) {
-      setError(rpcErr.message.includes('invalid class code') ? 'Código de clase no válido.' : rpcErr.message)
+      setError(rpcErr.message.includes('invalid class code') ? 'Invalid class code.' : rpcErr.message)
     } else {
       onEnrolled()
     }
@@ -34,13 +34,13 @@ export default function JoinClassModal({ onEnrolled }: { onEnrolled: () => void 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
       <div className="w-full max-w-sm rounded-2xl border border-gray-700 bg-gray-800 p-8 text-white shadow-2xl">
-        <h2 className="text-lg font-semibold">Únete a una clase</h2>
+        <h2 className="text-lg font-semibold">Join a class</h2>
         <p className="mt-1 text-sm text-gray-400">
-          Pide a tu profe el código de la clase. Tu trabajo se guardará con un apodo, nunca tu nombre real.
+          Ask your teacher for the class code. Your work will be saved under a nickname, never your real name.
         </p>
         <form onSubmit={submit} className="mt-4 flex flex-col gap-3">
           <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-gray-300">Código de clase</span>
+            <span className="text-xs font-medium text-gray-300">Class code</span>
             <input
               autoFocus
               value={code}
@@ -50,11 +50,11 @@ export default function JoinClassModal({ onEnrolled }: { onEnrolled: () => void 
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-gray-300">Apodo (opcional)</span>
+            <span className="text-xs font-medium text-gray-300">Nickname (optional)</span>
             <input
               value={nick}
               onChange={(e) => setNick(e.target.value)}
-              placeholder="Estrella7"
+              placeholder="Star7"
               className="rounded-lg border border-gray-600 bg-gray-900 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </label>
@@ -64,7 +64,7 @@ export default function JoinClassModal({ onEnrolled }: { onEnrolled: () => void 
             disabled={busy || !code.trim()}
             className="mt-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-600 py-2 font-medium"
           >
-            {busy ? '…' : 'Unirme'}
+            {busy ? '…' : 'Join'}
           </button>
         </form>
       </div>

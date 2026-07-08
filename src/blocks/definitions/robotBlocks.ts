@@ -37,25 +37,25 @@ const CONTROL_ORANGE = '#FF8C00'
 // Colour-picker swatches for `sensor_sees_color`. Hexes mirror SensorPanel's
 // COLOR_DISPLAY so the block swatch and the live readout chip look identical.
 const COLOR_OPTIONS = [
-  imageOption(colorCircle('#DA291C'), 'rojo',     'RED'),
-  imageOption(colorCircle('#2E7D32'), 'verde',    'GREEN'),
-  imageOption(colorCircle('#006CB7'), 'azul',     'BLUE'),
-  imageOption(colorCircle('#FFD700'), 'amarillo', 'YELLOW'),
-  imageOption(colorCircle('#F5F5F5'), 'blanco',   'WHITE'),
-  imageOption(colorCircle('#1a1a1a'), 'negro',    'BLACK'),
+  imageOption(colorCircle('#DA291C'), 'red',    'RED'),
+  imageOption(colorCircle('#2E7D32'), 'green',  'GREEN'),
+  imageOption(colorCircle('#006CB7'), 'blue',   'BLUE'),
+  imageOption(colorCircle('#FFD700'), 'yellow', 'YELLOW'),
+  imageOption(colorCircle('#F5F5F5'), 'white',  'WHITE'),
+  imageOption(colorCircle('#1a1a1a'), 'black',  'BLACK'),
 ]
 
 // Shared dropdown option lists.
 const PORT_OPTIONS = [['A', 'A'], ['B', 'B']]
 // Motor spin direction shown as rotation-arrow icons (SPIKE-style).
 const SPIN_OPTIONS = [
-  imageOption(ICON_ROTATE_CW,  'horario',     'CW'),
-  imageOption(ICON_ROTATE_CCW, 'antihorario', 'CCW'),
+  imageOption(ICON_ROTATE_CW,  'clockwise',        'CW'),
+  imageOption(ICON_ROTATE_CCW, 'counterclockwise', 'CCW'),
 ]
 // Turn direction shown as left/right arrow icons.
 const TURN_OPTIONS = [
-  imageOption(ICON_ARROW_LEFT,  'izquierda', 'LEFT'),
-  imageOption(ICON_ARROW_RIGHT, 'derecha',   'RIGHT'),
+  imageOption(ICON_ARROW_LEFT,  'left',  'LEFT'),
+  imageOption(ICON_ARROW_RIGHT, 'right', 'RIGHT'),
 ]
 
 // ---------------------------------------------------------------------------
@@ -71,43 +71,43 @@ const blockJsonArray: object[] = [
     // below it run when the program starts. The interpreter treats it as a
     // cosmetic no-op and executes the blocks connected beneath.
     type: 'event_when_started',
-    message0: '%1 Al empezar el programa',
-    args0: [blockIcon(ICON_EVENT, 'evento')],
+    message0: '%1 When the program starts',
+    args0: [blockIcon(ICON_EVENT, 'event')],
     nextStatement: null,
     colour: SPIKE_EVENT,
-    tooltip: 'Inicia el programa. Conecta los bloques que quieras ejecutar debajo.',
+    tooltip: 'Starts the program. Connect the blocks you want to run below.',
   },
   {
     type: 'robot_drive_forward',
-    message0: '%1 Mover adelante %2 por %3 segundos',
+    message0: '%1 Move forward %2 for %3 seconds',
     args0: [
-      blockIcon(ICON_MOVE, 'mover'),
+      blockIcon(ICON_MOVE, 'move'),
       { type: 'field_number', name: 'SPEED',    value: 50, min: 0, max: 100 },
       { type: 'field_number', name: 'DURATION', value: 1,  min: 0 },
     ],
     previousStatement: null,
     nextStatement: null,
     colour: LEGO_RED,
-    tooltip: 'Mueve el robot hacia adelante durante N segundos.',
+    tooltip: 'Moves the robot forward for N seconds.',
   },
   {
     type: 'robot_drive_backward',
-    message0: '%1 Mover atrás %2 por %3 segundos',
+    message0: '%1 Move backward %2 for %3 seconds',
     args0: [
-      blockIcon(ICON_MOVE, 'mover'),
+      blockIcon(ICON_MOVE, 'move'),
       { type: 'field_number', name: 'SPEED',    value: 50, min: 0, max: 100 },
       { type: 'field_number', name: 'DURATION', value: 1,  min: 0 },
     ],
     previousStatement: null,
     nextStatement: null,
     colour: LEGO_RED,
-    tooltip: 'Mueve el robot hacia atrás durante N segundos.',
+    tooltip: 'Moves the robot backward for N seconds.',
   },
   {
     type: 'robot_turn',
-    message0: '%1 Girar %2 %3 grados',
+    message0: '%1 Turn %2 %3 degrees',
     args0: [
-      blockIcon(ICON_MOVE, 'girar'),
+      blockIcon(ICON_MOVE, 'turn'),
       {
         type: 'field_dropdown',
         name: 'DIRECTION',
@@ -118,34 +118,34 @@ const blockJsonArray: object[] = [
     previousStatement: null,
     nextStatement: null,
     colour: LEGO_BLUE,
-    tooltip: 'Gira el robot a la izquierda o derecha el número de grados indicado.',
+    tooltip: 'Turns the robot left or right by the given number of degrees.',
   },
   {
     type: 'robot_stop',
-    message0: '%1 Parar motores',
-    args0: [blockIcon(ICON_MOVE, 'parar')],
+    message0: '%1 Stop motors',
+    args0: [blockIcon(ICON_MOVE, 'stop')],
     previousStatement: null,
     nextStatement: null,
     colour: LEGO_RED,
-    tooltip: 'Detiene los motores del robot inmediatamente.',
+    tooltip: 'Stops the robot\'s motors immediately.',
   },
   {
     // Value block — no previousStatement/nextStatement; has output instead.
     // Sensor blocks carry the leading sensor glyph like the SPIKE app (the
     // reference sim puts SensorLight.svg inside its sensor reporters too).
     type: 'sensor_distance',
-    message0: '%1 Distancia frontal (cm)',
+    message0: '%1 Front distance (cm)',
     args0: [blockIcon(ICON_SENSOR, 'sensor')],
     output: 'Number',
     colour: SPIKE_SENSOR,
-    tooltip: 'Devuelve la distancia en centímetros al obstáculo más cercano.',
+    tooltip: 'Returns the distance in centimeters to the nearest obstacle.',
   },
   {
     // Boolean reporter for the colour sensor — plugs into "si… entonces" /
     // "repetir hasta que". SPIKE-style: sensor glyph + a picker of real colour
     // circles (not text). Codes must match `DetectableColor` (colorRegistry).
     type: 'sensor_sees_color',
-    message0: '%1 ¿Ve el color %2?',
+    message0: '%1 Sees the color %2?',
     args0: [
       blockIcon(ICON_SENSOR, 'sensor'),
       {
@@ -156,33 +156,33 @@ const blockJsonArray: object[] = [
     ],
     output: 'Boolean',
     colour: SPIKE_SENSOR,
-    tooltip: 'Verdadero cuando el sensor de color ve el color elegido (de cerca).',
+    tooltip: 'True when the color sensor sees the chosen color (up close).',
   },
   {
     type: 'wait_seconds',
-    message0: '%1 Esperar %2 segundos',
+    message0: '%1 Wait %2 seconds',
     args0: [
-      blockIcon(ICON_TIME, 'tiempo'),
+      blockIcon(ICON_TIME, 'time'),
       { type: 'field_number', name: 'SECONDS', value: 1, min: 0 },
     ],
     previousStatement: null,
     nextStatement: null,
     colour: LEGO_YELLOW,
-    tooltip: 'Pausa el programa durante N segundos.',
+    tooltip: 'Pauses the program for N seconds.',
   },
 
   // ── Movement: SPIKE-style "move for N rotations / degrees / seconds" ───────
   {
     type: 'robot_move_for',
-    message0: '%1 Mover %2 por %3 %4',
+    message0: '%1 Move %2 for %3 %4',
     args0: [
-      blockIcon(ICON_MOVE, 'mover'),
+      blockIcon(ICON_MOVE, 'move'),
       {
         type: 'field_dropdown',
         name: 'DIRECTION',
         options: [
-          ['adelante', 'FORWARD'],
-          ['atrás',    'BACKWARD'],
+          ['forward',  'FORWARD'],
+          ['backward', 'BACKWARD'],
         ],
       },
       { type: 'field_number', name: 'AMOUNT', value: 1, min: 0 },
@@ -190,25 +190,25 @@ const blockJsonArray: object[] = [
         type: 'field_dropdown',
         name: 'UNIT',
         options: [
-          ['rotaciones', 'ROTATIONS'],
-          ['grados',     'DEGREES'],
-          ['segundos',   'SECONDS'],
+          ['rotations', 'ROTATIONS'],
+          ['degrees',   'DEGREES'],
+          ['seconds',   'SECONDS'],
         ],
       },
     ],
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_MOVE,
-    tooltip: 'Mueve el robot una cantidad de rotaciones, grados o segundos.',
+    tooltip: 'Moves the robot a number of rotations, degrees, or seconds.',
   },
 
   // ── Hub 3×3 light matrix ───────────────────────────────────────────────────
   {
     // Drawable 3×3 editor (SPIKE-style): the kid clicks pixels on the block.
     type: 'light_display_matrix',
-    message0: '%1 Mostrar %2',
+    message0: '%1 Show %2',
     args0: [
-      blockIcon(ICON_LIGHT, 'luz'),
+      blockIcon(ICON_LIGHT, 'light'),
       {
         type: 'field_bitmap',
         name: 'MATRIX',
@@ -227,36 +227,36 @@ const blockJsonArray: object[] = [
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_LIGHT,
-    tooltip: 'Dibuja una imagen en la matriz de luces 3×3.',
+    tooltip: 'Draws an image on the 3×3 light matrix.',
   },
   {
     type: 'light_display_image',
-    message0: '%1 Mostrar imagen %2',
+    message0: '%1 Show image %2',
     args0: [
-      blockIcon(ICON_LIGHT, 'luz'),
+      blockIcon(ICON_LIGHT, 'light'),
       {
         type: 'field_dropdown',
         name: 'IMAGE',
         options: [
-          ['corazón ♥',  'CORAZON'],
-          ['cara 🙂',    'CARA'],
-          ['cuadrado ⬜', 'CUADRADO'],
-          ['equis ✖',    'EQUIS'],
-          ['flecha ↑',   'FLECHA'],
-          ['todo encendido', 'LLENO'],
+          ['heart ♥',   'CORAZON'],
+          ['face 🙂',   'CARA'],
+          ['square ⬜',  'CUADRADO'],
+          ['cross ✖',   'EQUIS'],
+          ['arrow ↑',   'FLECHA'],
+          ['all on',    'LLENO'],
         ],
       },
     ],
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_LIGHT,
-    tooltip: 'Muestra una imagen en la matriz de luces 3×3.',
+    tooltip: 'Shows an image on the 3×3 light matrix.',
   },
   {
     type: 'light_set_pixel',
-    message0: '%1 Encender fila %2 columna %3 brillo %4',
+    message0: '%1 Turn on row %2 column %3 brightness %4',
     args0: [
-      blockIcon(ICON_LIGHT, 'luz'),
+      blockIcon(ICON_LIGHT, 'light'),
       { type: 'field_number', name: 'ROW',        value: 1, min: 1, max: 3 },
       { type: 'field_number', name: 'COL',        value: 1, min: 1, max: 3 },
       { type: 'field_number', name: 'BRIGHTNESS', value: 100, min: 0, max: 100 },
@@ -264,22 +264,22 @@ const blockJsonArray: object[] = [
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_LIGHT,
-    tooltip: 'Enciende un píxel de la matriz 3×3 (fila y columna de 1 a 3).',
+    tooltip: 'Turns on a pixel of the 3×3 matrix (row and column from 1 to 3).',
   },
   {
     type: 'light_off',
-    message0: '%1 Apagar pantalla',
-    args0: [blockIcon(ICON_LIGHT, 'luz')],
+    message0: '%1 Turn off display',
+    args0: [blockIcon(ICON_LIGHT, 'light')],
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_LIGHT,
-    tooltip: 'Apaga toda la matriz de luces.',
+    tooltip: 'Turns off the entire light matrix.',
   },
 
   // ── Motors addressed by port (SPIKE Essential ports A / B) ─────────────────
   {
     type: 'motor_run_for',
-    message0: '%1 Motor %2 girar %3 por %4 %5',
+    message0: '%1 Motor %2 spin %3 for %4 %5',
     args0: [
       blockIcon(ICON_MOTOR, 'motor'),
       { type: 'field_dropdown', name: 'PORT',      options: PORT_OPTIONS },
@@ -289,20 +289,20 @@ const blockJsonArray: object[] = [
         type: 'field_dropdown',
         name: 'UNIT',
         options: [
-          ['rotaciones', 'ROTATIONS'],
-          ['grados',     'DEGREES'],
-          ['segundos',   'SECONDS'],
+          ['rotations', 'ROTATIONS'],
+          ['degrees',   'DEGREES'],
+          ['seconds',   'SECONDS'],
         ],
       },
     ],
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_MOTOR,
-    tooltip: 'Gira un motor (puerto A o B) una cantidad y luego lo detiene.',
+    tooltip: 'Spins a motor (port A or B) an amount, then stops it.',
   },
   {
     type: 'motor_start',
-    message0: '%1 Encender motor %2 girando %3',
+    message0: '%1 Start motor %2 spinning %3',
     args0: [
       blockIcon(ICON_MOTOR, 'motor'),
       { type: 'field_dropdown', name: 'PORT',      options: PORT_OPTIONS },
@@ -311,11 +311,11 @@ const blockJsonArray: object[] = [
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_MOTOR,
-    tooltip: 'Empieza a girar un motor de forma continua (no se detiene solo).',
+    tooltip: 'Starts spinning a motor continuously (it does not stop on its own).',
   },
   {
     type: 'motor_stop_port',
-    message0: '%1 Parar motor %2',
+    message0: '%1 Stop motor %2',
     args0: [
       blockIcon(ICON_MOTOR, 'motor'),
       { type: 'field_dropdown', name: 'PORT', options: PORT_OPTIONS },
@@ -323,38 +323,38 @@ const blockJsonArray: object[] = [
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_MOTOR,
-    tooltip: 'Detiene el motor del puerto indicado.',
+    tooltip: 'Stops the motor on the given port.',
   },
   {
     // Reporter (value block) — outputs the motor angle in degrees.
     type: 'motor_position',
-    message0: 'Posición del motor %1 (grados)',
+    message0: 'Motor %1 position (degrees)',
     args0: [
       { type: 'field_dropdown', name: 'PORT', options: PORT_OPTIONS },
     ],
     output: 'Number',
     colour: SPIKE_MOTOR,
-    tooltip: 'Devuelve el ángulo girado por el motor, en grados.',
+    tooltip: 'Returns the angle the motor has turned, in degrees.',
   },
 
   // ── Sound (hub speaker) ────────────────────────────────────────────────────
   {
     type: 'sound_beep',
-    message0: '%1 Pitar por %2 segundos',
+    message0: '%1 Beep for %2 seconds',
     args0: [
-      blockIcon(ICON_SOUND, 'sonido'),
+      blockIcon(ICON_SOUND, 'sound'),
       { type: 'field_number', name: 'DURATION', value: 0.5, min: 0 },
     ],
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_SOUND,
-    tooltip: 'Emite un pitido durante N segundos.',
+    tooltip: 'Plays a beep for N seconds.',
   },
   {
     type: 'sound_play_note',
-    message0: '%1 Tocar nota %2 por %3 segundos',
+    message0: '%1 Play note %2 for %3 seconds',
     args0: [
-      blockIcon(ICON_SOUND, 'sonido'),
+      blockIcon(ICON_SOUND, 'sound'),
       {
         type: 'field_dropdown',
         name: 'NOTE',
@@ -368,16 +368,16 @@ const blockJsonArray: object[] = [
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_SOUND,
-    tooltip: 'Toca una nota musical durante N segundos.',
+    tooltip: 'Plays a musical note for N seconds.',
   },
   {
     type: 'sound_stop',
-    message0: '%1 Parar sonido',
-    args0: [blockIcon(ICON_SOUND, 'sonido')],
+    message0: '%1 Stop sound',
+    args0: [blockIcon(ICON_SOUND, 'sound')],
     previousStatement: null,
     nextStatement: null,
     colour: SPIKE_SOUND,
-    tooltip: 'Detiene cualquier sonido que esté sonando.',
+    tooltip: 'Stops any sound that is playing.',
   },
 
   // ── Control (SPIKE-style additions next to the native controls_*) ──────────
@@ -385,43 +385,43 @@ const blockJsonArray: object[] = [
     // Scratch/SPIKE "forever". Runs its body until the program stops. No
     // nextStatement on purpose — like SPIKE, nothing can follow a forever loop.
     type: 'control_forever',
-    message0: 'por siempre %1',
+    message0: 'forever %1',
     args0: [{ type: 'input_statement', name: 'DO' }],
     previousStatement: null,
     colour: CONTROL_ORANGE,
-    tooltip: 'Repite los bloques de dentro sin parar (el patrón "vigilar y reaccionar").',
+    tooltip: 'Repeats the blocks inside without stopping (the "watch and react" pattern).',
   },
   {
     type: 'control_wait_until',
-    message0: 'esperar hasta que %1',
+    message0: 'wait until %1',
     args0: [{ type: 'input_value', name: 'CONDITION', check: 'Boolean' }],
     previousStatement: null,
     nextStatement: null,
     colour: CONTROL_ORANGE,
-    tooltip: 'Pausa el programa hasta que la condición sea verdadera.',
+    tooltip: 'Pauses the program until the condition is true.',
   },
   {
     // Terminal block: stops program + motors. No nextStatement — nothing can
     // run after it.
     type: 'control_stop',
-    message0: 'parar el programa',
+    message0: 'stop the program',
     previousStatement: null,
     colour: CONTROL_ORANGE,
-    tooltip: 'Detiene el programa y frena los motores.',
+    tooltip: 'Stops the program and brakes the motors.',
   },
 
   // ── Operators ───────────────────────────────────────────────────────────────
   {
     // Reporter (value block) — random integer between FROM and TO inclusive.
     type: 'operator_random',
-    message0: 'número aleatorio entre %1 y %2',
+    message0: 'random number between %1 and %2',
     args0: [
       { type: 'field_number', name: 'FROM', value: 1 },
       { type: 'field_number', name: 'TO',   value: 10 },
     ],
     output: 'Number',
     colour: SPIKE_OP,
-    tooltip: 'Devuelve un número entero al azar entre los dos valores (incluidos).',
+    tooltip: 'Returns a random integer between the two values (inclusive).',
   },
 ]
 
@@ -488,13 +488,13 @@ export function buildRobotToolbox(
   const categories: Cat[] = [
     {
       kind: 'category',
-      name: 'Eventos',
+      name: 'Events',
       colour: SPIKE_EVENT,
       contents: [{ kind: 'block', type: 'event_when_started' }],
     },
     {
       kind: 'category',
-      name: 'Movimiento',
+      name: 'Movement',
       colour: LEGO_RED,
       contents: [
         { kind: 'block', type: 'robot_move_for' },
@@ -506,7 +506,7 @@ export function buildRobotToolbox(
     },
     {
       kind: 'category',
-      name: 'Motores',
+      name: 'Motors',
       colour: SPIKE_MOTOR,
       contents: [
         { kind: 'block', type: 'motor_run_for' },
@@ -517,7 +517,7 @@ export function buildRobotToolbox(
     },
     {
       kind: 'category',
-      name: 'Luz',
+      name: 'Light',
       colour: SPIKE_LIGHT,
       contents: [
         { kind: 'block', type: 'light_display_matrix' },
@@ -528,7 +528,7 @@ export function buildRobotToolbox(
     },
     {
       kind: 'category',
-      name: 'Sonido',
+      name: 'Sound',
       colour: SPIKE_SOUND,
       contents: [
         { kind: 'block', type: 'sound_beep' },
@@ -546,7 +546,7 @@ export function buildRobotToolbox(
   if (sensorBlocks.length > 0) {
     categories.push({
       kind: 'category',
-      name: 'Sensores',
+      name: 'Sensors',
       colour: SPIKE_SENSOR,
       contents: sensorBlocks,
     })
@@ -554,7 +554,7 @@ export function buildRobotToolbox(
 
   categories.push({
     kind: 'category',
-    name: 'Tiempo',
+    name: 'Time',
     colour: LEGO_YELLOW,
     contents: [{ kind: 'block', type: 'wait_seconds' }],
   })

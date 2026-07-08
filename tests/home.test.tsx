@@ -7,7 +7,7 @@ describe('Home', () => {
   it('shows the title and a teacher login link to /dashboard', () => {
     render(<MemoryRouter><Home /></MemoryRouter>)
     expect(screen.getByText(/BrickCode/)).toBeTruthy()
-    const link = screen.getByText('Entrar como profesor').closest('a')
+    const link = screen.getByText('Log in as a teacher').closest('a')
     expect(link?.getAttribute('href')).toBe('/dashboard')
   })
 })

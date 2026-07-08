@@ -276,9 +276,9 @@ function buildProcCaveCar(): { group: THREE.Group; disposables: { dispose(): voi
 
 export const challengeCave = {
   id:          'challenge-cave',
-  title:       '🔦 El coche de la cueva',
+  title:       '🔦 The cave car',
   description:
-    'Es el atardecer y el coche avanza solo hacia una cueva oscura. Pista de explorador: viaja 18 cm cada segundo. Enciende la pieza de luz antes de entrar, apágala en los cristales azules y vuelve a encenderla para la última zona oscura.',
+    'It\'s dusk and the car drives on its own toward a dark cave. Explorer tip: it travels 18 cm every second. Turn on the light part before entering, turn it off at the blue crystals, and turn it back on for the last dark stretch.',
   difficulty:  2,
   tags:        ['lights'],
   robot:       'simple',
@@ -288,13 +288,13 @@ export const challengeCave = {
   // The cave decides the outcome, not the end of the kid's program.
   scenarioDecidesEnd: true,
   // The level drives the car — movement blocks would only mislead.
-  hiddenCategories: ['Movimiento', 'Motores'],
+  hiddenCategories: ['Movement', 'Motors'],
   // Drives the per-level loading screen (see levelAssets).
   decorModels: [CAR_MODEL, ROCK_MODEL, PINE_MODEL, BAT_MODEL],
   hints: [
-    'Acertijo: si el coche avanza 18 cm por segundo, en 5 segundos recorre casi 90 cm. La primera oscuridad empieza un poquito antes: conviene encender la pieza de luz al inicio',
-    'Los cristales azules están cerca de los segundos 11 a 14. Ahí duermen los murciélagos, así que la luz debe estar apagada antes de llegar',
-    'Después de los cristales vuelve otra zona oscura cerca del segundo 17. Ritmo de prueba: enciende → espera 8 → apaga → espera 7 → enciende',
+    'Riddle: if the car moves 18 cm per second, in 5 seconds it covers almost 90 cm. The first darkness starts a little before that: it\'s best to turn on the light part at the start',
+    'The blue crystals are near seconds 11 to 14. That\'s where the bats sleep, so the light must be off before you get there',
+    'After the crystals, another dark stretch comes back near second 17. Test rhythm: turn on → wait 8 → turn off → wait 7 → turn on',
   ],
 
   /**
@@ -639,17 +639,17 @@ export const challengeCave = {
         if ((inZone(p.z, DARK_A) || inZone(p.z, DARK_B)) && !lit) {
           s.result = {
             success: false,
-            message: '💥 ¡Crash! El coche chocó con una roca en la oscuridad. Enciende la luz antes de entrar a la cueva.',
+            message: '💥 Crash! The car hit a rock in the dark. Turn on the light before entering the cave.',
           }
         } else if (inZone(p.z, BAT) && lit) {
           s.result = {
             success: false,
-            message: '🦇 ¡La luz despertó a los murciélagos! Apágala antes de llegar a los cristales azules (usa "esperar segundos").',
+            message: '🦇 The light woke up the bats! Turn it off before reaching the blue crystals (use "wait seconds").',
           }
         } else if (p.z <= EXIT_Z) {
           s.result = {
             success: true,
-            message: '🌟 ¡Saliste de la cueva! Encendiste y apagaste la luz en el momento justo.',
+            message: '🌟 You made it out of the cave! You turned the light on and off at just the right moment.',
           }
         }
         if (s.result) {
@@ -757,7 +757,7 @@ export const challengeCave = {
     return (
       active?.result ?? {
         success: false,
-        message: 'El coche arranca solo. Programa el ritmo de la luz con "esperar segundos": enciéndela para la oscuridad y apágala junto a los murciélagos, y pulsa Ejecutar.',
+        message: 'The car starts on its own. Program the light\'s rhythm with "wait seconds": turn it on for the darkness and off near the bats, then press Run.',
       }
     )
   },

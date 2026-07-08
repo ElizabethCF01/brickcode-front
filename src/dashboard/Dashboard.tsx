@@ -35,13 +35,13 @@ function Chrome() {
       <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
         <span className="flex items-center gap-2 font-semibold text-slate-900">
           <img src="/logo.png" alt="" className="h-6 w-6" />
-          <span>BrickCode · Panel del profesor</span>
+          <span>BrickCode · Teacher dashboard</span>
         </span>
         <button
           onClick={() => getSupabase()?.auth.signOut()}
           className="text-sm text-slate-500 hover:text-slate-900"
         >
-          Cerrar sesión
+          Sign out
         </button>
       </div>
     </header>

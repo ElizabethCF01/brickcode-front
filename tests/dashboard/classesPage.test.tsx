@@ -27,10 +27,10 @@ describe('ClassesPage', () => {
     vi.mocked(createClass).mockResolvedValue({ id: 'c2', name: 'Nueva Clase', classCode: 'ABC123', createdAt: '2026-06-28T10:00:00Z' })
 
     render(<MemoryRouter><ClassesPage /></MemoryRouter>)
-    await screen.findByText(/Aún no tienes clases/)
+    await screen.findByText(/don't have any classes/)
 
-    fireEvent.change(screen.getByPlaceholderText(/Nombre de la clase/), { target: { value: 'Nueva Clase' } })
-    fireEvent.click(screen.getByText('Crear clase'))
+    fireEvent.change(screen.getByPlaceholderText(/Class name/), { target: { value: 'Nueva Clase' } })
+    fireEvent.click(screen.getByText('Create class'))
 
     expect(createClass).toHaveBeenCalledWith('Nueva Clase')
     await waitFor(() => expect(screen.getByText('Nueva Clase')).toBeTruthy())

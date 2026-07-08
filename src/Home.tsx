@@ -13,20 +13,20 @@ export default function Home() {
           <span>BrickCode</span>
         </h1>
         <p className="max-w-md text-gray-400">
-          Programa un robot LEGO en 3D con bloques — sin hardware, directamente en el navegador.
+          Program a 3D LEGO robot with blocks — no hardware, right in your browser.
         </p>
         <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
           <Link
             to="/play"
             className="rounded-lg bg-green-600 hover:bg-green-500 px-6 py-3 font-medium transition-colors"
           >
-            Soy alumno
+            I'm a student
           </Link>
           <Link
             to="/dashboard"
             className="rounded-lg bg-indigo-600 hover:bg-indigo-500 px-6 py-3 font-medium transition-colors"
           >
-            Entrar como profesor
+            Log in as a teacher
           </Link>
         </div>
       </div>

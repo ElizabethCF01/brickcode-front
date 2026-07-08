@@ -29,13 +29,13 @@ export default function StudentAuthGate({ children }: { children: ReactNode }) {
     return () => { cancelled = true }
   }, [session])
 
-  const loading = <div className="min-h-screen flex items-center justify-center bg-gray-900 text-gray-400">Cargando…</div>
+  const loading = <div className="min-h-screen flex items-center justify-center bg-gray-900 text-gray-400">Loading…</div>
 
   if (!ready) return loading
   if (!session) return <StudentLoginForm />
   if (isTeacher === null) return loading
   if (isTeacher) {
-    return <StudentLoginForm note="Estás conectado como profesor. Inicia sesión como alumno para jugar." />
+    return <StudentLoginForm note="You're signed in as a teacher. Sign in as a student to play." />
   }
   return <>{children}</>
 }

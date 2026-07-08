@@ -7,10 +7,10 @@ import { getSupabase } from '../backend/supabaseClient'
 // Category presentation mirrors the SPIKE-style toolbox palette in robotBlocks.ts
 // so a level's tags read the same colour as the blocks it exercises.
 const CATEGORY_LABEL: Record<LevelCategory, string> = {
-  motors: 'Motores',
-  sensors: 'Sensores',
-  lights: 'Luces',
-  sound: 'Sonido',
+  motors: 'Motors',
+  sensors: 'Sensors',
+  lights: 'Lights',
+  sound: 'Sound',
 }
 // Mirrors the SPIKE toolbox palette in robotBlocks.ts (Sensores = cyan).
 const CATEGORY_COLOR: Record<LevelCategory, string> = {
@@ -19,7 +19,7 @@ const CATEGORY_COLOR: Record<LevelCategory, string> = {
   lights: '#9B6AF6',
   sound: '#C061F1',
 }
-const DIFFICULTY_LABEL: Record<number, string> = { 1: 'Fácil', 2: 'Medio', 3: 'Difícil' }
+const DIFFICULTY_LABEL: Record<number, string> = { 1: 'Easy', 2: 'Medium', 3: 'Hard' }
 
 type Filter = LevelCategory | 'all'
 
@@ -55,19 +55,19 @@ export default function LevelSelect({ onSelect }: LevelSelectProps) {
         <button
           onClick={() => getSupabase()?.auth.signOut()}
           className="text-xs px-2.5 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-200"
-          title="Cerrar sesión"
+          title="Sign out"
         >
-          🚪 Cerrar sesión
+          🚪 Sign out
         </button>
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-8">
-        <h1 className="text-2xl font-bold mb-1">Elige tu reto</h1>
-        <p className="text-gray-400 mb-6">Cada nivel practica algo distinto. ¡Empieza por donde quieras!</p>
+        <h1 className="text-2xl font-bold mb-1">Choose your challenge</h1>
+        <p className="text-gray-400 mb-6">Each level practices something different. Start wherever you like!</p>
 
         {/* Category filter */}
         <div className="flex flex-wrap gap-2 mb-8">
-          <FilterChip active={filter === 'all'} onClick={() => setFilter('all')} label="Todos" />
+          <FilterChip active={filter === 'all'} onClick={() => setFilter('all')} label="All" />
           {categories.map((cat) => (
             <FilterChip
               key={cat}
@@ -153,10 +153,10 @@ function LevelCard({
       {/* Status badge */}
       <div className="absolute top-3 right-3 text-sm">
         {completed ? (
-          <span className="text-green-400" title="Completado">✅</span>
+          <span className="text-green-400" title="Completed">✅</span>
         ) : level.comingSoon ? (
           <span className="text-[10px] uppercase tracking-wide text-gray-400 bg-gray-700 px-1.5 py-0.5 rounded">
-            Próximamente
+            Coming soon
           </span>
         ) : null}
       </div>

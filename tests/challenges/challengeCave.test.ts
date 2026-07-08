@@ -76,7 +76,7 @@ describe('challenge-cave', () => {
   it('evaluate() before any verdict returns the fallback nudge', () => {
     const result = challengeCave.evaluate(robot)
     expect(result.success).toBe(false)
-    expect(result.message).toContain('Programa')
+    expect(result.message).toContain('Program')
   })
 
   it('crashes when the car enters a dark zone with the hub light off', () => {
@@ -85,7 +85,7 @@ describe('challenge-cave', () => {
 
     const result = challengeCave.evaluate(robot)
     expect(result.success).toBe(false)
-    expect(result.message).toContain('roca')
+    expect(result.message).toContain('rock')
     expect(useSimulationStore.getState().autoStopRequested).toBe(true)
   })
 
@@ -96,7 +96,7 @@ describe('challenge-cave', () => {
 
     const result = challengeCave.evaluate(robot)
     expect(result.success).toBe(false)
-    expect(result.message).toContain('murciélagos')
+    expect(result.message).toContain('bats')
     expect(useSimulationStore.getState().autoStopRequested).toBe(true)
   })
 
@@ -125,13 +125,13 @@ describe('challenge-cave', () => {
   it('mirrors the real cave car kit: no sensor kit, no Sensores UI', () => {
     expect(robot.hasSensor).toBe(false)
     expect(robot.hasColorSensor).toBe(false)
-    expect(challengeCave.hiddenCategories).toEqual(['Movimiento', 'Motores'])
+    expect(challengeCave.hiddenCategories).toEqual(['Movement', 'Motors'])
   })
 
   it('gives kid-readable timing clues because the car has no sensors', () => {
     expect(challengeCave.description).toContain('18 cm')
-    expect(challengeCave.hints.join(' ')).toContain('segundos 11 a 14')
-    expect(challengeCave.hints.join(' ')).toContain('segundo 17')
+    expect(challengeCave.hints.join(' ')).toContain('seconds 11 to 14')
+    expect(challengeCave.hints.join(' ')).toContain('second 17')
   })
 
   it('places the visible beam at the front light module connected to the hub', () => {
@@ -169,7 +169,7 @@ describe('challenge-cave', () => {
 
     handle.reset!()
 
-    expect(challengeCave.evaluate(robot).message).toContain('Programa')
+    expect(challengeCave.evaluate(robot).message).toContain('Program')
     expect(useSimulationStore.getState().hubMatrix.every((v) => v === 0)).toBe(true)
     expect(Math.abs(robot.getPosition().z)).toBeLessThan(0.01)
   })

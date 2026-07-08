@@ -17,13 +17,13 @@ export default function ClassPage() {
   return (
     <>
       <PageHeader
-        title={data?.cls?.name ?? 'Clase'}
-        subtitle={data?.cls ? `Código: ${data.cls.classCode}` : undefined}
-        back={{ to: dash.classes, label: 'Clases' }}
+        title={data?.cls?.name ?? 'Class'}
+        subtitle={data?.cls ? `Code: ${data.cls.classCode}` : undefined}
+        back={{ to: dash.classes, label: 'Classes' }}
       />
       {loading && <Loading />}
       {error && <ErrorBox message={error} />}
-      {data && data.stats.length === 0 && <Empty>Ningún alumno se ha unido todavía.</Empty>}
+      {data && data.stats.length === 0 && <Empty>No students have joined yet.</Empty>}
       {data && data.stats.length > 0 && (
         <div className="grid gap-3">
           {data.stats.map((s) => {
@@ -33,9 +33,9 @@ export default function ClassPage() {
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-slate-900">{s.pseudonym}</span>
                   <div className="flex gap-4 text-sm text-slate-600">
-                    <span><b className="text-slate-900">{s.runCount}</b> ejecuciones</span>
+                    <span><b className="text-slate-900">{s.runCount}</b> runs</span>
                     <span className={s.failureCount > 0 ? 'text-amber-600' : ''}>
-                      <b>{s.failureCount}</b> fallos
+                      <b>{s.failureCount}</b> failures
                     </span>
                   </div>
                 </div>

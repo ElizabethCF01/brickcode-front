@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BrickCode — Defense Deck Preview</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧱</text></svg>">
+<style>
+  /* minimal reset */
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0}
+  img{max-width:100%;height:auto}
+  button{font:inherit}
+
+  :root {
+    --paper:#F4F6F8; --card:#FFFFFF;
+    --ink:#14171C; --ink-2:#48515F; --ink-3:#8A93A2;
+    --line:#E4E7EC; --line-2:#CFD5DE;
+    --accent:#D0161B; --on-accent:#FFFFFF;
+    --yellow:#F2B705; --blue:#1A6FD4;
+    --good:#1E9E58; --warn:#C07A15;
+    --note:#EEF1F5; --note-line:#D8DEE6;
+    --shadow:0 1px 2px rgba(20,23,28,.04), 0 8px 24px -12px rgba(20,23,28,.18);
+    --font-display:"SF Pro Display","Helvetica Neue",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --font-body:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#0C0E12; --card:#161A21;
+      --ink:#E9ECF1; --ink-2:#A7AFBC; --ink-3:#6C7581;
+      --line:#252A32; --line-2:#333A44;
+      --accent:#F5484C; --on-accent:#160607;
+      --yellow:#F3C64B; --blue:#4E97EA;
+      --good:#37C97D; --warn:#E0A43C;
+      --note:#12161C; --note-line:#262C35;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 30px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#F4F6F8; --card:#FFFFFF; --ink:#14171C; --ink-2:#48515F; --ink-3:#8A93A2;
+    --line:#E4E7EC; --line-2:#CFD5DE; --accent:#D0161B; --on-accent:#FFFFFF;
+    --yellow:#F2B705; --blue:#1A6FD4; --good:#1E9E58; --warn:#C07A15;
+    --note:#EEF1F5; --note-line:#D8DEE6;
+    --shadow:0 1px 2px rgba(20,23,28,.04), 0 8px 24px -12px rgba(20,23,28,.18);
+  }
+  :root[data-theme="dark"]{
+    --paper:#0C0E12; --card:#161A21; --ink:#E9ECF1; --ink-2:#A7AFBC; --ink-3:#6C7581;
+    --line:#252A32; --line-2:#333A44; --accent:#F5484C; --on-accent:#160607;
+    --yellow:#F3C64B; --blue:#4E97EA; --good:#37C97D; --warn:#E0A43C;
+    --note:#12161C; --note-line:#262C35;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 30px -14px rgba(0,0,0,.6);
+  }
+
+  .page{
+    background:var(--paper); color:var(--ink);
+    font-family:var(--font-body); line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:5rem;
+  }
+
+  /* ---------- header ---------- */
+  .top{
+    position:sticky; top:0; z-index:20;
+    background:color-mix(in srgb, var(--paper) 86%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .top-inner{
+    max-width:960px; margin:0 auto; padding:.85rem clamp(1rem,4vw,2rem);
+    display:flex; align-items:center; gap:1rem; justify-content:space-between;
+  }
+  .brand{display:flex; align-items:center; gap:.7rem; min-width:0}
+  .studs{display:flex; gap:4px}
+  .stud{width:11px; height:11px; border-radius:50%; background:var(--ink-3)}
+  .stud.r{background:var(--accent)} .stud.y{background:var(--yellow)} .stud.b{background:var(--blue)}
+  .brand b{font-family:var(--font-display); font-weight:800; letter-spacing:-.02em; font-size:1.02rem}
+  .brand span{color:var(--ink-3); font-size:.82rem; white-space:nowrap}
+  .toggle{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.04em;
+    color:var(--ink-2); background:var(--card); border:1px solid var(--line-2);
+    border-radius:999px; padding:.4rem .8rem; cursor:pointer;
+  }
+  .toggle:hover{border-color:var(--accent); color:var(--accent)}
+  .toggle:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  /* ---------- intro ---------- */
+  .wrap{max-width:960px; margin:0 auto; padding:0 clamp(1rem,4vw,2rem)}
+  .intro{padding:clamp(2rem,6vw,3.6rem) 0 1.4rem}
+  .eyebrow{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--accent); margin:0 0 .8rem;
+  }
+  .intro h1{
+    font-family:var(--font-display); font-weight:800; letter-spacing:-.03em;
+    font-size:clamp(1.8rem,5vw,2.9rem); line-height:1.05; margin:0 0 .8rem;
+    text-wrap:balance; max-width:20ch;
+  }
+  .intro p{color:var(--ink-2); font-size:1.02rem; max-width:60ch; margin:0}
+  .legend{
+    display:flex; flex-wrap:wrap; gap:.6rem; margin-top:1.6rem;
+  }
+  .legend span{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.03em;
+    padding:.4rem .7rem; border-radius:8px; border:1px solid var(--line-2);
+    color:var(--ink-2); background:var(--card);
+  }
+  .legend span b{color:var(--ink); font-weight:700}
+  .legend .l-head{border-left:3px solid var(--accent)}
+  .legend .l-screen{border-left:3px solid var(--blue)}
+  .legend .l-say{border-left:3px solid var(--ink-3)}
+
+  /* ---------- slide ---------- */
+  .deck{display:flex; flex-direction:column; gap:clamp(2.2rem,6vw,3.4rem); padding-top:1.4rem}
+  .slide{display:flex; flex-direction:column; gap:.75rem}
+  .frame{
+    background:var(--card); border:1px solid var(--line);
+    border-radius:16px; box-shadow:var(--shadow);
+    aspect-ratio:16/9; overflow:hidden;
+    display:flex; flex-direction:column;
+    padding:clamp(1.1rem,3.4vw,2rem);
+    position:relative;
+  }
+  .frame::before{ /* stud accent, top-right corner */
+    content:""; position:absolute; top:14px; right:16px;
+    width:9px; height:9px; border-radius:50%;
+    background:var(--line-2);
+  }
+  .frame.key::before{background:var(--accent)}
+  .s-top{display:flex; align-items:center; gap:.6rem; margin-bottom:auto}
+  .num{
+    font-family:var(--font-mono); font-weight:700; font-size:.74rem;
+    color:var(--on-accent); background:var(--ink);
+    border-radius:6px; padding:.2rem .45rem; letter-spacing:.02em;
+  }
+  .frame.key .num{background:var(--accent)}
+  .kick{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--ink-3);
+  }
+  .frame.key .kick{color:var(--accent)}
+  .headline{
+    font-family:var(--font-display); font-weight:800; letter-spacing:-.025em;
+    line-height:1.04; margin:.2rem 0; text-wrap:balance;
+    font-size:clamp(1.25rem,3.9vw,2.4rem); max-width:20ch;
+  }
+  .tagline{color:var(--ink-2); font-size:clamp(.95rem,2.2vw,1.25rem); margin:.1rem 0 0}
+  .foot-meta{
+    font-family:var(--font-mono); font-size:clamp(.66rem,1.5vw,.8rem);
+    color:var(--ink-3); margin-top:auto; letter-spacing:.02em;
+  }
+  .chips{display:flex; flex-wrap:wrap; gap:.45rem; margin-top:.7rem}
+  .chip{
+    font-size:clamp(.72rem,1.7vw,.9rem); font-weight:600;
+    padding:.32rem .7rem; border-radius:999px;
+    border:1px solid var(--line-2); color:var(--ink-2); background:var(--paper);
+  }
+  .lead-in{color:var(--ink-3); font-size:clamp(.8rem,1.8vw,.95rem); margin:.1rem 0 0}
+  ul.pts{margin:.6rem 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:.45rem}
+  ul.pts li{
+    position:relative; padding-left:1.1rem; color:var(--ink);
+    font-size:clamp(.85rem,2vw,1.08rem); max-width:34ch;
+  }
+  ul.pts li::before{
+    content:""; position:absolute; left:0; top:.55em;
+    width:7px; height:7px; border-radius:50%; background:var(--accent);
+  }
+  .grow{flex:1; display:flex; flex-direction:column; justify-content:center}
+
+  /* visual placeholder */
+  .visual{
+    margin-top:.8rem; border:1.5px dashed var(--line-2); border-radius:10px;
+    background:repeating-linear-gradient(45deg,transparent,transparent 9px,color-mix(in srgb,var(--line) 40%,transparent) 9px,color-mix(in srgb,var(--line) 40%,transparent) 10px);
+    display:flex; align-items:center; gap:.6rem; padding:.7rem .9rem;
+    color:var(--ink-3);
+  }
+  .visual.big{flex:1; align-items:center; justify-content:center; text-align:center; margin-top:.9rem}
+  .visual .vlabel{
+    font-family:var(--font-mono); font-size:.64rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--accent);
+    border:1px solid currentColor; border-radius:5px; padding:.16rem .35rem; flex:none;
+  }
+  .visual .vtext{font-size:clamp(.75rem,1.7vw,.92rem); color:var(--ink-2)}
+  .visual.big .vinner{display:flex; flex-direction:column; align-items:center; gap:.4rem}
+
+  /* two-column status */
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:.4rem}
+  .col h4{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.06em;
+    text-transform:uppercase; margin:0 0 .5rem; display:flex; align-items:center; gap:.4rem;
+  }
+  .dot{width:9px; height:9px; border-radius:50%; flex:none}
+  .dot.good{background:var(--good)} .dot.warn{background:var(--warn)}
+  .col.good h4{color:var(--good)} .col.warn h4{color:var(--warn)}
+  .col ul{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:.32rem}
+  .col li{font-size:clamp(.76rem,1.7vw,.95rem); color:var(--ink); padding-left:.9rem; position:relative}
+  .col li::before{content:""; position:absolute; left:0; top:.55em; width:5px; height:5px; border-radius:50%}
+  .col.good li::before{background:var(--good)} .col.warn li::before{background:var(--warn)}
+
+  /* two-user flow (slide 4) */
+  .flow{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:clamp(.5rem,2vw,1.4rem); margin-top:.6rem; flex:1}
+  .node{border:1px solid var(--line-2); border-radius:12px; padding:clamp(.7rem,2vw,1.2rem); background:var(--paper); text-align:center}
+  .node .who{font-family:var(--font-display); font-weight:800; font-size:clamp(1rem,2.6vw,1.5rem); letter-spacing:-.02em}
+  .node .what{color:var(--ink-2); font-size:clamp(.72rem,1.6vw,.92rem); margin-top:.25rem}
+  .node.student .who{color:var(--blue)} .node.teacher .who{color:var(--accent)}
+  .arrow{font-family:var(--font-mono); color:var(--ink-3); font-size:.72rem; text-align:center; letter-spacing:.06em}
+  .arrow b{display:block; color:var(--ink); font-size:1.4rem; line-height:.8}
+
+  /* diagram caption */
+  .cap{font-family:var(--font-mono); font-size:.62rem; letter-spacing:.05em; color:var(--ink-3); margin:.55rem 0 0}
+
+  /* event log (slide 7) */
+  .log{
+    margin-top:.85rem; flex:1; border:1px solid var(--line-2); border-radius:10px;
+    background:var(--paper); padding:clamp(.55rem,1.6vw,.85rem) clamp(.6rem,2vw,1rem);
+    font-family:var(--font-mono); font-size:clamp(.66rem,1.5vw,.86rem);
+    display:flex; flex-direction:column; justify-content:center; gap:.3rem;
+  }
+  .lrow{display:grid; grid-template-columns:3.2em 8.5em 1fr; gap:.5rem; color:var(--ink-2); white-space:nowrap; overflow:hidden}
+  .lt{color:var(--ink-3)} .lk{color:var(--blue); font-weight:600} .lk.err{color:var(--accent)}
+
+  /* pipeline (slide 8) */
+  .pipe{
+    display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:.5rem;
+    align-items:stretch; margin-top:.9rem; flex:1;
+  }
+  .pstage{
+    border:1px solid var(--line-2); border-radius:12px; background:var(--paper);
+    padding:clamp(.6rem,1.8vw,.95rem); display:flex; flex-direction:column; gap:.4rem; justify-content:center;
+  }
+  .pstage h5{margin:0; font-family:var(--font-mono); font-size:.64rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
+  .pstage.out{border-color:var(--accent)}
+  .pstage.out h5{color:var(--accent)}
+  .pstage ul{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:.24rem}
+  .pstage li{font-size:clamp(.72rem,1.5vw,.92rem); color:var(--ink)}
+  .pstage.out li{font-weight:600}
+  .parrow{display:flex; align-items:center; justify-content:center; color:var(--ink-3); font-family:var(--font-mono); font-size:1.1rem}
+
+  /* architecture chain (slide 10) */
+  .chain{display:flex; align-items:stretch; gap:.5rem; margin-top:.9rem; flex:1}
+  .cnode{
+    flex:1; border:1px solid var(--line-2); border-radius:12px; background:var(--paper);
+    padding:clamp(.6rem,1.8vw,1rem); display:flex; flex-direction:column; justify-content:center;
+    text-align:center; gap:.3rem;
+  }
+  .cnode .cn-t{font-family:var(--font-display); font-weight:800; letter-spacing:-.01em; font-size:clamp(.85rem,2vw,1.15rem)}
+  .cnode .cn-s{font-size:clamp(.66rem,1.4vw,.86rem); color:var(--ink-2)}
+  .cnode.mid{border-color:var(--accent)}
+  .cnode.mid .cn-t{color:var(--accent)}
+  .carrow{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.15rem; color:var(--ink-3); font-family:var(--font-mono); font-size:.6rem; letter-spacing:.06em}
+  .carrow b{font-size:1.3rem; line-height:.7}
+
+  /* dashboard wireframe (slide 9) */
+  .dash{margin-top:.9rem; flex:1; border:1px solid var(--line-2); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; background:var(--paper)}
+  .dash-bar{display:flex; align-items:center; gap:6px; padding:.5rem .75rem; border-bottom:1px solid var(--line); background:var(--card)}
+  .dash-bar .dt{width:8px; height:8px; border-radius:50%; background:var(--line-2)}
+  .dash-bar .dname{font-family:var(--font-mono); font-size:.64rem; letter-spacing:.05em; color:var(--ink-3); margin-left:.3rem}
+  .dash-body{display:flex; flex-direction:column; flex:1}
+  .drow{display:grid; grid-template-columns:5.5em 1fr auto; gap:.7rem; align-items:center; padding:clamp(.5rem,1.6vw,.8rem) .75rem; border-bottom:1px solid var(--line); flex:1}
+  .drow:last-child{border-bottom:none}
+  .dstudent{font-size:clamp(.74rem,1.6vw,.95rem); font-weight:600}
+  .dbars{display:flex; gap:.35rem; align-items:center}
+  .dbar{height:7px; border-radius:4px; background:var(--line-2); flex:1; overflow:hidden}
+  .dbar i{display:block; height:100%; background:var(--blue); border-radius:4px}
+  .pill{font-family:var(--font-mono); font-size:.62rem; letter-spacing:.03em; padding:.2rem .5rem; border-radius:999px; white-space:nowrap}
+  .pill.ok{color:var(--good); background:color-mix(in srgb,var(--good) 15%,transparent)}
+  .pill.mid{color:var(--warn); background:color-mix(in srgb,var(--warn) 17%,transparent)}
+  .pill.low{color:var(--accent); background:color-mix(in srgb,var(--accent) 15%,transparent)}
+
+  /* ---------- say note ---------- */
+  .say{
+    background:var(--note); border:1px solid var(--note-line);
+    border-left:3px solid var(--ink-3); border-radius:0 10px 10px 0;
+    padding:.7rem .95rem; display:flex; gap:.7rem; align-items:baseline;
+  }
+  .say .sl{
+    font-family:var(--font-mono); font-size:.64rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--ink-3); flex:none; padding-top:.1rem;
+  }
+  .say p{margin:0; color:var(--ink-2); font-size:.92rem; max-width:70ch}
+
+  .endnote{
+    max-width:960px; margin:3.4rem auto 0; padding:1.4rem clamp(1rem,4vw,2rem) 0;
+    border-top:1px solid var(--line); color:var(--ink-3); font-size:.85rem;
+  }
+  .endnote b{color:var(--ink-2)}
+
+  /* reveal */
+  .slide{opacity:1}
+  @media (prefers-reduced-motion:no-preference){
+    .slide.reveal{opacity:0; transform:translateY(14px); transition:opacity .5s ease, transform .5s ease}
+    .slide.reveal.in{opacity:1; transform:none}
+  }
+
+  @media (max-width:640px){
+    .frame{aspect-ratio:auto; min-height:auto}
+    .cols{grid-template-columns:1fr}
+    .flow{grid-template-columns:1fr; gap:.5rem}
+    .arrow b{transform:rotate(90deg)}
+    .pipe{grid-template-columns:1fr}
+    .parrow{transform:rotate(90deg)}
+    .chain{flex-direction:column}
+    .carrow b{transform:rotate(90deg)}
+    .drow{grid-template-columns:1fr auto}
+    .dbars{display:none}
+    .lrow{grid-template-columns:2.6em 7em 1fr; font-size:.68rem}
+    .brand span{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header class="top">
+    <div class="top-inner">
+      <div class="brand">
+        <div class="studs"><span class="stud r"></span><span class="stud y"></span><span class="stud b"></span></div>
+        <b>BrickCode</b>
+        <span>Defense deck · preview</span>
+      </div>
+      <button class="toggle" id="themeBtn" type="button" aria-label="Toggle light or dark theme">Theme</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <section class="intro">
+      <p class="eyebrow">Slide-by-slide mockup</p>
+      <h1>A minimalist deck you can rebuild in your template.</h1>
+      <p>Each card below is one slide, sized like it'll project (16:9). The big text is the
+        headline; the little that's left is all that goes on screen. The muted strip beneath a
+        slide is <b>what you say</b> — never on the slide itself. Dashed boxes mark where a
+        screenshot or diagram lives.</p>
+      <div class="legend">
+        <span class="l-head"><b>Headline</b> — the big text box</span>
+        <span class="l-screen"><b>On screen</b> — the only other content</span>
+        <span class="l-say"><b>You say</b> — spoken, not shown</span>
+      </div>
+    </section>
+
+    <div class="deck">
+
+      <!-- 1 -->
+      <article class="slide">
+        <div class="frame">
+          <div class="s-top"><span class="num">01</span><span class="kick">Title</span></div>
+          <div class="grow">
+            <h2 class="headline">BrickCode</h2>
+            <p class="tagline">Code a robot. No robot required.</p>
+          </div>
+          <p class="foot-meta">[Your name] · M.Sc. Computer Science &amp; Data Science · Capstone Defense · [date]</p>
+        </div>
+        <div class="say"><span class="sl">Say</span><p>"In the next 15 minutes I'll show a system that teaches kids to program robots without hardware — and quietly measures how they learn to think."</p></div>
+      </article>
+
+      <!-- 2 -->
+      <article class="slide">
+        <div class="frame">
+          <div class="s-top"><span class="num">02</span><span class="kick">Hook</span></div>
+          <div class="grow">
+            <h2 class="headline">The lesson stops before it starts.</h2>
+            <p class="lead-in">To program a LEGO robot in Scratch, a child first needs —</p>
+            <div class="chips"><span class="chip">a kit</span><span class="chip">a cable</span><span class="chip">Wi-Fi</span><span class="chip">drivers</span></div>
+          </div>
+          <div class="visual"><span class="vlabel">Visual</span><span class="vtext">Photo — a tangled cable or a LEGO kit box on a desk.</span></div>
+        </div>
+        <div class="say"><span class="sl">Say</span><p>Paint the scene: a kid excited to code, blocked by 20 minutes of setup before anything moves. The idea dies in the setup.</p></div>
+      </article>
+
+      <!-- 3 -->
+      <article class="slide">
+        <div class="frame">
+          <div class="s-top"><span class="num">03</span><span class="kick">Problem</span></div>
+          <div class="grow">
+            <h2 class="headline">Robotics is gated by hardware.</h2>
+            <ul class="pts">
+              <li>Cost, maintenance, space</li>
+              <li>Every LEGO Scratch plugin needs the kit + Wi-Fi</li>
+              <li>No accessible, pedagogical 3D simulator to replace it</li>
+            </ul>
+          </div>
+        </div>
+        <div class="say"><span class="sl">Say</span><p>Name the competitors — Mindstorms, Boost, WeDo — so they know you did your homework, then land the equity point: access shouldn't depend on a purchase order.</p></div>
+      </article>
+
+      <!-- 4 -->
+      <article class="slide">
+        <div class="frame key">
+          <div class="s-top"><span class="num">04</span><span class="kick">The reframe ★</span></div>
+          <h2 class="headline">An instrument, not a toy.</h2>
+          <div class="flow">
+            <div class="node student"><div class="who">Student</div><div class="what">programs the robot → generates data</div></div>
+            <div class="arrow"><b>→</b>one system</div>
+            <div class="node teacher"><div class="who">Teacher</div><div class="what">sees how thinking develops</div></div>
+          </div>
+        </div>
+        <div class="say"><span class="sl">Say</span><p>This is the pivot — slow down. Removing hardware is table stakes; the real question is what we learn about <em>how a child thinks</em> while they play. That's what makes this CS <b>&amp;</b> Data Science.</p></div>
+      </article>
+
+      <!-- 5 -->
+      <article class="slide">
+        <div class="frame">
+          <div class="s-top"><span class="num">05</span><span class="kick">The product</span></div>
+          <h2 class="headline">Drag blocks. Watch a 3D robot obey.</h2>
+          <div class="chips"><span class="chip">Real physics</span><span class="chip">Real sensors</span><span class="chip">Just a browser</span></div>
+          <div class="visual big"><div class="vinner"><span class="vlabel">Visual — hero</span><span class="vtext">Big screenshot: Blockly blocks on the left, 3D robot on the right.</span></div></div>
+        </div>
+        <div class="say"><span class="sl">Say</span><p>No hardware, no install, no internet. Real gravity, collisions, motor torque, distance and color sensors — all simulated.</p></div>
+      </article>
+
+      <!-- 6 -->
+      <article class="slide">
+        <div class="frame key">
+          <div class="s-top"><span class="num">06</span><span class="kick">Demo ★</span></div>
+          <div class="visual big" style="margin-top:.6rem"><div class="vinner"><span class="vlabel">Live demo / GIF</span><span class="vtext" style="font-size:1rem">“Move forward, stop 20 cm from the wall.”</span><span class="vtext">Near full-screen. Keep a 15–20s recorded GIF as fallback.</span></div></div>
+        </div>
+        <div class="say"><span class="sl">Say</span><p>Narrate the child's logic out loud as it runs. Rehearse until it's boring to you — and have the GIF ready in case live breaks on the projector.</p></div>
+      </article>
+
+      <!-- 7 -->
+      <article class="slide">
+        <div class="frame">
+          <div class="s-top"><span class="num">07</span><span class="kick">The invisible half</span></div>
+          <h2 class="headline">Every move, quietly logged.</h2>
+          <div class="log">
+            <div class="lrow"><span class="lt">0.4s</span><span class="lk">block_added</span><span>move_forward</span></div>
+            <div class="lrow"><span class="lt">1.2s</span><span class="lk">run</span><span></span></div>
+            <div class="lrow"><span class="lt">1.9s</span><span class="lk">sensor_read</span><span>distance = 34 cm</span></div>
+            <div class="lrow"><span class="lt">2.1s</span><span class="lk err">error</span><span>loop has no body</span></div>
+            <div class="lrow"><span class="lt">3.0s</span><span class="lk">block_moved</span><span>repeat → wrap blocks</span></div>
+          </div>
+          <p class="cap">Illustrative event stream · non-intrusive · privacy-respecting</p>
+        </div>
+        <div class="say"><span class="sl">Say</span><p>The child never notices. Their play becomes a clean dataset — this is the bridge from the tool to the research.</p></div>
+      </article>
+
+      <!-- 8 -->
+      <article class="slide">
+        <div class="frame key">
+          <div class="s-top"><span class="num">08</span><span class="kick">Data Science contribution ★</span></div>
+          <h2 class="headline">From play to insight.</h2>
+          <div class="pipe">
+            <div class="pstage">
+              <h5>Raw events</h5>
+              <ul><li>block moved</li><li>run · error</li><li>timings</li></ul>
+            </div>
+            <div class="parrow">→</div>
+            <div class="pstage">
+              <h5>Metrics</h5>
+              <ul><li>trajectory<br><span style="color:var(--ink-3);font-size:.85em">(tree edit distance)</span></li><li>attempts · time</li></ul>
+            </div>
+            <div class="parrow">→</div>
+            <div class="pstage out">
+              <h5>CT indicators</h5>
+              <ul><li>abstraction</li><li>decomposition</li><li>loops · debugging</li></ul>
+            </div>
+          </div>
+          <p class="cap">Build as three boxes + arrows in Canva</p>
+        </div>
+        <div class="say"><span class="sl">Say</span><p>Name the technique — tree edit distance between successive program versions — and the indicators it reveals: abstraction, decomposition, loops, conditionals, debugging.</p></div>
+      </article>
+
+      <!-- 9 -->
+      <article class="slide">
+        <div class="frame key">
+          <div class="s-top"><span class="num">09</span><span class="kick">The payoff ★</span></div>
+          <h2 class="headline">One glance replaces 30 programs.</h2>
+          <div class="dash">
+            <div class="dash-bar"><span class="dt"></span><span class="dt"></span><span class="dt"></span><span class="dname">Class 4B · computational thinking</span></div>
+            <div class="dash-body">
+              <div class="drow"><span class="dstudent">Ana M.</span><span class="dbars"><span class="dbar"><i style="width:82%"></i></span><span class="dbar"><i style="width:74%"></i></span><span class="dbar"><i style="width:88%"></i></span></span><span class="pill ok">decomposing</span></div>
+              <div class="drow"><span class="dstudent">Leo P.</span><span class="dbars"><span class="dbar"><i style="width:55%"></i></span><span class="dbar"><i style="width:40%"></i></span><span class="dbar"><i style="width:48%"></i></span></span><span class="pill mid">guessing</span></div>
+              <div class="drow"><span class="dstudent">Sam R.</span><span class="dbars"><span class="dbar"><i style="width:30%"></i></span><span class="dbar"><i style="width:22%"></i></span><span class="dbar"><i style="width:18%"></i></span></span><span class="pill low">stuck</span></div>
+            </div>
+          </div>
+          <p class="cap">Concept wireframe — bars = CT indicators per student</p>
+        </div>
+        <div class="say"><span class="sl">Say</span><p>The dashboard doesn't dump logs — it <em>mirrors</em> what happened and <em>orients</em> the teacher toward what to do next.</p></div>
+      </article>
+
+      <!-- 10 -->
+      <article class="slide">
+        <div class="frame">
+          <div class="s-top"><span class="num">10</span><span class="kick">Architecture</span></div>
+          <h2 class="headline">Four subsystems, cleanly separated.</h2>
+          <div class="chips"><span class="chip">React + TypeScript</span><span class="chip">Three.js</span><span class="chip">Rapier (WASM)</span><span class="chip">Blockly</span></div>
+          <div class="chain">
+            <div class="cnode"><span class="cn-t">Student sim</span><span class="cn-s">blocks · 3D · physics</span></div>
+            <div class="carrow"><b>→</b>events</div>
+            <div class="cnode mid"><span class="cn-t">Pipeline</span><span class="cn-s">logs → metrics</span></div>
+            <div class="carrow"><b>→</b>indicators</div>
+            <div class="cnode"><span class="cn-t">Teacher dashboard</span><span class="cn-s">per student / group</span></div>
+          </div>
+          <p class="cap">Build as boxes + arrows in Canva</p>
+        </div>
+        <div class="say"><span class="sl">Say</span><p>Fully client-side, runs in any browser. Walk the diagram left to right and let it do the talking — not the bullet list.</p></div>
+      </article>
+
+      <!-- 11 -->
+      <article class="slide">
+        <div class="frame">
+          <div class="s-top"><span class="num">11</span><span class="kick">Engineering</span></div>
+          <div class="grow">
+            <h2 class="headline">Deliberate trade-offs.</h2>
+            <ul class="pts">
+              <li>Interpreter, <b>not</b> <code>eval</code>/codegen — safe for kids, real-time feedback</li>
+              <li>Async — loops &amp; sensors never block the physics loop</li>
+              <li>Clean data by design</li>
+            </ul>
+          </div>
+        </div>
+        <div class="say"><span class="sl">Say</span><p>Each of these is a question you <em>want</em> to be asked — invite them. Tie "clean data" back to the analytics half.</p></div>
+      </article>
+
+      <!-- 12 -->
+      <article class="slide">
+        <div class="frame">
+          <div class="s-top"><span class="num">12</span><span class="kick">Grounding</span></div>
+          <div class="grow">
+            <h2 class="headline">Standing on solid ground.</h2>
+            <ul class="pts">
+              <li>Simulators &amp; equity <span style="color:var(--ink-3)">(e.g. RoboScape Online)</span></li>
+              <li>Learning analytics on block programming <span style="color:var(--ink-3)">(Grover et al.)</span></li>
+              <li>Teacher dashboards: mirror vs. guide <span style="color:var(--ink-3)">(Holstein, Amarasinghe et al.)</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="say"><span class="sl">Say</span><p>One sentence: BrickCode sits at the intersection of these three lines. Don't read the citations — they're there to show grounding.</p></div>
+      </article>
+
+      <!-- 13 -->
+      <article class="slide">
+        <div class="frame">
+          <div class="s-top"><span class="num">13</span><span class="kick">Status</span></div>
+          <h2 class="headline">What's real today.</h2>
+          <div class="cols">
+            <div class="col good">
+              <h4><span class="dot good"></span>Built</h4>
+              <ul>
+                <li>3D sim + physics</li>
+                <li>Motors + distance/color sensors</li>
+                <li>Blockly interpreter</li>
+                <li>Multiple levels/challenges</li>
+                <li>Block-level telemetry capture</li>
+                <li>Backend persistence + sync</li>
+              </ul>
+            </div>
+            <div class="col warn">
+              <h4><span class="dot warn"></span>In progress</h4>
+              <ul>
+                <li>Analytics pipeline (logs → CT indicators)</li>
+                <li>Dashboard wired to indicators</li>
+                <li>Hosted deployment</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="say"><span class="sl">Say</span><p>State the boundary before they ask. Being precise here reads as being in control of your own project.</p></div>
+      </article>
+
+      <!-- 14 -->
+      <article class="slide">
+        <div class="frame">
+          <div class="s-top"><span class="num">14</span><span class="kick">Honesty</span></div>
+          <div class="grow">
+            <h2 class="headline">Honest scope.</h2>
+            <ul class="pts">
+              <li>≈2 students → a <b>proof-of-concept pipeline</b>, not a trained ML model</li>
+              <li>No control-group study or inferential stats</li>
+              <li>Preset robots, not a free-form build editor <span style="color:var(--ink-3)">(future work)</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="say"><span class="sl">Say</span><p>Own the "≈2 students" with confidence, then reframe: that's <em>why</em> the contribution is the instrument + pipeline, designed to scale. The capstone is assessed on the artifact.</p></div>
+      </article>
+
+      <!-- 15 -->
+      <article class="slide">
+        <div class="frame key">
+          <div class="s-top"><span class="num">15</span><span class="kick">Close</span></div>
+          <div class="grow">
+            <h2 class="headline">Play becomes a window into how kids learn to think.</h2>
+            <p class="lead-in" style="margin-top:.7rem">Next: finish the pipeline · complete the dashboard · host it</p>
+          </div>
+          <p class="foot-meta" style="color:var(--accent)">Thank you.  ·  Questions</p>
+        </div>
+        <div class="say"><span class="sl">Say</span><p>Callback to slide 4 — remove the hardware barrier, and turn every child's play into insight for the teacher. End on the vision line, then stop.</p></div>
+      </article>
+
+    </div>
+
+    <p class="endnote">This page is a <b>reference mockup</b>, not the final deck — rebuild it in your Canva
+      template. Design cues to carry over: <b>one accent color</b> (a LEGO red), one font family, lots of
+      whitespace, and <b>one image or diagram per slide</b>. Give slides <b>04, 06, 08, 09</b> the most visual weight.</p>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var btn = document.getElementById('themeBtn');
+    var root = document.documentElement;
+    btn.addEventListener('click', function(){
+      var cur = root.getAttribute('data-theme');
+      if(!cur){
+        cur = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      root.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+    });
+
+    if(window.matchMedia('(prefers-reduced-motion: no-preference)').matches && 'IntersectionObserver' in window){
+      var slides = document.querySelectorAll('.slide');
+      slides.forEach(function(s){ s.classList.add('reveal'); });
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+      }, {rootMargin:'0px 0px -8% 0px', threshold:.08});
+      slides.forEach(function(s){ io.observe(s); });
+    }
+  })();
+</script>
+
+</body>
+</html>

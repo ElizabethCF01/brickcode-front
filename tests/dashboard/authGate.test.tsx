@@ -26,7 +26,7 @@ describe('AuthGate (dashboard)', () => {
   it('shows the login form when there is no session', async () => {
     auth.getSession.mockResolvedValue({ data: { session: null } })
     renderGate()
-    expect(await screen.findByPlaceholderText('profe@escuela.es')).toBeTruthy()
+    expect(await screen.findByPlaceholderText('teacher@school.edu')).toBeTruthy()
     expect(screen.queryByText('SECRET DASHBOARD')).toBeNull()
   })
 
@@ -41,7 +41,7 @@ describe('AuthGate (dashboard)', () => {
     setTeacher(false)
     auth.getSession.mockResolvedValue({ data: { session: { user: { id: 's' } } } })
     renderGate()
-    expect(await screen.findByText(/no es de profesor/i)).toBeTruthy()
+    expect(await screen.findByText(/not a teacher/i)).toBeTruthy()
     expect(screen.queryByText('SECRET DASHBOARD')).toBeNull()
   })
 })

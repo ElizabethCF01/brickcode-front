@@ -25,7 +25,7 @@ export default function LoginForm({ note }: { note?: string }) {
         : await supabase.auth.signUp({ email, password, options: { data: { display_name: displayName, role: 'teacher' } } })
       if (res.error) setError(res.error.message)
       else if (mode === 'signup' && !res.data.session) {
-        setError('Revisa tu correo para confirmar la cuenta, luego inicia sesión.')
+        setError('Check your email to confirm the account, then sign in.')
       }
     } finally {
       setBusy(false)
@@ -36,32 +36,32 @@ export default function LoginForm({ note }: { note?: string }) {
     <CenteredCard>
       <h1 className="flex items-center gap-2 text-xl font-semibold text-slate-900 mb-1">
         <img src="/logo.png" alt="" className="h-7 w-7" />
-        <span>BrickCode · Profesor</span>
+        <span>BrickCode · Teacher</span>
       </h1>
       {note && <p className="text-sm text-amber-600 mb-2">{note}</p>}
       <p className="text-sm text-slate-500 mb-6">
-        {mode === 'login' ? 'Inicia sesión para ver el progreso de tu clase.' : 'Crea tu cuenta de profesor.'}
+        {mode === 'login' ? 'Sign in to see your class\'s progress.' : 'Create your teacher account.'}
       </p>
       <form onSubmit={submit} className="flex flex-col gap-3">
         {mode === 'signup' && (
-          <Field label="Nombre" value={displayName} onChange={setName} type="text" placeholder="Sra. García" />
+          <Field label="Name" value={displayName} onChange={setName} type="text" placeholder="Ms. Garcia" />
         )}
-        <Field label="Correo" value={email} onChange={setEmail} type="email" placeholder="profe@escuela.es" required />
-        <Field label="Contraseña" value={password} onChange={setPassword} type="password" required />
+        <Field label="Email" value={email} onChange={setEmail} type="email" placeholder="teacher@school.edu" required />
+        <Field label="Password" value={password} onChange={setPassword} type="password" required />
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="submit"
           disabled={busy}
           className="mt-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-300 text-white font-medium py-2.5 transition-colors"
         >
-          {busy ? '…' : mode === 'login' ? 'Entrar' : 'Crear cuenta'}
+          {busy ? '…' : mode === 'login' ? 'Sign in' : 'Create account'}
         </button>
       </form>
       <button
         onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(null) }}
         className="mt-4 text-sm text-indigo-600 hover:underline"
       >
-        {mode === 'login' ? '¿No tienes cuenta? Crear una' : '¿Ya tienes cuenta? Inicia sesión'}
+        {mode === 'login' ? 'No account? Create one' : 'Already have an account? Sign in'}
       </button>
     </CenteredCard>
   )

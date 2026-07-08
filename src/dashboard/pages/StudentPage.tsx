@@ -14,10 +14,10 @@ export default function StudentPage() {
 
   return (
     <>
-      <PageHeader title="Sesiones del alumno" back={{ to: dash.classes, label: 'Clases' }} />
+      <PageHeader title="Student sessions" back={{ to: dash.classes, label: 'Classes' }} />
       {loading && <Loading />}
       {error && <ErrorBox message={error} />}
-      {data && data.length === 0 && <Empty>Este alumno aún no tiene sesiones.</Empty>}
+      {data && data.length === 0 && <Empty>This student has no sessions yet.</Empty>}
       {data && data.length > 0 && (
         <div className="grid gap-3">
           {data.map((s) => (
@@ -25,8 +25,8 @@ export default function StudentPage() {
               <div className="flex items-center justify-between">
                 <span className="text-slate-900">{fmt(s.startedAt)}</span>
                 <div className="flex gap-4 text-sm text-slate-600">
-                  <span><b className="text-slate-900">{s.eventCount}</b> eventos</span>
-                  <span>{s.challengeIds.join(', ') || 'sin reto'}</span>
+                  <span><b className="text-slate-900">{s.eventCount}</b> events</span>
+                  <span>{s.challengeIds.join(', ') || 'no challenge'}</span>
                 </div>
               </div>
             </CardLink>

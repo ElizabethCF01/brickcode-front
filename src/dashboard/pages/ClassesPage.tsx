@@ -12,12 +12,12 @@ export default function ClassesPage() {
 
   return (
     <>
-      <PageHeader title="Tus clases" subtitle="Comparte el código con tus alumnos para que se unan." />
+      <PageHeader title="Your classes" subtitle="Share the code with your students so they can join." />
       <CreateClassForm onCreated={() => setVersion((v) => v + 1)} />
       {loading && <Loading />}
       {error && <ErrorBox message={error} />}
       {data && data.length === 0 && (
-        <Empty>Aún no tienes clases. Crea una arriba para obtener un código.</Empty>
+        <Empty>You don't have any classes yet. Create one above to get a code.</Empty>
       )}
       {data && data.length > 0 && (
         <div className="grid gap-3">
@@ -63,7 +63,7 @@ function CreateClassForm({ onCreated }: { onCreated: () => void }) {
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Nombre de la clase (ej. Robótica 3ºA)"
+        placeholder="Class name (e.g. Robotics 3A)"
         className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
       <button
@@ -71,7 +71,7 @@ function CreateClassForm({ onCreated }: { onCreated: () => void }) {
         disabled={busy || !name.trim()}
         className="rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-300 px-4 py-2 font-medium text-white transition-colors"
       >
-        {busy ? '…' : 'Crear clase'}
+        {busy ? '…' : 'Create class'}
       </button>
       {error && <ErrorBox message={error} />}
     </form>

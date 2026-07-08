@@ -18,13 +18,13 @@ export default function LoadingScreen({ loaded, total, error }: LoadingScreenPro
         {error ? (
           <>
             <div className="text-red-400 text-sm text-center">
-              No se pudieron cargar las piezas LEGO.
+              Could not load the LEGO parts.
             </div>
             <div className="text-gray-500 text-xs text-center break-all">{error}</div>
           </>
         ) : (
           <>
-            <div className="text-sm text-gray-400">Cargando las piezas del nivel…</div>
+            <div className="text-sm text-gray-400">Loading the level's parts…</div>
 
             <div className="w-full h-2 bg-gray-800 rounded overflow-hidden">
               <div
