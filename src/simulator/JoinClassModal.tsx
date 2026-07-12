@@ -6,7 +6,7 @@ import { getSupabase } from '../backend/supabaseClient'
  * teacher shared, plus a nickname (pseudonym — no real names). Calls the
  * join_class RPC, which links their account to the class.
  */
-export default function JoinClassModal({ onEnrolled }: { onEnrolled: () => void }) {
+export default function JoinClassModal({ onEnrolled }: Readonly<{ onEnrolled: () => void }>) {
   const supabase = getSupabase()
   const [code, setCode] = useState('')
   const [nick, setNick] = useState('')
@@ -32,37 +32,42 @@ export default function JoinClassModal({ onEnrolled }: { onEnrolled: () => void 
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
-      <div className="w-full max-w-sm rounded-2xl border border-gray-700 bg-gray-800 p-8 text-white shadow-2xl">
-        <h2 className="text-lg font-semibold">Join a class</h2>
-        <p className="mt-1 text-sm text-gray-400">
+    <div className="min-h-screen flex items-center justify-center bg-canvas p-4">
+      <div className="w-full max-w-sm rounded-2xl border border-line bg-surface p-8 text-ink shadow-lg">
+        <h2 className="text-xl font-extrabold">Join a class</h2>
+        <p className="mt-1 text-sm text-ink-muted">
           Ask your teacher for the class code. Your work will be saved under a nickname, never your real name.
         </p>
         <form onSubmit={submit} className="mt-4 flex flex-col gap-3">
           <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-gray-300">Class code</span>
+            <span className="text-sm font-semibold text-ink">Class code</span>
             <input
               autoFocus
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="ABC123"
-              className="rounded-lg border border-gray-600 bg-gray-900 px-3 py-2 font-mono uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="rounded-xl border border-line bg-surface-2 px-3 py-3 font-mono text-2xl
+                text-center uppercase tracking-[0.3em] text-ink placeholder:text-ink-muted/40
+                focus:outline-none focus:ring-2 focus:ring-focus"
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-gray-300">Nickname (optional)</span>
+            <span className="text-sm font-semibold text-ink">Nickname (optional)</span>
             <input
               value={nick}
               onChange={(e) => setNick(e.target.value)}
               placeholder="Star7"
-              className="rounded-lg border border-gray-600 bg-gray-900 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="rounded-xl border border-line bg-surface-2 px-3 py-3 text-base text-ink
+                placeholder:text-ink-muted/60 focus:outline-none focus:ring-2 focus:ring-focus"
             />
           </label>
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="text-sm text-danger-600" role="alert">{error}</p>}
           <button
             type="submit"
             disabled={busy || !code.trim()}
-            className="mt-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-600 py-2 font-medium"
+            className="mt-2 min-h-11 rounded-xl bg-action-600 hover:bg-action-500 disabled:bg-line
+              disabled:text-ink-muted py-3 font-bold text-white transition-colors
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
           >
             {busy ? '…' : 'Join'}
           </button>

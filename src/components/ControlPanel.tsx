@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { ArrowLeft, Blocks, LogOut, Play, RotateCcw, Square } from 'lucide-react'
 import * as Blockly from 'blockly'
 import { useSimulationStore } from '../store/simulationStore'
 import { useChallengeStore } from '../store/challengeStore'
@@ -131,8 +132,8 @@ export default function ControlPanel({ onBackToLevels }: Readonly<ControlPanelPr
   }
 
   return (
-    <header className="flex items-center gap-4 px-4 py-2 bg-gray-800 border-b border-gray-700 shrink-0">
-      <span className="flex items-center gap-2 text-yellow-400 font-bold text-xl tracking-wide">
+    <header className="flex items-center gap-3 px-4 py-2 bg-surface border-b border-line shrink-0">
+      <span className="flex items-center gap-2 text-ink font-extrabold text-xl tracking-wide">
         <img src="/logo.png" alt="" className="h-7 w-7" />
         <span>BrickCode</span>
       </span>
@@ -140,60 +141,74 @@ export default function ControlPanel({ onBackToLevels }: Readonly<ControlPanelPr
       {onBackToLevels && (
         <button
           onClick={onBackToLevels}
-          className="text-xs px-2.5 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-200"
-          title="Back to the level list"
+          className="flex items-center gap-1.5 min-h-11 px-4 rounded-lg text-sm font-semibold
+            bg-surface-2 hover:bg-line text-ink transition-colors
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
         >
-          ← Levels
+          <ArrowLeft size={16} aria-hidden="true" />
+          Levels
         </button>
       )}
 
       <button
         onClick={() => getSupabase()?.auth.signOut()}
-        className="text-xs px-2.5 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-200"
-        title="Sign out"
+        className="flex items-center gap-1.5 min-h-11 px-4 rounded-lg text-sm font-semibold
+          bg-surface-2 hover:bg-line text-ink transition-colors
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
       >
-        🚪 Sign out
+        <LogOut size={16} aria-hidden="true" />
+        Sign out
       </button>
 
       <div className="flex gap-2 ml-auto">
         <button
+          id="blocks-toggle"
           onClick={toggleEditor}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium
-            transition-colors ${
+          aria-pressed={showEditor}
+          aria-controls="block-editor-drawer"
+          className={`flex items-center gap-1.5 min-h-11 px-4 rounded-lg text-sm font-semibold
+            transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ${
               showEditor
-                ? 'bg-indigo-600 hover:bg-indigo-500 text-white'
-                : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
+                ? 'bg-action-600 hover:bg-action-500 text-white'
+                : 'bg-surface-2 hover:bg-line text-ink'
             }`}
         >
-          📝 Blocks
+          <Blocks size={16} aria-hidden="true" />
+          Blocks
         </button>
-        <div className="w-px bg-gray-600 mx-1" />
+        <div className="w-px bg-line mx-1" />
         <button
           onClick={handleRun}
           disabled={status === 'running'}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium
-            bg-green-600 hover:bg-green-500 disabled:bg-gray-600 disabled:text-gray-400
-            text-white transition-colors"
+          className="flex items-center gap-1.5 min-h-11 px-5 rounded-xl text-sm font-bold
+            bg-success-700 hover:bg-success-600 disabled:bg-line disabled:text-ink-muted
+            text-white transition-colors
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
         >
-          ▶ Run
+          <Play size={16} fill="currentColor" aria-hidden="true" />
+          Run
         </button>
 
         <button
           onClick={handleStop}
           disabled={status === 'stopped'}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium
-            bg-red-600 hover:bg-red-500 disabled:bg-gray-600 disabled:text-gray-400
-            text-white transition-colors"
+          className="flex items-center gap-1.5 min-h-11 px-5 rounded-xl text-sm font-bold
+            bg-danger-600 hover:bg-danger-700 disabled:bg-line disabled:text-ink-muted
+            text-white transition-colors
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
         >
-          ⏹ Stop
+          <Square size={16} fill="currentColor" aria-hidden="true" />
+          Stop
         </button>
 
         <button
           onClick={handleReset}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium
-            bg-gray-600 hover:bg-gray-500 text-white transition-colors"
+          className="flex items-center gap-1.5 min-h-11 px-4 rounded-xl text-sm font-semibold
+            bg-surface-2 hover:bg-line text-ink transition-colors
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
         >
-          ↺ Reset
+          <RotateCcw size={16} aria-hidden="true" />
+          Reset
         </button>
       </div>
     </header>

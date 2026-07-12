@@ -29,7 +29,7 @@ export default function StudentAuthGate({ children }: { children: ReactNode }) {
     return () => { cancelled = true }
   }, [session])
 
-  const loading = <div className="min-h-screen flex items-center justify-center bg-gray-900 text-gray-400">Loading…</div>
+  const loading = <div className="min-h-screen flex items-center justify-center bg-canvas text-ink-muted">Loading…</div>
 
   if (!ready) return loading
   if (!session) return <StudentLoginForm />

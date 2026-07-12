@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { CircleCheck, Lock, LogOut } from 'lucide-react'
 import { LEVELS, isPlayable } from '../challenges'
 import type { Level, LevelCategory, LevelDefinition } from '../challenges/types'
 import { getCompletedLevels } from '../challenges/completion'
@@ -27,9 +28,9 @@ interface LevelSelectProps {
   onSelect: (level: LevelDefinition) => void
 }
 
-export default function LevelSelect({ onSelect }: LevelSelectProps) {
+export default function LevelSelect({ onSelect }: Readonly<LevelSelectProps>) {
   // Read once on mount; navigating back from a level remounts this screen, so the
-  // ✅ badges stay fresh without a subscription.
+  // completed badges stay fresh without a subscription.
   const [completed] = useState(getCompletedLevels)
   const [filter, setFilter] = useState<Filter>('all')
 
@@ -46,24 +47,26 @@ export default function LevelSelect({ onSelect }: LevelSelectProps) {
   )
 
   return (
-    <div className="w-screen h-screen overflow-y-auto bg-gray-900 text-white">
-      <header className="flex items-center gap-4 px-6 py-4 border-b border-gray-700">
-        <span className="flex items-center gap-2 text-yellow-400 font-bold text-xl tracking-wide">
+    <div className="w-screen h-screen overflow-y-auto bg-canvas text-ink">
+      <header className="flex items-center gap-4 px-6 py-3 bg-surface border-b border-line">
+        <span className="flex items-center gap-2 font-extrabold text-xl tracking-wide">
           <img src="/logo.png" alt="" className="h-7 w-7" />
           <span>BrickCode</span>
         </span>
         <button
           onClick={() => getSupabase()?.auth.signOut()}
-          className="text-xs px-2.5 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-200"
-          title="Sign out"
+          className="ml-auto flex items-center gap-1.5 min-h-11 px-4 rounded-lg text-sm font-semibold
+            bg-surface-2 hover:bg-line text-ink transition-colors
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
         >
-          🚪 Sign out
+          <LogOut size={16} aria-hidden="true" />
+          Sign out
         </button>
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-8">
-        <h1 className="text-2xl font-bold mb-1">Choose your challenge</h1>
-        <p className="text-gray-400 mb-6">Each level practices something different. Start wherever you like!</p>
+        <h1 className="text-3xl font-extrabold mb-1">Choose your challenge</h1>
+        <p className="text-ink-muted mb-6">Each level practices something different. Start wherever you like!</p>
 
         {/* Category filter */}
         <div className="flex flex-wrap gap-2 mb-8">
@@ -100,24 +103,26 @@ function FilterChip({
   onClick,
   label,
   color,
-}: {
+}: Readonly<{
   active: boolean
   onClick: () => void
   label: string
   color?: string
-}) {
+}>) {
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border ${
+      aria-pressed={active}
+      className={`px-4 py-2 min-h-10 rounded-full text-sm font-semibold transition-colors border
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ${
         active
-          ? 'bg-white text-gray-900 border-white'
-          : 'bg-gray-800 text-gray-300 border-gray-700 hover:border-gray-500'
+          ? 'bg-ink text-white border-ink'
+          : 'bg-surface text-ink-muted border-line hover:border-ink-muted'
       }`}
     >
       {color && !active && (
         <span
-          className="inline-block w-2 h-2 rounded-full mr-1.5 align-middle"
+          className="inline-block w-2.5 h-2.5 rounded-full mr-1.5 align-middle"
           style={{ backgroundColor: color }}
         />
       )}
@@ -130,11 +135,11 @@ function LevelCard({
   level,
   completed,
   onSelect,
-}: {
+}: Readonly<{
   level: Level
   completed: boolean
   onSelect: (level: LevelDefinition) => void
-}) {
+}>) {
   const playable = isPlayable(level) && !level.comingSoon
   const clickable = playable
 
@@ -143,38 +148,42 @@ function LevelCard({
       type="button"
       disabled={!clickable}
       onClick={() => clickable && onSelect(level as LevelDefinition)}
-      className={`relative text-left rounded-xl border p-4 flex flex-col gap-3 transition ${
+      className={`relative text-left rounded-2xl border p-4 flex flex-col gap-3 transition ${
         clickable
-          ? 'bg-gray-800 border-gray-700 hover:border-yellow-400 hover:shadow-lg cursor-pointer'
-          : 'bg-gray-850 border-gray-800 opacity-60 cursor-not-allowed'
+          ? 'bg-surface border-line hover:border-brand-500 hover:shadow-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus'
+          : 'bg-surface-2 border-line opacity-70 cursor-not-allowed'
       }`}
-      style={!clickable ? { backgroundColor: '#161d2b' } : undefined}
     >
       {/* Status badge */}
       <div className="absolute top-3 right-3 text-sm">
         {completed ? (
-          <span className="text-green-400" title="Completed">✅</span>
+          <CircleCheck size={20} className="text-success-600" aria-label="Completed" />
         ) : level.comingSoon ? (
-          <span className="text-[10px] uppercase tracking-wide text-gray-400 bg-gray-700 px-1.5 py-0.5 rounded">
+          <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-ink-muted bg-line px-1.5 py-0.5 rounded">
+            <Lock size={10} aria-hidden="true" />
             Coming soon
           </span>
         ) : null}
       </div>
 
       <div className="pr-8">
-        <h2 className="font-bold text-yellow-300 leading-tight">{level.title}</h2>
+        <h2 className="font-bold text-ink leading-tight">{level.title}</h2>
         <DifficultyDots difficulty={level.difficulty} />
       </div>
 
-      <p className="text-gray-300 text-sm leading-snug line-clamp-3">{level.description}</p>
+      <p className="text-ink-muted text-sm leading-snug line-clamp-3">{level.description}</p>
 
       <div className="flex flex-wrap gap-1.5 mt-auto pt-1">
         {level.tags.map((tag) => (
           <span
             key={tag}
-            className="text-[11px] font-medium px-2 py-0.5 rounded-full text-white"
-            style={{ backgroundColor: CATEGORY_COLOR[tag] }}
+            className="flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-2 text-ink"
           >
+            <span
+              className="inline-block w-2 h-2 rounded-full"
+              style={{ backgroundColor: CATEGORY_COLOR[tag] }}
+              aria-hidden="true"
+            />
             {CATEGORY_LABEL[tag]}
           </span>
         ))}
@@ -183,16 +192,20 @@ function LevelCard({
   )
 }
 
-function DifficultyDots({ difficulty }: { difficulty: number }) {
+function DifficultyDots({ difficulty }: Readonly<{ difficulty: number }>) {
   return (
-    <span className="flex items-center gap-1 mt-1" title={DIFFICULTY_LABEL[difficulty]}>
+    <span
+      className="flex items-center gap-1 mt-1"
+      aria-label={`Difficulty: ${DIFFICULTY_LABEL[difficulty]}`}
+    >
       {[1, 2, 3].map((n) => (
         <span
           key={n}
-          className={`w-1.5 h-1.5 rounded-full ${n <= difficulty ? 'bg-yellow-400' : 'bg-gray-600'}`}
+          className={`w-2 h-2 rounded-full ${n <= difficulty ? 'bg-brand-500' : 'bg-line'}`}
+          aria-hidden="true"
         />
       ))}
-      <span className="text-[11px] text-gray-400 ml-1">{DIFFICULTY_LABEL[difficulty]}</span>
+      <span className="text-[11px] text-ink-muted ml-1">{DIFFICULTY_LABEL[difficulty]}</span>
     </span>
   )
 }

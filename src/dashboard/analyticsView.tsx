@@ -3,13 +3,14 @@
 // strip, and a compact per-student row for the class view. Pure rendering —
 // all computation lives in src/analytics.
 
+import { Check } from 'lucide-react'
 import type { CtIndicators, StudentReport, StudentStatus, TrajectoryStep } from '../analytics/types'
 
 const STATUS_META: Record<StudentStatus, { label: string; text: string; bg: string; dot: string }> = {
-  decomposing: { label: 'decomposing', text: 'text-emerald-700', bg: 'bg-emerald-50', dot: 'bg-emerald-500' },
+  decomposing: { label: 'decomposing', text: 'text-emerald-700', bg: 'bg-emerald-50', dot: 'bg-success-600' },
   guessing: { label: 'guessing', text: 'text-amber-700', bg: 'bg-amber-50', dot: 'bg-amber-500' },
   stuck: { label: 'stuck', text: 'text-rose-700', bg: 'bg-rose-50', dot: 'bg-rose-500' },
-  'no-data': { label: 'no data', text: 'text-slate-500', bg: 'bg-slate-100', dot: 'bg-slate-400' },
+  'no-data': { label: 'no data', text: 'text-ink-muted', bg: 'bg-surface-2', dot: 'bg-ink-muted' },
 }
 
 export function StatusPill({ status }: { status: StudentStatus }) {
@@ -35,14 +36,14 @@ export function IndicatorBars({ indicators }: { indicators: CtIndicators }) {
     <div className="grid gap-2">
       {INDICATORS.map(({ key, label }) => (
         <div key={key} className="flex items-center gap-3">
-          <span className="w-36 shrink-0 text-sm text-slate-600">{label}</span>
-          <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+          <span className="w-36 shrink-0 text-sm text-ink-muted">{label}</span>
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-2">
             <div
-              className="h-full rounded-full bg-indigo-500"
+              className="h-full rounded-full bg-action-500"
               style={{ width: `${Math.round(indicators[key] * 100)}%` }}
             />
           </div>
-          <span className="w-9 shrink-0 text-right font-mono text-xs tabular-nums text-slate-500">
+          <span className="w-9 shrink-0 text-right font-mono text-xs tabular-nums text-ink-muted">
             {Math.round(indicators[key] * 100)}
           </span>
         </div>
@@ -56,8 +57,8 @@ export function IndicatorMiniBars({ indicators }: { indicators: CtIndicators }) 
   return (
     <div className="flex items-center gap-1">
       {INDICATORS.map(({ key, label }) => (
-        <div key={key} title={`${label}: ${Math.round(indicators[key] * 100)}`} className="flex h-6 w-2.5 items-end overflow-hidden rounded-sm bg-slate-100">
-          <div className="w-full rounded-sm bg-indigo-500" style={{ height: `${Math.round(indicators[key] * 100)}%` }} />
+        <div key={key} title={`${label}: ${Math.round(indicators[key] * 100)}`} className="flex h-6 w-2.5 items-end overflow-hidden rounded-sm bg-surface-2">
+          <div className="w-full rounded-sm bg-action-500" style={{ height: `${Math.round(indicators[key] * 100)}%` }} />
         </div>
       ))}
     </div>
@@ -65,7 +66,7 @@ export function IndicatorMiniBars({ indicators }: { indicators: CtIndicators }) 
 }
 
 export function TrajectoryStrip({ trajectory }: { trajectory: TrajectoryStep[] }) {
-  if (trajectory.length === 0) return <p className="text-sm text-slate-400">No runs yet.</p>
+  if (trajectory.length === 0) return <p className="text-sm text-ink-muted">No runs yet.</p>
   const maxEdit = Math.max(1, ...trajectory.map((s) => s.editDistance))
   return (
     <div className="flex items-end gap-2">
@@ -74,17 +75,17 @@ export function TrajectoryStrip({ trajectory }: { trajectory: TrajectoryStep[] }
         const pct = step.editDistance === 0 ? 8 : Math.round((step.editDistance / maxEdit) * 100)
         return (
           <div key={step.run} className="flex w-8 flex-col items-center gap-1">
-            <span className="font-mono text-[10px] tabular-nums text-slate-400">{step.editDistance}</span>
+            <span className="font-mono text-[10px] tabular-nums text-ink-muted">{step.editDistance}</span>
             <div className="flex h-16 w-full items-end">
               <div
-                className={`w-full rounded-t ${step.success ? 'bg-emerald-500' : 'bg-indigo-300'}`}
+                className={`w-full rounded-t ${step.success ? 'bg-success-600' : 'bg-action-500/40'}`}
                 style={{ height: `${pct}%` }}
                 title={`Run ${step.run}: edit distance ${step.editDistance}${step.success ? ' · solved' : ''}`}
               />
             </div>
-            <span className="font-mono text-[10px] text-slate-500">
+            <span className="inline-flex items-center gap-0.5 font-mono text-[10px] text-ink-muted">
               {step.run}
-              {step.success ? ' ✓' : ''}
+              {step.success && <Check size={10} className="text-success-600" aria-hidden="true" />}
             </span>
           </div>
         )
@@ -96,16 +97,16 @@ export function TrajectoryStrip({ trajectory }: { trajectory: TrajectoryStep[] }
 /** Full per-student analytics panel shown on the student page. */
 export function StudentReportPanel({ report, pseudonym }: { report: StudentReport; pseudonym?: string }) {
   return (
-    <section className="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="mb-6 rounded-xl border border-line bg-surface p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-muted">
           Computational thinking{pseudonym ? ` · ${pseudonym}` : ''}
         </h2>
         <StatusPill status={report.status} />
       </div>
 
       {report.status === 'no-data' ? (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-ink-muted">
           No program snapshots captured yet — indicators appear once this student runs a program.
         </p>
       ) : (
@@ -115,10 +116,10 @@ export function StudentReportPanel({ report, pseudonym }: { report: StudentRepor
           </div>
           <div>
             <div className="mb-2 flex items-baseline justify-between">
-              <h3 className="text-xs font-medium uppercase tracking-wide text-slate-400">
+              <h3 className="text-xs font-medium uppercase tracking-wide text-ink-muted">
                 Programming trajectory
               </h3>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-ink-muted">
                 {report.successCount}/{report.runCount} runs solved · bar = change vs. previous run
               </span>
             </div>

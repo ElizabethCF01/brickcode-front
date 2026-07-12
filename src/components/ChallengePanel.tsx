@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CircleCheck, CircleX, Lightbulb } from 'lucide-react'
 import { useChallengeStore } from '../store/challengeStore'
 
 export default function ChallengePanel() {
@@ -9,45 +10,52 @@ export default function ChallengePanel() {
   if (!level) return null
 
   return (
-    <div className="px-4 py-3 bg-gray-850 border-t border-gray-700 text-sm shrink-0"
-         style={{ backgroundColor: '#1a2332' }}>
+    <div className="px-4 py-3 bg-surface/95 border-t border-line text-sm shrink-0">
       {/* Header row */}
       <div className="flex items-center justify-between mb-1">
-        <span className="text-yellow-300 font-bold">{level.title}</span>
+        <span className="text-ink font-bold">{level.title}</span>
         <button
           onClick={() => setShowHints(h => !h)}
-          className="text-gray-400 hover:text-gray-200 text-xs underline"
+          aria-expanded={showHints}
+          className="flex items-center gap-1.5 min-h-11 px-3 rounded-lg text-sm font-semibold
+            text-action-600 hover:text-action-500 hover:bg-surface-2 transition-colors
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
         >
-          {showHints ? 'Hide hints' : 'Show hints 💡'}
+          <Lightbulb size={16} aria-hidden="true" />
+          {showHints ? 'Hide hints' : 'Show hints'}
         </button>
       </div>
 
-      <p className="text-gray-300 mb-2 leading-snug">{level.description}</p>
+      <p className="text-ink-muted mb-2 leading-snug">{level.description}</p>
 
       {showHints && level.hints.length > 0 && (
         <ul className="mb-2 space-y-1">
           {level.hints.map((hint, i) => (
-            <li key={i} className="text-gray-400 text-xs flex gap-2">
-              <span className="text-yellow-400 shrink-0">💡</span>
+            <li key={i} className="text-ink-muted text-xs flex gap-2">
+              <Lightbulb size={14} className="text-brand-600 shrink-0" aria-hidden="true" />
               {hint}
             </li>
           ))}
         </ul>
       )}
 
-      {result && (
-        <div
-          className={`mt-1 px-3 py-2 rounded font-medium ${
-            result.success
-              ? 'bg-green-900 text-green-200'
-              : 'bg-red-950 text-red-300'
-          }`}
-          style={{ backgroundColor: result.success ? '#14532d' : '#450a0a' }}
-        >
-          {result.success ? '✅ ' : '❌ '}
-          {result.message}
-        </div>
-      )}
+      {/* Live region stays mounted so screen readers announce the run result. */}
+      <div aria-live="polite">
+        {result && (
+          <div
+            className={`mt-1 flex items-center gap-2 px-3 py-2 rounded-lg font-semibold border ${
+              result.success
+                ? 'bg-success-100 text-success-700 border-success-600/30'
+                : 'bg-danger-100 text-danger-700 border-danger-600/30'
+            }`}
+          >
+            {result.success
+              ? <CircleCheck size={18} className="shrink-0" aria-hidden="true" />
+              : <CircleX size={18} className="shrink-0" aria-hidden="true" />}
+            {result.message}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

@@ -7,7 +7,7 @@ import { CenteredCard } from './AuthGate'
  * teachers row (display_name from metadata). onAuthStateChange in AuthGate
  * reacts to the resulting session — no manual redirect needed.
  */
-export default function LoginForm({ note }: { note?: string }) {
+export default function LoginForm({ note }: Readonly<{ note?: string }>) {
   const supabase = getSupabase()!
   const [mode, setMode] = useState<'login' | 'signup'>('login')
   const [displayName, setName] = useState('')
@@ -34,12 +34,12 @@ export default function LoginForm({ note }: { note?: string }) {
 
   return (
     <CenteredCard>
-      <h1 className="flex items-center gap-2 text-xl font-semibold text-slate-900 mb-1">
+      <h1 className="flex items-center gap-2 text-xl font-bold text-ink mb-1">
         <img src="/logo.png" alt="" className="h-7 w-7" />
         <span>BrickCode · Teacher</span>
       </h1>
-      {note && <p className="text-sm text-amber-600 mb-2">{note}</p>}
-      <p className="text-sm text-slate-500 mb-6">
+      {note && <p className="text-sm text-amber-600 mb-2" role="alert">{note}</p>}
+      <p className="text-sm text-ink-muted mb-6">
         {mode === 'login' ? 'Sign in to see your class\'s progress.' : 'Create your teacher account.'}
       </p>
       <form onSubmit={submit} className="flex flex-col gap-3">
@@ -48,18 +48,21 @@ export default function LoginForm({ note }: { note?: string }) {
         )}
         <Field label="Email" value={email} onChange={setEmail} type="email" placeholder="teacher@school.edu" required />
         <Field label="Password" value={password} onChange={setPassword} type="password" required />
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-danger-600" role="alert">{error}</p>}
         <button
           type="submit"
           disabled={busy}
-          className="mt-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-300 text-white font-medium py-2.5 transition-colors"
+          className="mt-2 min-h-11 rounded-lg bg-action-600 hover:bg-action-500 disabled:bg-line
+            disabled:text-ink-muted text-white font-semibold py-2.5 transition-colors
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
         >
           {busy ? '…' : mode === 'login' ? 'Sign in' : 'Create account'}
         </button>
       </form>
       <button
         onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(null) }}
-        className="mt-4 text-sm text-indigo-600 hover:underline"
+        className="mt-4 min-h-11 text-sm text-action-600 hover:underline rounded-lg
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
       >
         {mode === 'login' ? 'No account? Create one' : 'Already have an account? Sign in'}
       </button>
@@ -67,15 +70,16 @@ export default function LoginForm({ note }: { note?: string }) {
   )
 }
 
-function Field(props: {
+function Field(props: Readonly<{
   label: string; value: string; onChange: (v: string) => void
   type: string; placeholder?: string; required?: boolean
-}) {
+}>) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-xs font-medium text-slate-600">{props.label}</span>
+      <span className="text-xs font-semibold text-ink-muted">{props.label}</span>
       <input
-        className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="rounded-lg border border-line px-3 py-2.5 text-ink bg-surface
+          placeholder:text-ink-muted/60 focus:outline-none focus:ring-2 focus:ring-focus"
         type={props.type}
         value={props.value}
         placeholder={props.placeholder}

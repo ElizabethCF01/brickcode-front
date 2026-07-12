@@ -31,9 +31,9 @@ export default function ClassPage() {
             return (
               <CardLink key={s.studentId} to={dash.student(s.studentId)}>
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-slate-900">{s.pseudonym}</span>
-                  <div className="flex gap-4 text-sm text-slate-600">
-                    <span><b className="text-slate-900">{s.runCount}</b> runs</span>
+                  <span className="font-medium text-ink">{s.pseudonym}</span>
+                  <div className="flex gap-4 text-sm text-ink-muted">
+                    <span><b className="text-ink">{s.runCount}</b> runs</span>
                     <span className={s.failureCount > 0 ? 'text-amber-600' : ''}>
                       <b>{s.failureCount}</b> failures
                     </span>
@@ -42,7 +42,7 @@ export default function ClassPage() {
                 {topBlocks.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {topBlocks.map(([block, n]) => (
-                      <span key={block} className="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-600">
+                      <span key={block} className="rounded bg-surface-2 px-2 py-0.5 font-mono text-xs text-ink-muted">
                         {block} ×{n}
                       </span>
                     ))}

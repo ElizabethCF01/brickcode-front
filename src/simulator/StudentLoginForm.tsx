@@ -8,7 +8,7 @@ import { getSupabase } from '../backend/supabaseClient'
  *
  * Privacy note: the email is PII held only in auth.users; teachers never see it.
  */
-export default function StudentLoginForm({ note }: { note?: string }) {
+export default function StudentLoginForm({ note }: Readonly<{ note?: string }>) {
   const supabase = getSupabase()
   const [mode, setMode] = useState<'login' | 'signup'>('login')
   const [email, setEmail] = useState('')
@@ -17,7 +17,7 @@ export default function StudentLoginForm({ note }: { note?: string }) {
   const [busy, setBusy] = useState(false)
 
   if (!supabase) {
-    return <Centered><p className="text-gray-300">Backend not configured.</p></Centered>
+    return <Centered><p className="text-ink-muted">Backend not configured.</p></Centered>
   }
 
   const submit = async (e: React.FormEvent) => {
@@ -38,28 +38,31 @@ export default function StudentLoginForm({ note }: { note?: string }) {
 
   return (
     <Centered>
-      <h1 className="flex items-center gap-2 text-2xl font-bold text-yellow-400">
+      <h1 className="flex items-center gap-2 text-2xl font-extrabold tracking-wide text-ink">
         <img src="/logo.png" alt="" className="h-8 w-8" />
         <span>BrickCode</span>
       </h1>
-      <p className="mt-1 mb-6 text-sm text-gray-400">
+      <p className="mt-1 mb-6 text-sm text-ink-muted">
         {note ?? (mode === 'login' ? 'Log in to program your robot.' : 'Create your student account.')}
       </p>
       <form onSubmit={submit} className="flex flex-col gap-3">
         <Field label="Email" value={email} onChange={setEmail} type="email" placeholder="student@school.edu" required />
         <Field label="Password" value={password} onChange={setPassword} type="password" required />
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-danger-600" role="alert">{error}</p>}
         <button
           type="submit"
           disabled={busy}
-          className="mt-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-600 py-2.5 font-medium text-white transition-colors"
+          className="mt-2 min-h-11 rounded-xl bg-action-600 hover:bg-action-500 disabled:bg-line
+            disabled:text-ink-muted py-3 font-bold text-white transition-colors
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
         >
           {busy ? '…' : mode === 'login' ? 'Sign in' : 'Create account'}
         </button>
       </form>
       <button
         onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(null) }}
-        className="mt-4 text-sm text-indigo-400 hover:underline"
+        className="mt-4 min-h-11 text-sm font-semibold text-action-600 hover:underline
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus rounded-lg"
       >
         {mode === 'login' ? 'No account? Create one' : 'Already have an account? Sign in'}
       </button>
@@ -67,25 +70,26 @@ export default function StudentLoginForm({ note }: { note?: string }) {
   )
 }
 
-function Centered({ children }: { children: React.ReactNode }) {
+function Centered({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
-      <div className="w-full max-w-sm rounded-2xl border border-gray-700 bg-gray-800 p-8 text-white shadow-2xl">
+    <div className="min-h-screen flex items-center justify-center bg-canvas p-4">
+      <div className="w-full max-w-sm rounded-2xl border border-line bg-surface p-8 text-ink shadow-lg">
         {children}
       </div>
     </div>
   )
 }
 
-function Field(props: {
+function Field(props: Readonly<{
   label: string; value: string; onChange: (v: string) => void
   type: string; placeholder?: string; required?: boolean
-}) {
+}>) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-xs font-medium text-gray-300">{props.label}</span>
+      <span className="text-sm font-semibold text-ink">{props.label}</span>
       <input
-        className="rounded-lg border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="rounded-xl border border-line bg-surface-2 px-3 py-3 text-base text-ink
+          placeholder:text-ink-muted/60 focus:outline-none focus:ring-2 focus:ring-focus"
         type={props.type}
         value={props.value}
         placeholder={props.placeholder}

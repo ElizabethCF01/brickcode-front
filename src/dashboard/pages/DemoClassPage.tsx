@@ -27,15 +27,15 @@ export default function DemoClassPage() {
         back={{ to: dash.classes, label: 'Classes' }}
       />
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50 px-5 py-2.5 text-xs font-medium uppercase tracking-wide text-slate-400">
+      <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
+        <div className="flex items-center gap-3 border-b border-line bg-surface-2 px-5 py-2.5 text-xs font-medium uppercase tracking-wide text-ink-muted">
           <span className="w-40">Student</span>
           <span className="flex-1">CT indicators</span>
           <span className="w-28 text-right">Strategy</span>
         </div>
         {rows.map(({ pseudonym, report }) => (
-          <div key={pseudonym} className="flex items-center gap-3 border-b border-slate-100 px-5 py-3 last:border-b-0">
-            <span className="w-40 text-sm font-medium text-slate-900">{pseudonym}</span>
+          <div key={pseudonym} className="flex items-center gap-3 border-b border-line px-5 py-3 last:border-b-0">
+            <span className="w-40 text-sm font-medium text-ink">{pseudonym}</span>
             <div className="flex-1">
               <IndicatorMiniBars indicators={report.indicators} />
             </div>
@@ -46,7 +46,7 @@ export default function DemoClassPage() {
         ))}
       </div>
 
-      <p className="mt-3 text-xs text-slate-400">
+      <p className="mt-3 text-xs text-ink-muted">
         Bars, left→right: abstraction · decomposition · loops · conditionals · iterative debugging.
         Strategy is derived from the programming trajectory (tree edit distance across runs).
       </p>

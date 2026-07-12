@@ -1,4 +1,41 @@
 @import "tailwindcss";
+@import "@fontsource-variable/nunito";
+
+@theme {
+  --font-sans: "Nunito Variable", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Brand — LEGO yellow. Always pairs with dark text (brand-900/ink), never white. */
+  --color-brand-100: #FFF7CC;
+  --color-brand-300: #FFE566;
+  --color-brand-400: #FFD500;
+  --color-brand-500: #F5C402;
+  --color-brand-600: #D9A400;
+  --color-brand-900: #4A3B00;
+
+  /* Action — SPIKE/LEGO blue (primary buttons, links, focus). White on action-600 ≈ 5.0:1. */
+  --color-action-100: #DBEEFF;
+  --color-action-500: #0090F5;
+  --color-action-600: #006CB7;
+  --color-action-700: #005592;
+
+  /* Success / Danger. White on success-700 ≈ 4.6:1, on danger-600 ≈ 4.8:1. */
+  --color-success-100: #DCFCE7;
+  --color-success-600: #16A34A;
+  --color-success-700: #15803D;
+  --color-danger-100: #FEE2E2;
+  --color-danger-600: #DA291C;
+  --color-danger-700: #B02015;
+
+  /* Neutral surfaces — light chrome */
+  --color-canvas: #EEF2F7;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #F6F8FB;
+  --color-ink: #1E293B;
+  --color-ink-muted: #64748B;
+  --color-line: #E2E8F0;
+
+  --color-focus: #0090F5;
+}
 
 * {
   box-sizing: border-box;
@@ -12,6 +49,21 @@ body,
   width: 100%;
   height: 100%;
   overflow: hidden;
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
 
 /* Blockly: keep the flyout layered inside the drawer */
@@ -57,5 +109,10 @@ body,
   font-size: 11px !important;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  fill: #9ca3af !important;
+  fill: #64748b !important;
+}
+
+/* Keep the selected category row visible on the white toolbox */
+.blocklyTreeRowSelected {
+  background-color: #eef2f7 !important;
 }

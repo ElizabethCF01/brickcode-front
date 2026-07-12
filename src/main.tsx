@@ -13,8 +13,8 @@ const Dashboard = lazy(() => import('./dashboard/Dashboard'))
 
 function Splash() {
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-gray-900 text-white">
-      <div className="flex items-center gap-3 text-2xl font-semibold">
+    <div className="w-screen h-screen flex items-center justify-center bg-canvas text-ink">
+      <div className="flex items-center gap-3 text-2xl font-extrabold tracking-wide">
         <img src="/logo.png" alt="" className="h-9 w-9" />
         <span>BrickCode</span>
       </div>

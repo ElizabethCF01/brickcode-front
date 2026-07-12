@@ -90,11 +90,11 @@ fallback in case live breaks.
 
 ## Slide 7 — The invisible half
 
-**HEADLINE:** Every move, quietly logged.
+**HEADLINE:** Every run, quietly logged.
 **ON SCREEN:**
-- blocks added / moved · runs · errors · timings · attempts
+- full **program snapshot** every run · executed blocks · errors · timings
 - *non-intrusive · privacy-respecting*
-- Visual: faint data-stream / event-log motif.
+- Visual: a short event-log using the real event types (see the mockup).
 
 **YOU SAY:** The child never notices. Their play becomes a clean dataset — this is the bridge
 from the tool to the research.
@@ -169,9 +169,10 @@ the citations — they're there to show grounding.
 
 **HEADLINE:** What's real today.
 **ON SCREEN (two columns):**
-- ✅ **Built:** 3D sim + physics · motors + distance/color sensors · Blockly interpreter ·
-  levels · **telemetry capture** · backend + sync
-- 🚧 **In progress:** analytics pipeline · dashboard wired to indicators · hosted deploy
+- ✅ **Built:** 3D sim + physics · sensors · Blockly interpreter · levels · program-snapshot
+  telemetry · backend + sync · **analytics pipeline (tree edit distance → CT indicators)** ·
+  **teacher dashboard: CT indicators + trajectory**
+- 🚧 **In progress:** hosted deployment · more levels · classroom validation at scale
 
 **YOU SAY:** State the boundary before they ask. Being precise here reads as being in control of
 your own project.

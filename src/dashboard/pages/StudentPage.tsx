@@ -32,9 +32,9 @@ export default function StudentPage() {
           {data.summaries.map((s) => (
             <CardLink key={s.id} to={dash.session(s.id)}>
               <div className="flex items-center justify-between">
-                <span className="text-slate-900">{fmt(s.startedAt)}</span>
-                <div className="flex gap-4 text-sm text-slate-600">
-                  <span><b className="text-slate-900">{s.eventCount}</b> events</span>
+                <span className="text-ink">{fmt(s.startedAt)}</span>
+                <div className="flex gap-4 text-sm text-ink-muted">
+                  <span><b className="text-ink">{s.eventCount}</b> events</span>
                   <span>{s.challengeIds.join(', ') || 'no challenge'}</span>
                 </div>
               </div>

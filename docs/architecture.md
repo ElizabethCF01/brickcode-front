@@ -646,7 +646,39 @@ has none.
 - **Toolbox extension**: `BlocklyWorkspace` combines `ROBOT_TOOLBOX` categories with built-in `controls_*` and `math_*` categories into `FULL_TOOLBOX`. `ROBOT_TOOLBOX` in `robotBlocks.ts` remains unchanged.
 - **Sensor key convention**: `simulationStore.sensorValues['front']` holds the front distance sensor reading in cm. `SensorPanel` reads this key; the bar fills relative to `SENSOR_MAX_CM = 100`. When the key is absent the display shows `— cm`.
 - **Control buttons**: Run/Stop/Reset toggle `simulationStore.status` only. Wiring to `BlockInterpreter` is deferred to the task that builds `SimpleRobot`.
-- **Status labels**: `stopped` → "En reposo", `running` → "Ejecutando", `paused` → "Pausado".
+- **Status labels**: `stopped` → "Idle", `running` → "Running", `paused` → "Paused" (English UI since the 2026-07 redesign).
+
+## UI Design System (2026-07 redesign)
+
+**Files**: `src/index.css` (single source of truth), all `src/components/*.tsx`, `src/dashboard/**`, `src/simulator/*.tsx`, `src/Home.tsx`, `src/main.tsx`
+
+The whole app moved from an ad-hoc dark `gray-*` simulator + light `slate-*` dashboard to one **bright, SPIKE-Essential-style light theme** driven by design tokens.
+
+### Tokens (Tailwind v4 `@theme` in `src/index.css`)
+
+There is no `tailwind.config.js` — Tailwind v4 reads the theme from CSS. Semantic tokens generate utilities like `bg-canvas`, `text-ink`, `border-line`:
+
+| Token | Value | Role |
+|---|---|---|
+| `brand-100…900` | LEGO yellow ramp, core `#FFD500`/`#F5C402` | brand accents; **always dark text on brand fills, never white** |
+| `action-100…700` | SPIKE/LEGO blue, core `#0090F5`/`#006CB7` | primary buttons, links, focus ring (white on `action-600` ≈ 5.0:1 AA) |
+| `success-*` / `danger-*` | `#15803D` / `#DA291C` cores | Run button, result banners (white text AA on the 600/700 shades used) |
+| `canvas` `#EEF2F7` · `surface` `#FFFFFF` · `surface-2` `#F6F8FB` | — | page bg · cards/headers/drawer · sunken wells |
+| `ink` `#1E293B` · `ink-muted` `#64748B` · `line` `#E2E8F0` | — | text · secondary text · borders |
+
+- **Font**: Nunito Variable via `@fontsource-variable/nunito` (bundled by Vite — no CDN, honoring the no-external-assets constraint). Kid surfaces use bold/extrabold weights; the dashboard stays at regular/semibold for a calmer read.
+- **Icons**: `lucide-react` replaced all emoji-as-icons in React UI (`Play`/`Square`/`RotateCcw`/`Blocks`/`LogOut`/`Lightbulb`/`CircleCheck`…). Icons next to text are `aria-hidden`; icon-only buttons carry `aria-label`. Blockly's in-house SVG data-URI block icons (`blockIcons.ts`) are unchanged. Emojis inside challenge *content* (titles/hints) intentionally remain.
+- **Blockly theme is now `brickcode-light`** (`BlocklyWorkspace.tsx`): workspace `#F8FAFC`, toolbox `#FFFFFF`, flyout `#E8EDF4` (sunken one step so bright SPIKE blocks keep an edge), grid `#D7DEE8`, insertion marker `#B45309`. SPIKE block category colors are untouched. `.blocklyTreeRowSelected` gets a light bg override in `index.css`.
+- **Category hex colors** in `LevelSelect.tsx` still mirror `robotBlocks.ts` (SPIKE palette); on light surfaces they are shown as colored **dots** next to neutral text, because white-on-cyan/yellow pills fail contrast.
+
+### Accessibility conventions
+
+- All interactive elements: `focus-visible:ring-2 ring-focus` (+ `ring-offset-2` on filled buttons); min hit target `min-h-11` (44px).
+- Live regions: run result (`ChallengePanel` — the `aria-live="polite"` wrapper stays mounted so announcements fire), sim status (`SensorPanel`), loading progress (`LoadingScreen`).
+- The Blockly drawer is an `<aside aria-label="Block editor">`; **Escape closes it** and returns focus to the `#blocks-toggle` button (`App.tsx`); the toggle carries `aria-pressed`/`aria-controls`.
+- Global `prefers-reduced-motion` rule zeroes transition/animation durations (the 220ms drawer-resize timeout still fires and is safe — the drawer is already at final size).
+- Form errors render in `role="alert"`; toggles use `aria-pressed`/`aria-expanded`.
+- Dashboard: students remain pseudonym-only (no PII).
 
 ## LDraw Asset Pipeline
 
@@ -1200,7 +1232,7 @@ loaded model and spins it in place to match physics:
 - **Drawer width is 50vw with `min-w-[420px]`**: fills half the viewport on desktop while staying usable on small screens.
 - **Drawer resize timing**: the drawer animates in via a 200ms CSS transform. `App.tsx` schedules `Blockly.svgResize` via a 220ms timeout (not `requestAnimationFrame`) so flyout/toolbox metrics are computed *after* the transform settles. Resizing earlier was the cause of "flyout doesn't reappear on second category click".
 - **Toolbox uses `kind: 'label'` instead of `kind: 'sep'`**: the previous separator items rendered visible horizontal bars in the flyout. Labels (`Movimiento`, `Sensores`, `Tiempo`) provide grouping without the bar.
-- **Theme contrast**: toolbox `#0f172a`, flyout `#111827`, workspace `#1f2937` — three distinct shades so the panes visually separate. `flyoutOpacity: 1` (was 0.9 — caused blending).
+- **Theme contrast**: three distinct shades so the panes visually separate — since the 2026-07 light redesign: toolbox `#FFFFFF`, flyout `#E8EDF4`, workspace `#F8FAFC` (theme `brickcode-light`). `flyoutOpacity: 1` (was 0.9 — caused blending).
 
 ---
 
@@ -1307,7 +1339,7 @@ analysed — see `docs/spike-essential-blocks.md`):
   defaults are the opposite (filled = dark `#363d80`, empty = white), which read
   backwards next to the hub card — the value semantics (`1` = lit) were always
   correct; only the editor's colours were inverted.
-- **`startHats: true`** on the `brickcode-dark` theme gives `event_when_started`
+- **`startHats: true`** on the `brickcode-light` theme gives `event_when_started`
   a rounded hat cap, like SPIKE event blocks.
 - **Inline direction icons** via `field_image` image-dropdowns: rotation ↻/↺ on
   the Motores blocks and ←/→ on `robot_turn`. The SVGs are drawn in-house as

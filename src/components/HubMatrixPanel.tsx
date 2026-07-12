@@ -9,8 +9,8 @@ export default function HubMatrixPanel() {
   const hubMatrix = useSimulationStore((s) => s.hubMatrix)
 
   return (
-    <div className="bg-black/60 rounded-lg p-2 pointer-events-none select-none">
-      <div className="text-[10px] text-gray-300 mb-1 text-center">Light</div>
+    <div className="bg-ink/80 rounded-xl p-2 pointer-events-none select-none" aria-hidden="true">
+      <div className="text-[10px] font-semibold text-white/70 mb-1 text-center">Light</div>
       <div className="grid grid-cols-3 gap-1">
         {hubMatrix.map((brightness, i) => (
           <div

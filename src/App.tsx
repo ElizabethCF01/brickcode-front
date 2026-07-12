@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { X } from 'lucide-react'
 import ControlPanel from './components/ControlPanel'
 import SensorPanel from './components/SensorPanel'
 import Attribution from './components/Attribution'
@@ -36,8 +37,21 @@ export default function App({ onBackToLevels }: Readonly<AppProps>) {
     return () => window.clearTimeout(t)
   }, [showEditor])
 
+  // Keyboard path for dismissing the drawer; on close, hand focus back to the
+  // Blocks toggle so keyboard users aren't stranded on a hidden element.
+  useEffect(() => {
+    if (!showEditor) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      toggleEditor()
+      document.getElementById('blocks-toggle')?.focus()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [showEditor, toggleEditor])
+
   return (
-    <div className="w-screen h-screen flex flex-col overflow-hidden bg-gray-900">
+    <div className="w-screen h-screen flex flex-col overflow-hidden bg-canvas">
       <ControlPanel onBackToLevels={onBackToLevels} />
 
       {/* Main area: 3D viewport fills the whole space */}
@@ -46,7 +60,7 @@ export default function App({ onBackToLevels }: Readonly<AppProps>) {
 
         {/* Top-left overlay stack: orbit hint + hub 3×3 light matrix */}
         <div className="absolute top-3 left-3 flex flex-col gap-2 items-start">
-          <div className="bg-black/50 text-white text-xs px-2 py-1 rounded pointer-events-none">
+          <div className="bg-surface/90 text-ink-muted text-xs font-semibold px-2.5 py-1 rounded-lg shadow-sm pointer-events-none">
             Drag to orbit · Scroll to zoom
           </div>
           <HubMatrixPanel />
@@ -57,35 +71,40 @@ export default function App({ onBackToLevels }: Readonly<AppProps>) {
           <ChallengePanel />
         </div>
 
-        {/* Dim backdrop — only when editor is open */}
+        {/* Dim backdrop — only when editor is open (Escape also closes) */}
         {showEditor && (
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-ink/20"
             onClick={toggleEditor}
+            aria-hidden="true"
           />
         )}
 
         {/* Blockly editor drawer — always in the DOM so blocks are never lost.
             Visibility toggled via CSS so Blockly's workspace isn't disposed. */}
-        <div
+        <aside
+          id="block-editor-drawer"
+          aria-label="Block editor"
           className={`absolute top-0 right-0 bottom-0 w-1/2 min-w-[420px] flex flex-col
-            bg-gray-900 border-l border-gray-700 shadow-2xl z-10
+            bg-surface border-l border-line shadow-2xl z-10
             transition-transform duration-200
             ${showEditor ? 'translate-x-0' : 'translate-x-full'}`}
         >
           {/* Drawer header */}
-          <div className="flex items-center justify-between px-3 py-1.5 bg-gray-800 border-b border-gray-700 shrink-0">
-            <span className="text-xs text-gray-400">Block editor</span>
+          <div className="flex items-center justify-between pl-3 pr-1.5 py-1 bg-surface-2 border-b border-line shrink-0">
+            <span className="text-xs font-semibold text-ink-muted">Block editor</span>
             <button
               onClick={toggleEditor}
-              className="text-gray-400 hover:text-white text-lg leading-none px-1"
-              title="Close editor"
+              aria-label="Close block editor"
+              className="h-9 w-9 grid place-items-center rounded-lg text-ink-muted hover:text-ink
+                hover:bg-line transition-colors
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
-              ✕
+              <X size={18} aria-hidden="true" />
             </button>
           </div>
           <BlocklyWorkspace />
-        </div>
+        </aside>
       </div>
 
       <SensorPanel />

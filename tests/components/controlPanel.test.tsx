@@ -45,8 +45,8 @@ describe('ControlPanel recording wiring', () => {
   })
 
   it('Run starts a session, records program_run_started, then seals + flushes', async () => {
-    const { getByText } = render(<ControlPanel />)
-    fireEvent.click(getByText('▶ Run'))
+    const { getByRole } = render(<ControlPanel />)
+    fireEvent.click(getByRole('button', { name: 'Run' }))
 
     expect(recorder.startSession).toHaveBeenCalledWith(['challenge-01'])
     expect(recorder.recordEvent).toHaveBeenCalledWith('program_run_started', expect.anything())
@@ -62,15 +62,15 @@ describe('ControlPanel recording wiring', () => {
   })
 
   it('Sign out signs the student out', () => {
-    const { getByText } = render(<ControlPanel />)
-    fireEvent.click(getByText('🚪 Sign out'))
+    const { getByRole } = render(<ControlPanel />)
+    fireEvent.click(getByRole('button', { name: 'Sign out' }))
     expect(signOut).toHaveBeenCalled()
   })
 
   it('Stop seals + flushes the active session', async () => {
     useSimulationStore.setState({ status: 'running' })
-    const { getByText } = render(<ControlPanel />)
-    fireEvent.click(getByText('⏹ Stop'))
+    const { getByRole } = render(<ControlPanel />)
+    fireEvent.click(getByRole('button', { name: 'Stop' }))
 
     expect(engine.interpreter.stop).toHaveBeenCalled()
     await waitFor(() => expect(sync.flush).toHaveBeenCalled())
@@ -81,8 +81,8 @@ describe('ControlPanel recording wiring', () => {
     useChallengeStore.setState({
       activeLevel: { ...challenge01, scenarioDecidesEnd: true },
     })
-    const { getByText } = render(<ControlPanel />)
-    fireEvent.click(getByText('▶ Run'))
+    const { getByRole } = render(<ControlPanel />)
+    fireEvent.click(getByRole('button', { name: 'Run' }))
 
     // The mocked run() resolves immediately — but the run must stay live.
     await waitFor(() => expect(engine.interpreter.run).toHaveBeenCalled())
@@ -97,8 +97,8 @@ describe('ControlPanel recording wiring', () => {
   })
 
   it('Reset discards the in-progress recording without flushing', () => {
-    const { getByText } = render(<ControlPanel />)
-    fireEvent.click(getByText('↺ Reset'))
+    const { getByRole } = render(<ControlPanel />)
+    fireEvent.click(getByRole('button', { name: 'Reset' }))
 
     expect(recorder.dispose).toHaveBeenCalled()
     expect(recorder.endSession).not.toHaveBeenCalled()

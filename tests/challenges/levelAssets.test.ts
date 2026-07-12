@@ -19,6 +19,7 @@ describe('levelAssets', () => {
       '/ldraw/models/packed/cave_car.mpd',
       '/ldraw/models/packed/rock-big.mpd',
       '/ldraw/models/packed/tree-pine.mpd',
+      '/ldraw/models/packed/bat.mpd',
     ])
   })
 

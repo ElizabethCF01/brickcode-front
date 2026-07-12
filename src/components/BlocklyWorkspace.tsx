@@ -138,25 +138,27 @@ export default function BlocklyWorkspace() {
       grid: {
         spacing: 20,
         length: 3,
-        colour: '#374151',
+        colour: '#D7DEE8',
         snap: true,
       },
-      theme: Blockly.Theme.defineTheme('brickcode-dark', {
-        name: 'brickcode-dark',
+      theme: Blockly.Theme.defineTheme('brickcode-light', {
+        name: 'brickcode-light',
         base: Blockly.Themes.Zelos,
         // SPIKE-style: event "hat" blocks (event_when_started) get a rounded cap.
         startHats: true,
         componentStyles: {
-          workspaceBackgroundColour: '#1f2937',
-          toolboxBackgroundColour:   '#0f172a',
-          toolboxForegroundColour:   '#f9fafb',
-          flyoutBackgroundColour:    '#111827',
-          flyoutForegroundColour:    '#f9fafb',
+          workspaceBackgroundColour: '#F8FAFC',
+          toolboxBackgroundColour:   '#FFFFFF',
+          toolboxForegroundColour:   '#334155',
+          // Flyout is sunken a step below the workspace so bright SPIKE blocks
+          // (yellow events especially) keep an edge against it.
+          flyoutBackgroundColour:    '#E8EDF4',
+          flyoutForegroundColour:    '#334155',
           flyoutOpacity:             1,
-          scrollbarColour:           '#4b5563',
+          scrollbarColour:           '#94A3B8',
           scrollbarOpacity:          0.9,
-          insertionMarkerColour:     '#fbbf24',
-          insertionMarkerOpacity:    0.4,
+          insertionMarkerColour:     '#B45309',
+          insertionMarkerOpacity:    0.5,
         },
       }),
     })
@@ -183,9 +185,9 @@ export default function BlocklyWorkspace() {
   }, [])
 
   return (
-    <div className="flex flex-col h-full bg-gray-900">
-      <div className="px-3 py-1.5 bg-gray-800 border-b border-gray-700 text-xs text-gray-400 shrink-0">
-        Bloques
+    <div className="flex flex-col h-full bg-surface">
+      <div className="px-3 py-1.5 bg-surface-2 border-b border-line text-xs font-semibold text-ink-muted shrink-0">
+        Blocks
       </div>
       <div ref={containerRef} className="flex-1" />
     </div>

@@ -77,7 +77,7 @@ function LevelAssetsGate({ level, children }: { level: LevelDefinition; children
       manager.preloadParts(parts, bump),
       ...models.map((url) =>
         fetch(url).then((res) => {
-          if (!res.ok) throw new Error(`HTTP ${res.status} al descargar ${url}`)
+          if (!res.ok) throw new Error(`HTTP ${res.status} while downloading ${url}`)
           return res.arrayBuffer().then(bump)
         }),
       ),

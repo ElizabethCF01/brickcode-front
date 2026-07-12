@@ -27,21 +27,21 @@ export default function SensorPanel() {
   const fillPct = hasValue ? Math.min((distance / SENSOR_MAX_CM) * 100, 100) : 0
 
   return (
-    <footer className="flex items-center gap-6 px-4 py-2 bg-gray-800 border-t border-gray-700 shrink-0 text-sm">
+    <footer className="flex items-center gap-6 px-4 py-2 bg-surface border-t border-line shrink-0 text-sm">
       {/* Sensor readout — only for robots that actually carry a distance sensor.
           Motors-only robots (e.g. imported spike-taxi) hide this entirely. */}
       {hasSensor && (
-        <div className="flex items-center gap-3">
-          <span className="text-gray-400 whitespace-nowrap">Front sensor:</span>
+        <div className="flex items-center gap-3" aria-label="Front sensor distance">
+          <span className="text-ink-muted whitespace-nowrap">Front sensor:</span>
 
-          <div className="w-32 h-4 bg-gray-700 rounded overflow-hidden">
+          <div className="w-32 h-4 bg-line rounded-full overflow-hidden" aria-hidden="true">
             <div
-              className="h-full bg-blue-500 transition-all duration-100"
+              className="h-full bg-action-500 transition-all duration-100"
               style={{ width: `${fillPct}%` }}
             />
           </div>
 
-          <span className="text-white font-mono w-14 text-right">
+          <span className="text-ink font-mono w-14 text-right">
             {hasValue ? `${Math.round(distance)} cm` : '— cm'}
           </span>
         </div>
@@ -51,22 +51,23 @@ export default function SensorPanel() {
           dimmed dash when nothing detectable is in range. */}
       {hasColorSensor && (
         <div className="flex items-center gap-2">
-          <span className="text-gray-400 whitespace-nowrap">Color:</span>
+          <span className="text-ink-muted whitespace-nowrap">Color:</span>
           <span
-            className="w-4 h-4 rounded-full border border-gray-600"
+            className="w-4 h-4 rounded-full border border-line"
             style={{ backgroundColor: colorInfo?.hex ?? 'transparent' }}
+            aria-hidden="true"
           />
-          <span className="text-white font-mono w-16">
+          <span className="text-ink font-mono w-16">
             {colorInfo?.label ?? '—'}
           </span>
         </div>
       )}
 
-      <div className="ml-auto flex items-center gap-2 text-gray-400">
+      <div className="ml-auto flex items-center gap-2 text-ink-muted" aria-live="polite">
         <span>Status:</span>
         <span
-          className={`font-medium ${
-            status === 'running' ? 'text-green-400' : 'text-gray-300'
+          className={`font-semibold ${
+            status === 'running' ? 'text-success-700' : 'text-ink'
           }`}
         >
           {STATUS_LABELS[status] ?? status}
