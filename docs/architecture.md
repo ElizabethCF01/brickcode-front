@@ -1438,7 +1438,8 @@ teacher's read functions can retrieve it.
   [ControlPanel.tsx](../src/components/ControlPanel.tsx) handlers drive its
   lifecycle: `startSession()` on Run → `recordEvent()` as the program executes →
   `endSession()` on Stop / natural finish (which *seals* it). Events:
-  `program_run_started`, `block_executed` (`payload.blockType`),
+  `program_run_started` (`payload.program` = the full Blockly snapshot, see
+  *Learning Analytics Pipeline* below), `block_executed` (`payload.blockType`),
   `program_run_ended`, `challenge_evaluated` (`payload.success`). A per-session
   event cap (5000) bounds runaway `while`/`repeat` loops.
 - **Interpreter telemetry** — [BlockInterpreter.ts](../src/interpreter/BlockInterpreter.ts)
@@ -1512,3 +1513,72 @@ Both audiences share one origin/localStorage, so two Supabase clients are used:
 
 Local-only for now; `docs/hosting.md` covers `supabase link` + `db push` + env switch
 to run against a cloud project (a guided, user-driven follow-up).
+
+## Learning Analytics Pipeline (Data Science layer)
+
+Turns recorded runs into interpretable **computational-thinking (CT) indicators**
+for the teacher — the research contribution. Lives in [`src/analytics/`](../src/analytics/),
+is **framework-agnostic and Blockly-free** (runs headlessly in Vitest and over
+synthetic data), and consumes `LearningSession` read-only. The simulator never
+imports it. Grounding for the CT/analytics framing is in `docs/references.md`.
+
+### Instrumentation: program snapshot per run (not authoring events)
+
+The pipeline needs the *structure* of the program at each run. On Run,
+[ControlPanel.tsx](../src/components/ControlPanel.tsx) serializes the workspace
+(`Blockly.serialization.workspaces.save`) and attaches it as `payload.program`
+on `program_run_started`. `events.payload` is already `jsonb` and `loadSession`
+reads arbitrary payloads, so **no DB migration / schema bump was needed**. The
+serialization is wrapped (`snapshotProgram`) so a failure loses one snapshot but
+never aborts the child's run.
+
+**Authoring events (block created/deleted/moved) were deliberately deferred.**
+The session model is *one session = one run*, so authoring happens between
+sessions when no recorder session is active; capturing it would mean reworking
+the sealed-session invariant. The pipeline does not need it: every indicator
+derives from the run snapshot's AST + run outcomes, and the trajectory from tree
+edit distance between successive run snapshots. (Slide 07 of the deck was worded
+to match what is actually captured.)
+
+### Module structure
+
+- **`programTree.ts`** — parses a serialized snapshot into a normalized ordered
+  tree. Design decisions: a synthetic `PROGRAM` root holds every top-level stack
+  (so the forest becomes one rooted tree); a `next` statement chain becomes
+  **siblings** (inserting one block = one edit); value/statement inputs become
+  **children** (nesting = real structure). Node **label = block type only** by
+  default, so the trajectory measures *structural* change, not number-fiddling
+  (`includeFields` folds field values in when a finer signal is wanted). Plus
+  `countByType` / `blockCount` / `maxDepth` for the indicators.
+- **`treeEditDistance.ts`** — Zhang–Shasha TED over the trees (insert = delete =
+  1, relabel = 0/1). Validated against the canonical paper example (distance 2)
+  in `tests/analytics/`. Kid programs have tens of nodes, so cost is irrelevant.
+- **`indicators.ts`** — the five CT indicators as 0..1 scores, each a documented,
+  teacher-explainable heuristic over the reference program + trajectory:
+  *loops* / *conditionals* (presence + variety of the loop / `controls_if` +
+  `control_wait_until` blocks), *abstraction* (sensor reads + logic/comparison =
+  reacting to the world), *decomposition* (nesting depth vs. a flat list),
+  *debugging* (share of purposeful small edits across runs, bonus on eventual
+  success). These are **proof-of-concept measures, not a trained model.**
+- **`report.ts`** — `analyzeStudent(sessions)` → `StudentReport`: orders a
+  student's runs, computes the trajectory (TED between successive snapshots), the
+  indicators on the reference program (last successful, else latest), and a coarse
+  **strategy label**: `decomposing` (reached a solution), `guessing` (changing a
+  lot across runs, no success), `stuck` (barely changing, no success), `no-data`.
+  The one threshold (`STALLED_EDIT`) is calibrated against the synthetic
+  archetypes and documented inline.
+- **`synthetic.ts`** — fabricates a class of students following the three
+  strategies so the pipeline can be demonstrated at classroom scale despite the
+  real cohort being ≈2. Clearly illustrative, separate from real records.
+
+### Dashboard wiring
+
+- [StudentPage.tsx](../src/dashboard/pages/StudentPage.tsx) loads a student's full
+  sessions (`listSessions` → `loadSession`, N+1 at PoC scale) and renders
+  `StudentReportPanel` — **real** CT indicators + programming-trajectory strip.
+- [DemoClassPage.tsx](../src/dashboard/pages/DemoClassPage.tsx) (`/dashboard/demo`,
+  linked from `ClassesPage`) runs the same `analyzeStudent` over
+  `generateSyntheticClass()` to show the class-level indicator table (deck slide
+  09), labelled as synthetic.
+- Presentational only: [analyticsView.tsx](../src/dashboard/analyticsView.tsx)
+  (`IndicatorBars`, `StatusPill`, `TrajectoryStrip`, `StudentReportPanel`).

@@ -5,6 +5,7 @@ import ClassesPage from './pages/ClassesPage'
 import ClassPage from './pages/ClassPage'
 import StudentPage from './pages/StudentPage'
 import SessionPage from './pages/SessionPage'
+import DemoClassPage from './pages/DemoClassPage'
 
 /**
  * Teacher dashboard root (mounted at /dashboard/* in main.tsx). Auth-gated; a
@@ -19,6 +20,7 @@ export default function Dashboard() {
         <main className="mx-auto max-w-4xl px-4 py-8">
           <Routes>
             <Route index element={<ClassesPage />} />
+            <Route path="demo" element={<DemoClassPage />} />
             <Route path="classes/:classId" element={<ClassPage />} />
             <Route path="students/:studentId" element={<StudentPage />} />
             <Route path="sessions/:sessionId" element={<SessionPage />} />

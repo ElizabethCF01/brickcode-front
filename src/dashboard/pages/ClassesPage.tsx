@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { listClasses, createClass } from '../../backend/dashboardApi'
 import { useAsync } from '../useAsync'
 import { dash } from '../paths'
@@ -13,6 +14,11 @@ export default function ClassesPage() {
   return (
     <>
       <PageHeader title="Your classes" subtitle="Share the code with your students so they can join." />
+      <div className="mb-4">
+        <Link to={dash.demo} className="text-sm font-medium text-indigo-600 hover:underline">
+          View class analytics demo (computational thinking) →
+        </Link>
+      </div>
       <CreateClassForm onCreated={() => setVersion((v) => v + 1)} />
       {loading && <Loading />}
       {error && <ErrorBox message={error} />}

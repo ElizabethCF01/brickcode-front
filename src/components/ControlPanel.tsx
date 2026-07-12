@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import * as Blockly from 'blockly'
 import { useSimulationStore } from '../store/simulationStore'
 import { useChallengeStore } from '../store/challengeStore'
 import { getEngine } from '../engine/engineSingleton'
@@ -10,6 +11,19 @@ import { getSupabase } from '../backend/supabaseClient'
 
 interface ControlPanelProps {
   onBackToLevels?: () => void
+}
+
+/**
+ * Serialize the program's block structure for the analytics trajectory. Wrapped
+ * so a serialization hiccup only loses one snapshot — it must never abort the
+ * child's run. Returns null when the workspace can't be serialized.
+ */
+function snapshotProgram(workspace: Blockly.Workspace): Record<string, unknown> | null {
+  try {
+    return Blockly.serialization.workspaces.save(workspace)
+  } catch {
+    return null
+  }
 }
 
 /**
@@ -72,9 +86,17 @@ export default function ControlPanel({ onBackToLevels }: Readonly<ControlPanelPr
     setStatus('running')
 
     // Begin recording this run (events stream in via the interpreter sink).
+    // Snapshot the program's block structure (Blockly serialization JSON) so the
+    // analytics pipeline can measure the programming trajectory — tree edit
+    // distance between the snapshots of a student's successive runs. The snapshot
+    // rides as opaque payload on program_run_started (events.payload is jsonb;
+    // no schema/DB change needed).
     const recorder = getRecorder()
     recorder.startSession([level.id])
-    recorder.recordEvent('program_run_started', { challengeId: level.id })
+    recorder.recordEvent('program_run_started', {
+      challengeId: level.id,
+      payload: { program: snapshotProgram(workspace) },
+    })
 
     // Resolves when a finite program ends; for a reactive `forever` program it
     // resolves only after finishRun() calls interpreter.stop() (the status guard
