@@ -2,11 +2,11 @@
 
 The project sits at the intersection of three research lines (mirrors `north-star.md`
 §Academic grounding). This file records the anchors and **where each one grounds a
-design decision** in the artifact, so the defense can trace claims to sources.
+design decision** in the artifact, so every claim can be traced to a source.
 
-> ⚠️ **Verify before the defense.** The entries below capture author / year / topic
+> ⚠️ **Verify before submitting.** The entries below capture author / year / topic
 > as used in the project. Confirm exact venue, pages, and DOI against the original
-> papers, and format to your program's required citation style, before submitting.
+> papers, and format to your program's required citation style.
 
 ---
 
@@ -14,20 +14,20 @@ design decision** in the artifact, so the defense can trace claims to sources.
 
 Physical robotics carries cost, maintenance, and space barriers that simulation
 reduces; simulator precedents report computational-thinking gains. Motivates the
-whole "no hardware, no Wi-Fi" premise (deck slides 02–05).
+whole "no hardware, no Wi-Fi" premise.
 
 - **Broll, B., et al.** *RoboScape / RoboScape Online* — a networked educational
   robotics environment; reports engagement and CT benefits without per-student
   hardware. (NetsBlox / Vanderbilt line of work.)
 - General framing: educational-robotics reviews note the field's dependence on
   teacher training and the thinness of shared theoretical frameworks — which is
-  part of why BrickCode centers the **teacher** (deck slide 09).
+  part of why BrickCode centers the **teacher**.
 
 ## 2. Learning analytics & computational thinking in block-based environments
 
 Frameworks that combine data-driven and hypothesis-driven approaches to infer
 programming strategies from interaction logs. Grounds the telemetry → metrics →
-CT-indicators pipeline (deck slides 07–08; `src/analytics/`).
+CT-indicators pipeline (`src/analytics/`).
 
 - **Grover, S., et al. (2017).** A framework combining hypothesis-driven and
   data-driven approaches to measure computational thinking in block-based
@@ -39,13 +39,18 @@ CT-indicators pipeline (deck slides 07–08; `src/analytics/`).
   → Grounds: **tree edit distance** between successive run snapshots
   (`treeEditDistance.ts`) as the trajectory signal and the driver of the
   *iterative debugging* indicator and the stuck/guessing/decomposing labels.
+- **Zhang, K., & Shasha, D. (1989).** Simple fast algorithms for the editing
+  distance between trees and related problems.
+  → Grounds: the algorithm itself behind `treeEditDistance.ts`. Applying it to
+  successive program snapshots as a learning-trajectory signal is this project's
+  adaptation, not a claim taken from the paper.
 
 ## 3. Teacher-facing dashboards & classroom orchestration
 
 Design of teacher-facing dashboards distinguishing **mirroring** support (show what
 happened) from **guiding** support (orient the teacher toward action), and
 teacher–AI complementarity in real-time orchestration. Grounds the dashboard design
-(deck slide 09; `src/dashboard/analyticsView.tsx`, `DemoClassPage.tsx`).
+(`src/dashboard/analyticsView.tsx`, `DemoClassPage.tsx`).
 
 - **Holstein, K., McLaren, B. M., & Aleven, V.** Teacher awareness / real-time
   classroom orchestration tools and their learning benefits.
@@ -58,10 +63,21 @@ teacher–AI complementarity in real-time orchestration. Grounds the dashboard d
 
 ---
 
+## Open gaps
+
+Two entries above are not yet attributable to a named source and should either be
+pinned to a concrete paper or dropped from any claim made about the work:
+
+1. **Programming-trajectory / edit-distance analysis** (§2) has no author. The
+   algorithm is firm (Zhang & Shasha); what needs a citation — or an explicit
+   framing as this project's own adaptation — is applying it to learning
+   trajectories.
+2. **The general framing of educational-robotics reviews** (§1) has no author.
+   Either anchor it to a specific review or remove the claim.
+
 ## How to use this file
 
 - Cite as design decisions are documented (see `docs/architecture.md` →
   *Learning Analytics Pipeline*). Every telemetry/analysis choice should be
   explainable in terms of *which CT indicator it helps reveal to the teacher*.
-- Keep this list in sync with the claims made in the presentation (deck slide 12)
-  and the thesis chapter.
+- Keep this list in sync with the claims made in the thesis chapter.
