@@ -14,6 +14,14 @@ const COLS = 3
 export class HubLights implements IHub {
   private readonly matrix: number[] = new Array<number>(HUB_MATRIX_SIZE).fill(0)
 
+  constructor() {
+    // A fresh hub must clear any lit state left in the store by a previous
+    // level/session — simulationStore.hubMatrix is a singleton that outlives
+    // level switches, and consumers (HubMatrixPanel, challenge ambient()
+    // callbacks) read it directly without knowing whether it's stale.
+    this.publish()
+  }
+
   /** Set one pixel (row/col 0–2, row 0 = top) to a 0–100 brightness. */
   setPixel(row: number, col: number, brightness: number): void {
     if (row < 0 || row >= COLS || col < 0 || col >= COLS) return

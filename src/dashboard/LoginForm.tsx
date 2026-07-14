@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { getSupabase } from '../backend/supabaseClient'
 import { CenteredCard } from './AuthGate'
 
@@ -35,7 +36,9 @@ export default function LoginForm({ note }: Readonly<{ note?: string }>) {
   return (
     <CenteredCard>
       <h1 className="flex items-center gap-2 text-xl font-bold text-ink mb-1">
-        <img src="/logo.png" alt="" className="h-7 w-7" />
+        <Link to="/" className="flex items-center gap-2">
+          <img src="/logo.png" alt="BrickCode home" className="h-7 w-7" />
+        </Link>
         <span>BrickCode · Teacher</span>
       </h1>
       {note && <p className="text-sm text-amber-600 mb-2" role="alert">{note}</p>}

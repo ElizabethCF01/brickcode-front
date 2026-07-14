@@ -562,6 +562,9 @@ export const challengeBoat = {
         s.crocBody.setTranslation({ x: 0, y: SENSOR_Y, z: START_Z }, true)
         s.crocGroup.position.z = START_Z
         s.result = null
+        // A hub matrix still lit from a previous run/level would leave the
+        // alarm light showing on even though the croc hasn't been detected yet.
+        useSimulationStore.getState().setHubMatrix(new Array(HUB_MATRIX_SIZE).fill(0))
       },
 
       dispose(): void {

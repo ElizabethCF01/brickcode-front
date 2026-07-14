@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { getSupabase } from '../backend/supabaseClient'
 
 /**
@@ -39,7 +40,9 @@ export default function StudentLoginForm({ note }: Readonly<{ note?: string }>) 
   return (
     <Centered>
       <h1 className="flex items-center gap-2 text-2xl font-extrabold tracking-wide text-ink">
-        <img src="/logo.png" alt="" className="h-8 w-8" />
+        <Link to="/" className="flex items-center gap-2">
+          <img src="/logo.png" alt="BrickCode home" className="h-8 w-8" />
+        </Link>
         <span>BrickCode</span>
       </h1>
       <p className="mt-1 mb-6 text-sm text-ink-muted">
