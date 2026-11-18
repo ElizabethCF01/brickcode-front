@@ -1,50 +1,30 @@
-# React + TypeScript + Vite
+# 🧱 BrickCode
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**An independent, non-commercial educational project for learning robotics and programming through interactive 3D simulation.**
 
-Currently, two official plugins are available:
+BrickCode is a personal educational initiative developed to explore how visual programming, robotics simulation and interactive learning environments can make computational thinking more accessible to students.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This project is created exclusively for educational, research and portfolio purposes. It is not intended for commercial use and is not affiliated with, endorsed by or sponsored by LEGO® or any of its subsidiaries.
 
-## Expanding the ESLint configuration
+## ⚖️ Disclaimer & Intellectual Property
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+BrickCode is an independent, non-profit educational project.
 
-- Configure the top-level `parserOptions` property like this:
+- **LEGO® references:** LEGO® is a trademark of the LEGO Group. This project is not affiliated with or endorsed by the LEGO Group. LEGO® references and compatible design concepts are used solely to provide educational context.
+- **Third-party models and assets:** Some 3D models, visual resources and other materials are based on or derived from third-party resources. Their respective creators retain ownership and rights over their work. All applicable licenses and attribution requirements must be respected.
+- **Educational research:** The project draws inspiration from existing academic research, educational studies and established approaches to teaching robotics and computational thinking. Original authors and publications should be credited wherever their work is referenced.
+- **Original development:** The application, its architecture, simulation logic and original features are independently developed as part of this educational initiative.
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+BrickCode is intended to support learning, experimentation and the exploration of educational technology, rather than to reproduce or replace any official LEGO® products or educational platforms.
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## 🙏 Acknowledgements
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+This project builds upon the work and contributions of the open-source community, educational researchers and creators of 3D resources.
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+Special thanks to the developers, researchers and educators whose tools, publications and shared knowledge make projects like BrickCode possible.
+
+See the project documentation and relevant asset sources for individual credits and licenses.
+
+---
+
+**Built with curiosity, creativity and a passion for educational technology.** 🧱
